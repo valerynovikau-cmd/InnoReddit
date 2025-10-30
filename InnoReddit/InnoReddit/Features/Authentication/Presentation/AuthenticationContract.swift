@@ -6,7 +6,9 @@
 //
 
 // MARK: View
-protocol AuthenticationViewInput: AnyObject { }
+protocol AuthenticationViewInput: AnyObject {
+    func showAlert(title: String, message: String)
+}
 
 // MARK: Presenter
 protocol AuthenticationViewOutput: AnyObject {
