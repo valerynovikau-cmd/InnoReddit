@@ -6,15 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 final class AuthenticationPresenter {
     weak var input: AuthenticationViewInput?
-    private let router: AuthenticationRouterProtocol
-    private let webAuthSessionService: ASWebAuthSessionService = ASWebAuthSessionService()
-    
-    init(router: AuthenticationRouterProtocol) {
-        self.router = router
-    }
+    @Injected(\.authenticationRouter) private var router: AuthenticationRouterProtocol
+    @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
 }
 
 extension AuthenticationPresenter: AuthenticationViewOutput {

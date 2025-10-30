@@ -15,9 +15,14 @@ fileprivate enum TokenDuration: String {
     case permanent, temporary
 }
 
+protocol ASWebAuthSessionServiceProtocol {
+    func startSession() async throws -> URL
+}
+
 final class ASWebAuthSessionService: NSObject {
     
-    // MARK: - Helper methods
+    // MARK: - Authentication URL assembly methods
+    
     private var components: URLComponents {
         var comp = URLComponents()
         comp.scheme = "https"
@@ -70,8 +75,11 @@ final class ASWebAuthSessionService: NSObject {
         
         return url
     }
-    
-    // MARK: - Authentication Session request
+}
+
+// MARK: - Authentication Session request
+
+extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
     func startSession() async throws -> URL {
         let scopes: [AuthScopes] = [
             .read,
@@ -79,7 +87,7 @@ final class ASWebAuthSessionService: NSObject {
         ]
         
         let authURL = try self.assembleAuthURL(scope: scopes, duration: .temporary)
-        let callbackScheme = try redirectURLScheme
+        let callbackScheme = try self.redirectURLScheme
         
         return try await withCheckedThrowingContinuation { continuation in
             let session = ASWebAuthenticationSession(

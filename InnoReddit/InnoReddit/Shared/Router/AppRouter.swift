@@ -23,9 +23,7 @@ final class AppRouter: RouterProtocol {
 
 extension AppRouter: AppRouterProtocol {
     func showAuthenticationScreen() {
-        let authenticationRouter = Container.shared.authenticationRouter()
-        
-        let presenter = AuthenticationPresenter(router: authenticationRouter)
+        let presenter = AuthenticationPresenter()
         let authenticationVC = AuthenticationViewController()
         
         authenticationVC.output = presenter

@@ -25,6 +25,12 @@ extension Container {
         }
     }
     
+    var webAuthSessionService: Factory<ASWebAuthSessionServiceProtocol> {
+        self { @MainActor in
+            ASWebAuthSessionService()
+        }
+    }
+    
 //    var authenticationPresenter: Factory<AuthenticationViewOutput> {
 //        self { @MainActor in
 //            AuthenticationPresenter(router: self.authenticationRouter())
