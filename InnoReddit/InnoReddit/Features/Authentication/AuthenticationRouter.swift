@@ -12,7 +12,7 @@ protocol AuthenticationRouterProtocol: AnyObject {
 }
 
 final class AuthenticationRouter: RouterProtocol {
-    var navigationController: UINavigationController?
+    var navigationController: UINavigationController
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController

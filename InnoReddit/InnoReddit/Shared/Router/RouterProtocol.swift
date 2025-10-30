@@ -8,5 +8,5 @@
 import UIKit
 
 protocol RouterProtocol: AnyObject {
-    var navigationController: UINavigationController? { get }
+    var navigationController: UINavigationController { get }
 }

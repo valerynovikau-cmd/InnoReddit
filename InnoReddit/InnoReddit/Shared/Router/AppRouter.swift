@@ -6,33 +6,32 @@
 //
 
 import UIKit
+import Factory
 
 protocol AppRouterProtocol: AnyObject {
     func showAuthenticationScreen()
 }
 
 final class AppRouter: RouterProtocol {
-    var navigationController: UINavigationController?
+    @Injected(\.rootNavigationController) var navigationController: UINavigationController
     private(set) var window: UIWindow?
     
     init(window: UIWindow?) {
-        self.navigationController = UINavigationController()
         self.window = window
     }
 }
 
 extension AppRouter: AppRouterProtocol {
     func showAuthenticationScreen() {
-        guard let navigationController = self.navigationController else { return }
+        let authenticationRouter = Container.shared.authenticationRouter()
         
-        let authenticationRouter = AuthenticationRouter(navigationController: navigationController)
-        let authenticationVC = AuthenticationViewController()
         let presenter = AuthenticationPresenter(router: authenticationRouter)
+        let authenticationVC = AuthenticationViewController()
         
         authenticationVC.output = presenter
         presenter.input = authenticationVC
-        
-        navigationController.setViewControllers([authenticationVC], animated: false)
+
+        self.navigationController.setViewControllers([authenticationVC], animated: false)
         self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
     }
