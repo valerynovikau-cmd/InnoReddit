@@ -9,12 +9,12 @@ import Foundation
 import Factory
 
 final class AuthenticationPresenter {
-    weak var input: AuthenticationViewInput?
+    weak var input: AuthenticationViewProtocol?
     @Injected(\.authenticationRouter) private var router: AuthenticationRouterProtocol
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
 }
 
-extension AuthenticationPresenter: AuthenticationViewOutput {
+extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func didTapAuthenticateWithReddit() {
         Task {
             do {

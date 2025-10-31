@@ -9,7 +9,7 @@ import UIKit
 
 class AuthenticationViewController: UIViewController {
 
-    var output: AuthenticationViewOutput?
+    var output: AuthenticationViewPresenterProtocol?
     
     // MARK: - UI Elements
     
@@ -55,7 +55,7 @@ class AuthenticationViewController: UIViewController {
     }
 }
 
-extension AuthenticationViewController: AuthenticationViewInput {
+extension AuthenticationViewController: AuthenticationViewProtocol {
     func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))

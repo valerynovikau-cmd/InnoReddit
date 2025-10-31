@@ -7,14 +7,6 @@
 
 import AuthenticationServices
 
-fileprivate enum AuthScopes: String {
-    case identity, edit, flair, history, modconfig, modflair, modlog, modposts, modwiki, mysubreddits, privatemessages, read, report, save, submit, subscribe, vote, wikiedit, wikiread
-}
-
-fileprivate enum TokenDuration: String {
-    case permanent, temporary
-}
-
 protocol ASWebAuthSessionServiceProtocol {
     func startSession() async throws -> URL
 }

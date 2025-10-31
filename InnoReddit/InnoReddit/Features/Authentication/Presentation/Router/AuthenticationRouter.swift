@@ -7,10 +7,6 @@
 
 import UIKit
 
-protocol AuthenticationRouterProtocol: AnyObject {
-    func goToMainFlow()
-}
-
 final class AuthenticationRouter: RouterProtocol {
     var navigationController: UINavigationController
     
