@@ -62,4 +62,10 @@ extension Container {
             RetrieveTokensUseCase()
         }
     }
+    
+    var saveTokensUseCase: Factory<SaveTokensUseCase> {
+        self { @MainActor in
+            SaveTokensUseCase()
+        }
+    }
 }
