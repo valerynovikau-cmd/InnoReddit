@@ -14,6 +14,7 @@ final class AuthenticationPresenter {
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
     @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCase
     @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCase
+    @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCase
 }
 
 extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
@@ -32,9 +33,20 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 }
                 
                 try saveTokensUseCase.execute(accessToken: tokenRetrieval.accessToken, refreshToken: refreshToken)
+                
+                router.goToMainFlow()
             } catch {
                 print(error)
             }
+        }
+    }
+    
+    func goToMainFlowIfAuthenticated() {
+        do {
+            let _ = try self.getAccessTokenUseCase.execute()
+            router.goToMainFlow()
+        } catch {
+            
         }
     }
 }

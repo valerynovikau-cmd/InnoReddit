@@ -7,4 +7,5 @@
 
 protocol AuthenticationViewPresenterProtocol: AnyObject {
     func didTapAuthenticateWithReddit()
+    func goToMainFlowIfAuthenticated()
 }
