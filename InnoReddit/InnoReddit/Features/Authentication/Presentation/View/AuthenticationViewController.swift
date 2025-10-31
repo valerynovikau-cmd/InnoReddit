@@ -41,9 +41,16 @@ class AuthenticationViewController: UIViewController {
         self.output?.didTapAuthenticateWithReddit()
     }
     
+    // MARK: Root view
+    
+    private func configureRootView() {
+        view.backgroundColor = .systemBackground
+    }
+    
     // MARK: General view UI configuration
     
     private func configureUI() {
+        self.configureRootView()
         self.configureLoginButton()
     }
     
