@@ -6,7 +6,7 @@
 //
 
 protocol TokenStorageRepositoryProtocol {
-    func getTokens() throws -> (accessToken: String, refreshToken: String)?
+    func getToken(tokenType: TokenType) throws -> String
     func saveTokens(accessToken: String, refreshToken: String) throws -> Void
     func clearTokens() throws -> Void
 }

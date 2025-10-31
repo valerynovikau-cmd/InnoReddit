@@ -8,17 +8,18 @@
 import Factory
 
 final class TokenStorageRepository: TokenStorageRepositoryProtocol {
+    
     @Injected(\.keychainDataSource) private var keychainDataSource: KeychainDataSource
     
-    func getTokens() -> (accessToken: String, refreshToken: String)? {
-        <#code#>
+    func getToken(tokenType: TokenType) throws -> String {
+        return try self.keychainDataSource.getToken(tokenType: tokenType)
     }
     
-    func saveTokens(accessToken: String, refreshToken: String) {
-        <#code#>
+    func saveTokens(accessToken: String, refreshToken: String) throws {
+        try self.keychainDataSource.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
     }
     
-    func clearTokens() {
-        <#code#>
+    func clearTokens() throws {
+        try self.keychainDataSource.deleteTokens()
     }
 }

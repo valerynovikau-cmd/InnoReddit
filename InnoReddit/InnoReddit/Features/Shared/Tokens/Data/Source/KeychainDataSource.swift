@@ -12,6 +12,7 @@ final class KeychainDataSource {
     
     enum KeychainError: Error {
         case invalidData
+        case tokenNotFound
         case tokensSaveError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
         case tokensDeleteError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
     }
@@ -47,7 +48,7 @@ final class KeychainDataSource {
         }
     }
     
-    func getToken(tokenType: TokenType) throws -> String? {
+    func getToken(tokenType: TokenType) throws -> String {
         let key = tokenType.rawValue
         let query = [
             kSecClass as String: kSecClassGenericPassword,
@@ -58,13 +59,17 @@ final class KeychainDataSource {
         
         var dataTypeRef: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
-        guard status == errSecSuccess,
-            let data = dataTypeRef as? Data
+        guard status == errSecSuccess else {
+            throw KeychainError.tokenNotFound
+        }
+        
+        guard let data = dataTypeRef as? Data,
+              let token = String(data: data, encoding: .utf8)
         else
         {
             throw KeychainError.invalidData
         }
-        return String(data: data, encoding: .utf8)
+        return token
     }
     
     func deleteTokens() throws {
