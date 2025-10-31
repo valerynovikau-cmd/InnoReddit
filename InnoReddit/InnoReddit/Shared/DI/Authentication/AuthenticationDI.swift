@@ -1,23 +1,12 @@
 //
-//  DependencyContainer.swift
+//  AuthenticationDI.swift
 //  InnoReddit
 //
-//  Created by Валерий Новиков on 30.10.25.
+//  Created by Валерий Новиков on 31.10.25.
 //
 
 import Factory
-import UIKit
 
-// MARK: Navigation controller resolving
-extension Container {
-    var rootNavigationController: Factory<UINavigationController> {
-        self { @MainActor in
-            UINavigationController()
-        }.singleton
-    }
-}
-
-// MARK: - Authentication feature resolving
 extension Container {
     var authenticationRouter: Factory<AuthenticationRouterProtocol> {
         self { @MainActor in

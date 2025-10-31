@@ -49,6 +49,7 @@ final class ASWebAuthSessionService: NSObject {
         
         let clientID = try self.clientID
         let redirectUri = try self.redirectURLScheme + "://auth"
+        let duration = duration.rawValue
         
         var comp = self.components
         comp.path = "/api/v1/authorize.compact"
@@ -57,7 +58,7 @@ final class ASWebAuthSessionService: NSObject {
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "state", value: state),
             URLQueryItem(name: "redirect_uri", value: redirectUri),
-            URLQueryItem(name: "duration", value: "temporary"),
+            URLQueryItem(name: "duration", value: duration),
             URLQueryItem(name: "scope", value: auchScopesString)
         ]
         
@@ -78,7 +79,7 @@ extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
             .identity
         ]
         
-        let authURL = try self.assembleAuthURL(scope: scopes, duration: .temporary)
+        let authURL = try self.assembleAuthURL(scope: scopes, duration: .permanent)
         let callbackScheme = try self.redirectURLScheme
         
         return try await withCheckedThrowingContinuation { continuation in
