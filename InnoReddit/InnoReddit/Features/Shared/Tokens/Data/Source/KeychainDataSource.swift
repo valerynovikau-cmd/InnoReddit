@@ -26,17 +26,17 @@ final class KeychainDataSource {
 
         let accessQuery = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: TokenType.accessToken,
+            kSecAttrAccount as String: TokenType.accessToken.rawValue,
             kSecValueData as String: accessTokenData
         ] as CFDictionary
         
         let refreshQuery = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: TokenType.refreshToken,
+            kSecAttrAccount as String: TokenType.refreshToken.rawValue,
             kSecValueData as String: refreshTokenData
         ] as CFDictionary
         
-        try self.deleteTokens()
+        try? self.deleteTokens()
         
         let accessStatus = SecItemAdd(accessQuery, nil)
         let refreshStatus = SecItemAdd(refreshQuery, nil)
@@ -75,12 +75,12 @@ final class KeychainDataSource {
     func deleteTokens() throws {
         let accessQuery = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: TokenType.accessToken
+            kSecAttrAccount as String: TokenType.accessToken.rawValue
         ] as CFDictionary
         
         let refreshQuery = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: TokenType.refreshToken
+            kSecAttrAccount as String: TokenType.refreshToken.rawValue
         ] as CFDictionary
         
         let accessStatus = SecItemDelete(accessQuery)
