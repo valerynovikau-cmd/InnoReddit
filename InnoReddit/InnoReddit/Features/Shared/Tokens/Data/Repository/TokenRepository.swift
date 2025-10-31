@@ -17,9 +17,18 @@ final class TokenRepository: TokenRepositoryProtocol {
             .compactMap { AuthScopes.init(rawValue: String($0)) }
         return TokenRetrieval(
             accessToken: tokenRetrieval.accessToken,
+            tokenType: tokenRetrieval.tokenType,
             expiresIn: tokenRetrieval.expiresIn,
             scope: scopes,
             refreshToken: tokenRetrieval.refreshToken
         )
+    }
+    
+    func refreshAccessToken(refreshToken: String) async throws -> TokenRetrieval {
+        fatalError()
+    }
+    
+    func invalidateTokens() async throws {
+        fatalError()
     }
 }

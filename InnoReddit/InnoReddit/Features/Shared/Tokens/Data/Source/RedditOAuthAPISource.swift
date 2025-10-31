@@ -9,6 +9,7 @@ import Foundation
 
 final class RedditOAuthAPISource {
     
+    // MARK: - Authentication URL assembly methods
     private var components: URLComponents {
         var comp = URLComponents()
         comp.scheme = "https"
@@ -37,6 +38,7 @@ final class RedditOAuthAPISource {
         }
     }
     
+    // MARK: - API Request methods
     func performTokenRetrieval(code: String) async throws -> TokenRetrievalDTO {
         var comp = self.components
         comp.path = "/api/v1/access_token"
@@ -65,4 +67,6 @@ final class RedditOAuthAPISource {
         
         return tokenRetrievalDTO
     }
+    
+    
 }

@@ -14,6 +14,12 @@ extension Container {
             RedditOAuthAPISource()
         }
     }
+    
+    var keychainDataSource: Factory<KeychainDataSource> {
+        self { @MainActor in
+            KeychainDataSource()
+        }
+    }
 }
 
 // MARK: Repositories
@@ -21,6 +27,12 @@ extension Container {
     var tokenRepository: Factory<TokenRepositoryProtocol> {
         self { @MainActor in
             TokenRepository()
+        }
+    }
+    
+    var tokenStorageRepository: Factory<TokenStorageRepositoryProtocol> {
+        self { @MainActor in
+            TokenStorageRepository()
         }
     }
 }

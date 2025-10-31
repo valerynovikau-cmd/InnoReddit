@@ -7,6 +7,7 @@
 
 struct TokenRetrieval {
     let accessToken: String
+    let tokenType: String
     let expiresIn: Int
     let scope: [AuthScopes]
     let refreshToken: String?
