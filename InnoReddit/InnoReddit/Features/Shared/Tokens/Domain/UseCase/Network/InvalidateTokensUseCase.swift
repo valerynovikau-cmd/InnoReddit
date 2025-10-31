@@ -8,7 +8,11 @@
 import Factory
 
 final class InvalidateTokensUseCase {
-    func execute() {
-        
+    @Injected(\.tokenRepository) private var tokenRepository: TokenRepositoryProtocol
+    @Injected(\.deleteTokensUseCase) private var deleteTokensUseCase: DeleteTokensUseCase
+    
+    func execute() async throws {
+        try await self.tokenRepository.invalidateTokens()
+        try self.deleteTokensUseCase.execute()
     }
 }

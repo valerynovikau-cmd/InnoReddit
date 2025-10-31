@@ -10,7 +10,8 @@ import Factory
 final class GetAccessTokenUseCase {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
-    func execute() throws {
+    func execute() throws -> String {
         let token = try self.tokenStorageRepository.getToken(tokenType: .accessToken)
+        return token
     }
 }

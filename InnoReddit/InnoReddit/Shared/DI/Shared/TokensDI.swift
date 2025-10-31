@@ -68,4 +68,10 @@ extension Container {
             SaveTokensUseCase()
         }
     }
+    
+    var deleteTokensUseCase: Factory<DeleteTokensUseCase> {
+        self { @MainActor in
+            DeleteTokensUseCase()
+        }
+    }
 }
