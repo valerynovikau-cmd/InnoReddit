@@ -33,7 +33,6 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 
                 try saveTokensUseCase.execute(accessToken: tokenRetrieval.accessToken, refreshToken: refreshToken)
             } catch {
-                print("все пошло по пизде :(")
                 print(error)
             }
         }
