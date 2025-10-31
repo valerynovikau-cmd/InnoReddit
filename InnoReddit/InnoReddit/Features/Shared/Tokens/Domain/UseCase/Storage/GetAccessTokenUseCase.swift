@@ -8,11 +8,9 @@
 import Factory
 
 final class GetAccessTokenUseCase {
-    @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCase
-    @Injected(\.refreshAccessTokenUseCase) private var refreshAccessTokenUseCase: RefreshAccessTokenUseCase
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
-    func execute() async throws {
-        
+    func execute() throws {
+        let token = try self.tokenStorageRepository.getToken(tokenType: .accessToken)
     }
 }
