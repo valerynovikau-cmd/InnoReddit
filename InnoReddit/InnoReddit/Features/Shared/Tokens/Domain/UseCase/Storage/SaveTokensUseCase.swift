@@ -7,6 +7,9 @@
 
 import Factory
 
+// MARK: Shouldn't be used directly as it would violate token consistency flow - use RetrieveTokensUseCase and RefreshAccessTokenUseCase instead
+/// RetrieveTokensUseCase retrieves tokens from the API, then saves them to the storage using this use case
+/// RefreshAccessTokenUseCase updates access token from the API, then saves tokens to the storage using this use case
 final class SaveTokensUseCase {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     

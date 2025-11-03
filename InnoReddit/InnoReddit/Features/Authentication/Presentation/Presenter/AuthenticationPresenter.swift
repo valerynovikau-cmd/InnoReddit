@@ -13,7 +13,6 @@ final class AuthenticationPresenter {
     @Injected(\.authenticationRouter) private var router: AuthenticationRouterProtocol
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
     @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCase
-    @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCase
     @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCase
 }
 
@@ -27,12 +26,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                     throw NSError()
                 }
                 
-                let tokenRetrieval = try await self.retrieveTokensUseCase.execute(code: code)
-                guard let refreshToken = tokenRetrieval.refreshToken else {
-                    throw NSError()
-                }
-                
-                try saveTokensUseCase.execute(accessToken: tokenRetrieval.accessToken, refreshToken: refreshToken)
+                try await self.retrieveTokensUseCase.execute(code: code)
                 
                 router.goToMainFlow()
             } catch {
