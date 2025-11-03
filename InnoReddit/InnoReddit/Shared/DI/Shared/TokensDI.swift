@@ -45,6 +45,12 @@ extension Container {
         }
     }
     
+    var getRefreshTokenUseCase: Factory<GetRefreshTokenUseCase> {
+        self { @MainActor in
+            GetRefreshTokenUseCase()
+        }
+    }
+    
     var invalidateTokensUseCase: Factory<InvalidateTokensUseCase> {
         self { @MainActor in
             InvalidateTokensUseCase()
