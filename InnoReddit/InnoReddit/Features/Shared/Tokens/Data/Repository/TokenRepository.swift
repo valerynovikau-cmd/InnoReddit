@@ -12,9 +12,7 @@ final class TokenRepository: TokenRepositoryProtocol {
     
     func exchangeCodeForTokens(code: String) async throws -> TokenRetrieval {
         let tokenRetrieval = try await redditOAuthAPISource.performTokenRetrieval(code: code)
-        let scopes = tokenRetrieval.scope
-            .split(separator: " ")
-            .compactMap { AuthScopes.init(rawValue: String($0)) }
+        let scopes = self.convertScopesString(scopesString: tokenRetrieval.scope)
         return TokenRetrieval(
             accessToken: tokenRetrieval.accessToken,
             tokenType: tokenRetrieval.tokenType,
@@ -25,10 +23,28 @@ final class TokenRepository: TokenRepositoryProtocol {
     }
     
     func refreshAccessToken(refreshToken: String) async throws -> TokenRetrieval {
-        fatalError()
+        let refreshedTokenResponse = try await redditOAuthAPISource.performAccessTokenRefresh(refreshToken: refreshToken)
+        let scopes = self.convertScopesString(scopesString: refreshedTokenResponse.scope)
+        var newRefreshToken = refreshedTokenResponse.refreshToken
+        if newRefreshToken == nil {
+            newRefreshToken = refreshToken
+        }
+        return TokenRetrieval(
+            accessToken: refreshedTokenResponse.accessToken,
+            tokenType: refreshedTokenResponse.tokenType,
+            expiresIn: refreshedTokenResponse.expiresIn,
+            scope: scopes,
+            refreshToken: newRefreshToken
+        )
     }
     
     func invalidateTokens() async throws {
         fatalError()
+    }
+    
+    private func convertScopesString(scopesString: String) -> [AuthScopes] {
+        return scopesString
+            .split(separator: " ")
+            .compactMap { AuthScopes.init(rawValue: String($0)) }
     }
 }

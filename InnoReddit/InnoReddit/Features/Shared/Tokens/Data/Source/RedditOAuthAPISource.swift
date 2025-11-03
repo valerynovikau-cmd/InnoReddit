@@ -68,5 +68,31 @@ final class RedditOAuthAPISource {
         return tokenRetrievalDTO
     }
     
-    
+    func performAccessTokenRefresh(refreshToken: String) async throws -> TokenRetrievalDTO {
+        var comp = self.components
+        comp.path = "/api/v1/access_token"
+        
+        guard let url = comp.url else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        let body = "grant_type=refresh_token&refresh_token=\(refreshToken)"
+        request.httpBody = body.data(using: .utf8)
+
+        let clientId = try self.clientID
+        let credentials = "\(clientId):"
+        let encoded = Data(credentials.utf8).base64EncodedString()
+        request.setValue("Basic \(encoded)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let tokenRetrievalDTO = try decoder.decode(TokenRetrievalDTO.self, from: data)
+        
+        return tokenRetrievalDTO
+    }
 }
