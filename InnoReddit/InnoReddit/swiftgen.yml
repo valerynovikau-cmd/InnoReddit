@@ -1,0 +1,17 @@
+strings:
+  - inputs:
+      - Features/Authentication/Presentation/Resources/LocalizableStrings/en.lproj/AuthenticationLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/Authentication/Presentation/Resources/AuthenticationLocalizableStrings+Generated.swift
+      params:
+        enumName: AuthenticationLocalizableStrings
+
+xcassets:
+  inputs:
+    Resources/Assets/Assets.xcassets
+  outputs:
+    templateName: swift5
+    params:
+        forceProvidesNamespaces: true
+    output: Resources/Assets/XCAssets+Generated.swift

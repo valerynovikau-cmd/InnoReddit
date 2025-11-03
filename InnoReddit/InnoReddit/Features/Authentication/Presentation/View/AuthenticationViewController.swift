@@ -17,7 +17,8 @@ class AuthenticationViewController: UIViewController {
 
     private lazy var loginButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Войти через Reddit", for: .normal)
+        let title = AuthenticationLocalizableStrings.logInWithRedditButtonText
+        button.setTitle(title, for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.backgroundColor = .systemOrange
         button.tintColor = .white

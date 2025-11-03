@@ -1,0 +1,12 @@
+/* 
+  AuthenticationLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 3.11.25.
+  
+*/
+
+"logInWithRedditButtonText" = "Log In with Reddit";
+"termsOfServiceInfoLabelText" = "By clicking \"Login\", you agree to the terms of use and privacy policy";
+"inforamtionLabelText" = "Join thousands of communities and discuss anything that interests you";
+"welcomeToInnoRedditLabelText" = "Welcome to InnoReddit!";
