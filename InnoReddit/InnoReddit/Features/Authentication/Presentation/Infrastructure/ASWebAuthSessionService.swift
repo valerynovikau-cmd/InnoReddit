@@ -8,7 +8,7 @@
 import AuthenticationServices
 
 protocol ASWebAuthSessionServiceProtocol {
-    func startSession() async throws -> URL
+    func startSession() async throws -> String
 }
 
 final class ASWebAuthSessionService: NSObject {
@@ -73,7 +73,7 @@ final class ASWebAuthSessionService: NSObject {
 // MARK: - Authentication Session request
 
 extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
-    func startSession() async throws -> URL {
+    func startSession() async throws -> String {
         let scopes: [AuthScopes] = [
             .read,
             .identity
@@ -82,7 +82,7 @@ extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
         let authURL = try self.assembleAuthURL(scope: scopes, duration: .permanent)
         let callbackScheme = try self.redirectURLScheme
         
-        return try await withCheckedThrowingContinuation { continuation in
+        let url = try await withCheckedThrowingContinuation { continuation in
             let session = ASWebAuthenticationSession(
                 url: authURL,
                 callbackURLScheme: callbackScheme
@@ -97,6 +97,13 @@ extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
             session.prefersEphemeralWebBrowserSession = true
             session.start()
         }
+        
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        guard let code = components?.queryItems?.first(where: { $0.name == "code" })?.value else {
+            throw NSError()
+        }
+        
+        return code
     }
 }
 

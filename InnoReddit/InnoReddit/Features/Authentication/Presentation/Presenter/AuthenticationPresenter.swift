@@ -20,11 +20,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func didTapAuthenticateWithReddit() {
         Task {
             do {
-                let url = try await self.webAuthSessionService.startSession()
-                let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-                guard let code = components?.queryItems?.first(where: { $0.name == "code" })?.value else {
-                    throw NSError()
-                }
+                let code = try await self.webAuthSessionService.startSession()
                 
                 try await self.retrieveTokensUseCase.execute(code: code)
                 
