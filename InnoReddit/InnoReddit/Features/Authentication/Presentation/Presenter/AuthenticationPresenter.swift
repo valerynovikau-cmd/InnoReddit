@@ -18,29 +18,33 @@ final class AuthenticationPresenter {
 
 extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func didTapAuthenticateWithReddit() {
+        self.input?.disableLoginButton()
         Task {
             do {
                 let code = try await self.webAuthSessionService.startSession()
                 
                 try await self.retrieveTokensUseCase.execute(code: code)
-                
-                router.goToMainFlow()
+                self.input?.enableLoginButton()
+                self.router.goToMainFlow()
             } catch let error as AuthenticationSessionError {
                 let title = AuthenticationLocalizableStrings.errorMessageTitle
                 switch error {
                 case .accessDenied:
                     let message = AuthenticationLocalizableStrings.accessDeniedErrorMessage
                     self.input?.showAlert(title: title, message: message)
+                    self.input?.enableLoginButton()
                 case .invalidResponseURL:
-                    break
+                    self.input?.enableLoginButton()
                 default:
                     let message = AuthenticationLocalizableStrings.serverErrorMessage
                     self.input?.showAlert(title: title, message: message)
+                    self.input?.enableLoginButton()
                 }
             } catch {
                 let title = AuthenticationLocalizableStrings.errorMessageTitle
                 let message = AuthenticationLocalizableStrings.authenticationErrorMessage
                 self.input?.showAlert(title: title, message: message)
+                self.input?.enableLoginButton()
             }
         }
     }
@@ -48,7 +52,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func goToMainFlowIfAuthenticated() {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
-            router.goToMainFlow()
+            self.router.goToMainFlow()
         } catch {
             
         }

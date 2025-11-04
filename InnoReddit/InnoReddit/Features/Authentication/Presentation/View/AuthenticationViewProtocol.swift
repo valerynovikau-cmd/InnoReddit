@@ -7,4 +7,6 @@
 
 protocol AuthenticationViewProtocol: AnyObject {
     func showAlert(title: String, message: String)
+    func disableLoginButton()
+    func enableLoginButton()
 }

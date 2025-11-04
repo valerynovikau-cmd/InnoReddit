@@ -10,7 +10,7 @@
 "logInWithRedditButtonText" = "Log In with Reddit";
 "termsOfServiceInfoLabelText" = "By clicking \"Login\", you agree to the terms of use and privacy policy";
 "inforamtionLabelText" = "Join thousands of communities and discuss anything that interests you";
-"welcomeToInnoRedditLabelText" = "Welcome to InnoReddit!";
+"welcomeToInnoRedditLabelText" = "Welcome to InnoReddit";
 
 // Error messages
 "errorMessageTitle" = "Error";

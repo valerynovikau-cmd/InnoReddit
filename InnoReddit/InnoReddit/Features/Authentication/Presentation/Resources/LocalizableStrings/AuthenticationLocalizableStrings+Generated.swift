@@ -27,8 +27,8 @@ internal enum AuthenticationLocalizableStrings {
   internal static let serverErrorMessage = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "serverErrorMessage", fallback: "Server error. Please try again.")
   /// By clicking "Login", you agree to the terms of use and privacy policy
   internal static let termsOfServiceInfoLabelText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "termsOfServiceInfoLabelText", fallback: "By clicking \"Login\", you agree to the terms of use and privacy policy")
-  /// Welcome to InnoReddit!
-  internal static let welcomeToInnoRedditLabelText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "welcomeToInnoRedditLabelText", fallback: "Welcome to InnoReddit!")
+  /// Welcome to InnoReddit
+  internal static let welcomeToInnoRedditLabelText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "welcomeToInnoRedditLabelText", fallback: "Welcome to InnoReddit")
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:enable nesting type_body_length type_name vertical_whitespace_opening_braces
