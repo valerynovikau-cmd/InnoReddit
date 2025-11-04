@@ -11,6 +11,22 @@ protocol ASWebAuthSessionServiceProtocol {
     func startSession() async throws -> String
 }
 
+enum AuthenticationSessionError: Error {
+    // In-code error handling types
+    case invalidClientData
+    case invalidURL
+    case invalidResponseURL
+    
+    // API Errors
+    case accessDenied
+    case unsupportedResponseType
+    case invalidScope
+    case invalidRequest
+    case noCodeReturned
+    
+    case unknownError
+}
+
 final class ASWebAuthSessionService: NSObject {
     
     // MARK: - Authentication URL assembly methods
@@ -23,29 +39,29 @@ final class ASWebAuthSessionService: NSObject {
     }
     
     private var clientID: String {
-        get throws {
+        get throws(AuthenticationSessionError) {
             guard let id = Bundle.main.infoDictionary?["ClientID"] as? String else {
-                throw URLError(.badURL)
+                throw .invalidClientData
             }
             return id
         }
     }
     
     private var redirectURLScheme: String {
-        get throws {
+        get throws(AuthenticationSessionError) {
             guard let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]],
                   let urlSchemes = urlTypes.first?["CFBundleURLSchemes"] as? [String],
                   let callbackScheme = urlSchemes.first
             else {
-                throw URLError(.badURL)
+                throw .invalidClientData
             }
             return callbackScheme
         }
     }
     
-    private func assembleAuthURL(scope: [AuthScopes], duration: TokenDuration) throws -> URL {
+    private func assembleAuthURL(scope: [AuthScopes], duration: TokenDuration) throws(AuthenticationSessionError) -> URL {
         let state = UUID().uuidString
-        let auchScopesString = scope.map(\.rawValue).joined(separator: " ")
+        let authScopesString = scope.map(\.rawValue).joined(separator: " ")
         
         let clientID = try self.clientID
         let redirectUri = try self.redirectURLScheme + "://auth"
@@ -59,11 +75,11 @@ final class ASWebAuthSessionService: NSObject {
             URLQueryItem(name: "state", value: state),
             URLQueryItem(name: "redirect_uri", value: redirectUri),
             URLQueryItem(name: "duration", value: duration),
-            URLQueryItem(name: "scope", value: auchScopesString)
+            URLQueryItem(name: "scope", value: authScopesString)
         ]
         
         guard let url = comp.url else {
-            throw URLError(.badURL)
+            throw .invalidURL
         }
         
         return url
@@ -73,7 +89,7 @@ final class ASWebAuthSessionService: NSObject {
 // MARK: - Authentication Session request
 
 extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
-    func startSession() async throws -> String {
+    func startSession() async throws(AuthenticationSessionError) -> String {
         let scopes: [AuthScopes] = [
             .read,
             .identity
@@ -82,25 +98,49 @@ extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
         let authURL = try self.assembleAuthURL(scope: scopes, duration: .permanent)
         let callbackScheme = try self.redirectURLScheme
         
-        let url = try await withCheckedThrowingContinuation { continuation in
-            let session = ASWebAuthenticationSession(
-                url: authURL,
-                callbackURLScheme: callbackScheme
-            ) { callbackURL, error in
-                if let url = callbackURL {
-                    continuation.resume(returning: url)
-                } else {
-                    continuation.resume(throwing: error ?? URLError(.cancelled))
+        guard
+            let url = (try? await withCheckedThrowingContinuation { continuation in
+                let session = ASWebAuthenticationSession(
+                    url: authURL,
+                    callbackURLScheme: callbackScheme
+                ) { callbackURL, error in
+                    if let url = callbackURL {
+                        continuation.resume(returning: url)
+                    } else {
+                        continuation.resume(throwing: error ?? URLError(.cancelled))
+                    }
                 }
-            }
-            session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = true
-            session.start()
+                session.presentationContextProvider = self
+                session.prefersEphemeralWebBrowserSession = true
+                session.start()
+            }),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
+            throw .invalidResponseURL
         }
         
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        guard let code = components?.queryItems?.first(where: { $0.name == "code" })?.value else {
-            throw NSError()
+        return try self.handleResponse(components: components)
+    }
+    
+    private func handleResponse(components: URLComponents) throws(AuthenticationSessionError) -> String {
+        let queryItems = components.queryItems
+        if let error = queryItems?.first(where: { $0.name == "error" })?.value {
+            switch error {
+            case "access_denied":
+                throw .accessDenied
+            case "unsupported_response_type":
+                throw .unsupportedResponseType
+            case "invalid_scope":
+                throw .invalidScope
+            case "invalid_request":
+                throw .invalidRequest
+            default:
+                throw .unknownError
+            }
+        }
+        
+        guard let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
+            throw .noCodeReturned
         }
         
         return code

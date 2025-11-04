@@ -6,7 +6,14 @@
   
 */
 
+// UI Strings
 "logInWithRedditButtonText" = "Войти через Reddit";
 "termsOfServiceInfoLabelText" = "Нажимая \"Войти\", вы соглашаетесь с условиями использования и политикой конфиденциальности";
 "inforamtionLabelText" = "Присоединяйтесь к тысячам сообществ и обсуждайте всё, что вас интересует";
 "welcomeToInnoRedditLabelText" = "Добро пожаловать в InnoReddit!";
+
+// Error messages
+"errorMessageTitle" = "Ошибка";
+"accessDeniedErrorMessage" = "Отказано в доступе. Нельзя продолжить без разрешения пользователя.";
+"serverErrorMessage" = "Ошибка сервера. Пожалуйста, попробуйте снова.";
+"authenticationErrorMessage" = "Ошибка аутентификации. Пожалуйста, попробуйте снова.";

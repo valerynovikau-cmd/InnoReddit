@@ -8,20 +8,20 @@
 import Foundation
 import Security
 
+enum KeychainError: Error {
+    case invalidData
+    case tokenNotFound
+    case tokensSaveError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
+    case tokensDeleteError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
+}
+
 final class KeychainDataSource {
     
-    enum KeychainError: Error {
-        case invalidData
-        case tokenNotFound
-        case tokensSaveError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
-        case tokensDeleteError(_ accessToken: OSStatus, _ refreshToken: OSStatus)
-    }
-    
-    func saveTokens(accessToken: String, refreshToken: String) throws {
+    func saveTokens(accessToken: String, refreshToken: String) throws(KeychainError) {
         guard let accessTokenData = accessToken.data(using: .utf8),
               let refreshTokenData = refreshToken.data(using: .utf8)
         else {
-            throw KeychainError.invalidData
+            throw .invalidData
         }
 
         let accessQuery = [
@@ -44,11 +44,11 @@ final class KeychainDataSource {
         guard accessStatus == errSecSuccess,
               refreshStatus == errSecSuccess
         else {
-            throw KeychainError.tokensSaveError(accessStatus, refreshStatus)
+            throw .tokensSaveError(accessStatus, refreshStatus)
         }
     }
     
-    func getToken(tokenType: TokenType) throws -> String {
+    func getToken(tokenType: TokenType) throws(KeychainError) -> String {
         let key = tokenType.rawValue
         let query = [
             kSecClass as String: kSecClassGenericPassword,
@@ -60,19 +60,19 @@ final class KeychainDataSource {
         var dataTypeRef: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
         guard status == errSecSuccess else {
-            throw KeychainError.tokenNotFound
+            throw .tokenNotFound
         }
         
         guard let data = dataTypeRef as? Data,
               let token = String(data: data, encoding: .utf8)
         else
         {
-            throw KeychainError.invalidData
+            throw .invalidData
         }
         return token
     }
     
-    func deleteTokens() throws {
+    func deleteTokens() throws(KeychainError) {
         let accessQuery = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: TokenType.accessToken.rawValue
@@ -88,7 +88,7 @@ final class KeychainDataSource {
         guard accessStatus == errSecSuccess,
               refreshStatus == errSecSuccess
         else {
-            throw KeychainError.tokensDeleteError(accessStatus, refreshStatus)
+            throw .tokensDeleteError(accessStatus, refreshStatus)
         }
     }
 }

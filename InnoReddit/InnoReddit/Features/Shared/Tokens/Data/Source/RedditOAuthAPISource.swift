@@ -7,6 +7,21 @@
 
 import Foundation
 
+enum RedditOAuthFlowError: Error {
+    // In-code error handling types
+    case invalidURL
+    case invalidClientData
+    case invalidResponse
+    case invalidData
+    
+    // API Errors
+    case invalidCredentials
+    case unsupportedGrantType
+    case noCodeWasIncluded
+    case codeHasExpired
+    case noRefreshTokenWasIncluded
+}
+
 final class RedditOAuthAPISource {
     
     // MARK: - Authentication URL assembly methods
@@ -18,33 +33,33 @@ final class RedditOAuthAPISource {
     }
     
     private var clientID: String {
-        get throws {
+        get throws(RedditOAuthFlowError) {
             guard let id = Bundle.main.infoDictionary?["ClientID"] as? String else {
-                throw URLError(.badURL)
+                throw .invalidClientData
             }
             return id
         }
     }
     
     private var redirectURLScheme: String {
-        get throws {
+        get throws(RedditOAuthFlowError) {
             guard let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]],
                   let urlSchemes = urlTypes.first?["CFBundleURLSchemes"] as? [String],
                   let callbackScheme = urlSchemes.first
             else {
-                throw URLError(.badURL)
+                throw .invalidClientData
             }
             return callbackScheme
         }
     }
     
     // MARK: - API Request methods
-    func performTokenRetrieval(code: String) async throws -> TokenRetrievalDTO {
+    func performTokenRetrieval(code: String) async throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
         var comp = self.components
         comp.path = "/api/v1/access_token"
         
         guard let url = comp.url else {
-            throw URLError(.badURL)
+            throw .invalidURL
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -59,21 +74,19 @@ final class RedditOAuthAPISource {
         request.setValue("Basic \(encoded)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let (data, response) = try? await URLSession.shared.data(for: request) else {
+            throw .invalidResponse
+        }
         
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let tokenRetrievalDTO = try decoder.decode(TokenRetrievalDTO.self, from: data)
-        
-        return tokenRetrievalDTO
+        return try self.handleResponse(data: data, response: response)
     }
     
-    func performAccessTokenRefresh(refreshToken: String) async throws -> TokenRetrievalDTO {
+    func performAccessTokenRefresh(refreshToken: String) async throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
         var comp = self.components
         comp.path = "/api/v1/access_token"
         
         guard let url = comp.url else {
-            throw URLError(.badURL)
+            throw .invalidURL
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -87,12 +100,40 @@ final class RedditOAuthAPISource {
         request.setValue("Basic \(encoded)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let (data, response) = try? await URLSession.shared.data(for: request) else {
+            throw .invalidResponse
+        }
+        
+        return try self.handleResponse(data: data, response: response)
+    }
+    
+    // Developers of Reddit OAuth API did not care enough to ensure proper error handling, so this part of error propagation may not throw exact error types but instead throw .invalidData
+    private func handleResponse(data: Data, response: URLResponse) throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
+        if (400...499).contains((response as? HTTPURLResponse)?.statusCode ?? 0) {
+            throw .invalidCredentials
+        }
         
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let tokenRetrievalDTO = try decoder.decode(TokenRetrievalDTO.self, from: data)
-        
-        return tokenRetrievalDTO
+        do {
+            let tokenRetrievalDTO = try decoder.decode(TokenRetrievalDTO.self, from: data)
+            return tokenRetrievalDTO
+        } catch {
+            guard let tokenRetrievalErrorDTO = try? decoder.decode(TokenRetrievalErrorDTO.self, from: data) else {
+                throw .invalidData
+            }
+            switch tokenRetrievalErrorDTO.error {
+            case "unsupported_grant_type":
+                throw .unsupportedGrantType
+            case "NO_TEXT for field code":
+                throw .noCodeWasIncluded
+            case "invalid_grant":
+                throw .codeHasExpired
+            case "NO_TEXT for field refresh_token":
+                throw .noRefreshTokenWasIncluded
+            default:
+                throw .invalidData
+            }
+        }
     }
 }

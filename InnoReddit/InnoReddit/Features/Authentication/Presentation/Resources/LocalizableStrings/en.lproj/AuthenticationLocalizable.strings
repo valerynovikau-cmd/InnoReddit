@@ -6,7 +6,14 @@
   
 */
 
+// UI Strings
 "logInWithRedditButtonText" = "Log In with Reddit";
 "termsOfServiceInfoLabelText" = "By clicking \"Login\", you agree to the terms of use and privacy policy";
 "inforamtionLabelText" = "Join thousands of communities and discuss anything that interests you";
 "welcomeToInnoRedditLabelText" = "Welcome to InnoReddit!";
+
+// Error messages
+"errorMessageTitle" = "Error";
+"accessDeniedErrorMessage" = "Access denied. Cannot continue without user permission.";
+"serverErrorMessage" = "Server error. Please try again.";
+"authenticationErrorMessage" = "Authentication error. Please try again.";

@@ -11,15 +11,44 @@ final class TokenStorageRepository: TokenStorageRepositoryProtocol {
     
     @Injected(\.keychainDataSource) private var keychainDataSource: KeychainDataSource
     
-    func getToken(tokenType: TokenType) throws -> String {
-        return try self.keychainDataSource.getToken(tokenType: tokenType)
+    func getToken(tokenType: TokenType) throws(TokenStorageError) -> String {
+        do {
+            return try self.keychainDataSource.getToken(tokenType: tokenType)
+        } catch {
+            switch error {
+            case .invalidData:
+                throw .invalidTokenData
+            case .tokenNotFound:
+                throw .noTokenSaved
+            default:
+                throw .unknownError
+            }
+        }
     }
     
-    func saveTokens(accessToken: String, refreshToken: String) throws {
-        try self.keychainDataSource.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
+    func saveTokens(accessToken: String, refreshToken: String) throws(TokenStorageError) {
+        do {
+            try self.keychainDataSource.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
+        } catch {
+            switch error {
+            case .tokensSaveError, .tokensDeleteError:
+                throw .saveTokensFailed
+            default:
+                throw .unknownError
+            }
+        }
     }
     
-    func clearTokens() throws {
-        try self.keychainDataSource.deleteTokens()
+    func clearTokens() throws(TokenStorageError) {
+        do {
+            try self.keychainDataSource.deleteTokens()
+        } catch {
+            switch error {
+            case .tokensDeleteError:
+                throw .deleteTokensFailed
+            default:
+                throw .unknownError
+            }
+        }
     }
 }

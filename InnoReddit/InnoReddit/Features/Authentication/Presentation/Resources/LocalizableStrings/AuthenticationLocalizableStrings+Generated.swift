@@ -10,6 +10,12 @@ import Foundation
 // swiftlint:disable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:disable nesting type_body_length type_name vertical_whitespace_opening_braces
 internal enum AuthenticationLocalizableStrings {
+  /// Access denied. Cannot continue without user permission.
+  internal static let accessDeniedErrorMessage = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "accessDeniedErrorMessage", fallback: "Access denied. Cannot continue without user permission.")
+  /// Authentication error. Please try again.
+  internal static let authenticationErrorMessage = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "authenticationErrorMessage", fallback: "Authentication error. Please try again.")
+  /// Error
+  internal static let errorMessageTitle = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "errorMessageTitle", fallback: "Error")
   /// Join thousands of communities and discuss anything that interests you
   internal static let inforamtionLabelText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "inforamtionLabelText", fallback: "Join thousands of communities and discuss anything that interests you")
   /// AuthenticationLocalizable.strings
@@ -17,6 +23,8 @@ internal enum AuthenticationLocalizableStrings {
   /// 
   ///   Created by Валерий Новиков on 3.11.25.
   internal static let logInWithRedditButtonText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "logInWithRedditButtonText", fallback: "Log In with Reddit")
+  /// Server error. Please try again.
+  internal static let serverErrorMessage = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "serverErrorMessage", fallback: "Server error. Please try again.")
   /// By clicking "Login", you agree to the terms of use and privacy policy
   internal static let termsOfServiceInfoLabelText = AuthenticationLocalizableStrings.tr("AuthenticationLocalizable", "termsOfServiceInfoLabelText", fallback: "By clicking \"Login\", you agree to the terms of use and privacy policy")
   /// Welcome to InnoReddit!
