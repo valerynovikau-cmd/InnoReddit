@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class AuthenticationViewController: UIViewController {
 
@@ -235,5 +236,14 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         self.present(alert, animated: true)
+    }
+}
+
+struct AuthenticationViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        ViewControllerPreview {
+            AuthenticationViewController()
+        }
+        .ignoresSafeArea()
     }
 }
