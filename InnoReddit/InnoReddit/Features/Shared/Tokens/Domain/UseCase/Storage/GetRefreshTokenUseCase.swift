@@ -7,7 +7,11 @@
 
 import Factory
 
-final class GetRefreshTokenUseCase {
+protocol GetRefreshTokenUseCaseProtocol {
+    func execute() throws -> String
+}
+
+final class GetRefreshTokenUseCase: GetRefreshTokenUseCaseProtocol {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
     func execute() throws -> String {

@@ -7,9 +7,13 @@
 
 import Factory
 
-final class RetrieveTokensUseCase {
+protocol RetrieveTokensUseCaseProtocol {
+    func execute(code: String) async throws
+}
+
+final class RetrieveTokensUseCase: RetrieveTokensUseCaseProtocol {
     @Injected(\.tokenRepository) private var tokenRepository: TokenRepositoryProtocol
-    @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCase
+    @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCaseProtocol
     
     func execute(code: String) async throws {
         let tokenRetrieval = try await self.tokenRepository.exchangeCodeForTokens(code: code)

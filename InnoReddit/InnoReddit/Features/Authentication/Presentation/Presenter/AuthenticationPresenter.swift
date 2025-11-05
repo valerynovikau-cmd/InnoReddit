@@ -12,8 +12,8 @@ final class AuthenticationPresenter {
     weak var input: AuthenticationViewProtocol?
     @Injected(\.authenticationRouter) private var router: AuthenticationRouterProtocol
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
-    @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCase
-    @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCase
+    @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCaseProtocol
+    @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCaseProtocol
 }
 
 extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {

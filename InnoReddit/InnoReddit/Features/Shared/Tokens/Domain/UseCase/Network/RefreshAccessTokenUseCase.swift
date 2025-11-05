@@ -7,9 +7,13 @@
 
 import Factory
 
-final class RefreshAccessTokenUseCase {
+protocol RefreshAccessTokenUseCaseProtocol {
+    func execute(refreshToken: String) async throws
+}
+
+final class RefreshAccessTokenUseCase: RefreshAccessTokenUseCaseProtocol {
     @Injected(\.tokenRepository) private var tokenRepository: TokenRepositoryProtocol
-    @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCase
+    @Injected(\.saveTokensUseCase) private var saveTokensUseCase: SaveTokensUseCaseProtocol
     
     func execute(refreshToken: String) async throws {
         let refreshedTokenRetrieval = try await self.tokenRepository.refreshAccessToken(refreshToken: refreshToken)

@@ -39,43 +39,43 @@ extension Container {
 
 // MARK: UseCases
 extension Container {
-    var getAccessTokenUseCase: Factory<GetAccessTokenUseCase> {
+    var getAccessTokenUseCase: Factory<GetAccessTokenUseCaseProtocol> {
         self { @MainActor in
             GetAccessTokenUseCase()
         }
     }
     
-    var getRefreshTokenUseCase: Factory<GetRefreshTokenUseCase> {
+    var getRefreshTokenUseCase: Factory<GetRefreshTokenUseCaseProtocol> {
         self { @MainActor in
             GetRefreshTokenUseCase()
         }
     }
     
-    var invalidateTokensUseCase: Factory<InvalidateTokensUseCase> {
+    var invalidateTokensUseCase: Factory<InvalidateTokensUseCaseProtocol> {
         self { @MainActor in
             InvalidateTokensUseCase()
         }
     }
     
-    var refreshAccessTokenUseCase: Factory<RefreshAccessTokenUseCase> {
+    var refreshAccessTokenUseCase: Factory<RefreshAccessTokenUseCaseProtocol> {
         self { @MainActor in
             RefreshAccessTokenUseCase()
         }
     }
     
-    var retrieveTokensUseCase: Factory<RetrieveTokensUseCase> {
+    var retrieveTokensUseCase: Factory<RetrieveTokensUseCaseProtocol> {
         self { @MainActor in
             RetrieveTokensUseCase()
         }
     }
     
-    var saveTokensUseCase: Factory<SaveTokensUseCase> {
+    var saveTokensUseCase: Factory<SaveTokensUseCaseProtocol> {
         self { @MainActor in
             SaveTokensUseCase()
         }
     }
     
-    var deleteTokensUseCase: Factory<DeleteTokensUseCase> {
+    var deleteTokensUseCase: Factory<DeleteTokensUseCaseProtocol> {
         self { @MainActor in
             DeleteTokensUseCase()
         }

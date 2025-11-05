@@ -7,7 +7,11 @@
 
 import Factory
 
-final class GetAccessTokenUseCase {
+protocol GetAccessTokenUseCaseProtocol {
+    func execute() throws -> String
+}
+
+final class GetAccessTokenUseCase: GetAccessTokenUseCaseProtocol {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
     func execute() throws -> String {
