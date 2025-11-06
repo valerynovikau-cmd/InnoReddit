@@ -20,32 +20,32 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func didTapAuthenticateWithReddit() {
         self.input?.disableLoginButton()
         Task {
+            var errorTitle: String
+            var errorMessage: String
             do {
                 let code = try await self.webAuthSessionService.startSession()
                 
                 try await self.retrieveTokensUseCase.execute(code: code)
                 self.input?.enableLoginButton()
                 self.router.goToMainFlow()
+                return
             } catch let error as AuthenticationSessionError {
-                let title = AuthenticationLocalizableStrings.errorMessageTitle
+                errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
                 switch error {
                 case .accessDenied:
-                    let message = AuthenticationLocalizableStrings.accessDeniedErrorMessage
-                    self.input?.showAlert(title: title, message: message)
-                    self.input?.enableLoginButton()
+                    errorMessage = AuthenticationLocalizableStrings.accessDeniedErrorMessage
                 case .invalidResponseURL:
                     self.input?.enableLoginButton()
+                    return
                 default:
-                    let message = AuthenticationLocalizableStrings.serverErrorMessage
-                    self.input?.showAlert(title: title, message: message)
-                    self.input?.enableLoginButton()
+                    errorMessage = AuthenticationLocalizableStrings.serverErrorMessage
                 }
             } catch {
-                let title = AuthenticationLocalizableStrings.errorMessageTitle
-                let message = AuthenticationLocalizableStrings.authenticationErrorMessage
-                self.input?.showAlert(title: title, message: message)
-                self.input?.enableLoginButton()
+                errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
+                errorMessage = AuthenticationLocalizableStrings.authenticationErrorMessage
             }
+            self.input?.enableLoginButton()
+            self.input?.showAlert(title: errorTitle, message: errorMessage)
         }
     }
     
@@ -53,8 +53,6 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
             self.router.goToMainFlow()
-        } catch {
-            
-        }
+        } catch { }
     }
 }
