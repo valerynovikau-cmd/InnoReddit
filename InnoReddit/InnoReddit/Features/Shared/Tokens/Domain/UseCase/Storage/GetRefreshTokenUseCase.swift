@@ -15,7 +15,7 @@ final class GetRefreshTokenUseCase: GetRefreshTokenUseCaseProtocol {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
     func execute() throws -> String {
-        let token = try self.tokenStorageRepository.getToken(tokenType: .refreshToken)
+        let token = try self.tokenStorageRepository.getToken(tokenAccessType: .refreshToken)
         return token
     }
 }

@@ -13,8 +13,8 @@ final class MockTokenStorageRepository: TokenStorageRepositoryProtocol {
     var accessToken: String?
     var refreshToken: String?
     
-    func getToken(tokenType: TokenType) throws(TokenStorageError) -> String {
-        if tokenType == .accessToken {
+    func getToken(tokenAccessType: TokenAccessType) throws(TokenStorageError) -> String {
+        if tokenAccessType == .accessToken {
             return self.accessToken ?? ""
         } else {
             return self.refreshToken ?? ""

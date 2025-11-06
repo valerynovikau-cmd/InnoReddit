@@ -11,9 +11,9 @@ final class TokenStorageRepository: TokenStorageRepositoryProtocol {
     
     @Injected(\.keychainDataSource) private var keychainDataSource: KeychainDataSource
     
-    func getToken(tokenType: TokenType) throws(TokenStorageError) -> String {
+    func getToken(tokenAccessType: TokenAccessType) throws(TokenStorageError) -> String {
         do {
-            return try self.keychainDataSource.getToken(tokenType: tokenType)
+            return try self.keychainDataSource.getToken(tokenAccessType: tokenAccessType)
         } catch {
             switch error {
             case .invalidData:

@@ -14,7 +14,7 @@ enum TokenStorageError: Error {
 }
 
 protocol TokenStorageRepositoryProtocol {
-    func getToken(tokenType: TokenType) throws(TokenStorageError) -> String
+    func getToken(tokenAccessType: TokenAccessType) throws(TokenStorageError) -> String
     func saveTokens(accessToken: String, refreshToken: String) throws(TokenStorageError) -> Void
     func clearTokens() throws(TokenStorageError) -> Void
 }

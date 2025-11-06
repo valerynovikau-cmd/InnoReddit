@@ -15,7 +15,7 @@ final class GetAccessTokenUseCase: GetAccessTokenUseCaseProtocol {
     @Injected(\.tokenStorageRepository) private var tokenStorageRepository: TokenStorageRepositoryProtocol
     
     func execute() throws -> String {
-        let token = try self.tokenStorageRepository.getToken(tokenType: .accessToken)
+        let token = try self.tokenStorageRepository.getToken(tokenAccessType: .accessToken)
         return token
     }
 }
