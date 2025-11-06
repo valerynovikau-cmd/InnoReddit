@@ -63,8 +63,17 @@ final class TokenRepository: TokenRepositoryProtocol {
         }
     }
     
-    func invalidateTokens() async throws(TokenError) {
-        fatalError()
+    func invalidateTokens(tokenToRevoke: String, tokenAccessType: TokenAccessType) async throws(TokenError) {
+        do {
+            try await redditOAuthAPISource.performTokenRevoking(tokenToRevoke: tokenToRevoke, tokenAccessType: tokenAccessType)
+        } catch {
+            switch error {
+            case .invalidCredentials:
+                throw .invalidRequest
+            default:
+                throw .unknownError
+            }
+        }
     }
     
     private func convertScopesString(scopesString: String) -> [AuthScopes] {

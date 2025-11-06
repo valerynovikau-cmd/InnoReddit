@@ -14,9 +14,14 @@ protocol InvalidateTokensUseCaseProtocol {
 final class InvalidateTokensUseCase: InvalidateTokensUseCaseProtocol {
     @Injected(\.tokenRepository) private var tokenRepository: TokenRepositoryProtocol
     @Injected(\.deleteTokensUseCase) private var deleteTokensUseCase: DeleteTokensUseCaseProtocol
+    @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCaseProtocol
+    @Injected(\.getRefreshTokenUseCase) private var getRefreshTokenUseCase: GetRefreshTokenUseCaseProtocol
     
     func execute() async throws {
-        try await self.tokenRepository.invalidateTokens()
+        let accessToken = try self.getAccessTokenUseCase.execute()
+        let refreshToken = try self.getRefreshTokenUseCase.execute()
+        try await self.tokenRepository.invalidateTokens(tokenToRevoke: accessToken, tokenAccessType: .accessToken)
+        try await self.tokenRepository.invalidateTokens(tokenToRevoke: refreshToken, tokenAccessType: .refreshToken)
         try self.deleteTokensUseCase.execute()
     }
 }

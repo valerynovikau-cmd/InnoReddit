@@ -15,5 +15,5 @@ enum TokenError: Error {
 protocol TokenRepositoryProtocol: AnyObject {
     func exchangeCodeForTokens(code: String) async throws(TokenError) -> TokenRetrieval
     func refreshAccessToken(refreshToken: String) async throws(TokenError) -> TokenRetrieval
-    func invalidateTokens() async throws(TokenError) -> Void
+    func invalidateTokens(tokenToRevoke: String, tokenAccessType: TokenAccessType) async throws(TokenError) -> Void
 }

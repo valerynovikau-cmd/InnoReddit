@@ -78,7 +78,7 @@ final class RedditOAuthAPISource {
             throw .invalidResponse
         }
         
-        return try self.handleResponse(data: data, response: response)
+        return try self.handleTokenRetrievalResponse(data: data, response: response)
     }
     
     func performAccessTokenRefresh(refreshToken: String) async throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
@@ -104,11 +104,35 @@ final class RedditOAuthAPISource {
             throw .invalidResponse
         }
         
-        return try self.handleResponse(data: data, response: response)
+        return try self.handleTokenRetrievalResponse(data: data, response: response)
+    }
+    
+    func performTokenRevoking(tokenToRevoke: String, tokenAccessType: TokenAccessType) async throws(RedditOAuthFlowError) {
+        var comp = self.components
+        comp.path = "/api/v1/revoke_token"
+        
+        guard let url = comp.url else {
+            throw .invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        let body = "token=\(tokenToRevoke)&token_type_hint=\(tokenAccessType.rawValue)"
+        request.httpBody = body.data(using: .utf8)
+
+        let clientId = try self.clientID
+        let credentials = "\(clientId):"
+        let encoded = Data(credentials.utf8).base64EncodedString()
+        request.setValue("Basic \(encoded)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        guard let (_, _) = try? await URLSession.shared.data(for: request) else {
+            throw .invalidCredentials
+        }
     }
     
     // Developers of Reddit OAuth API did not care enough to ensure proper error handling, so this part of error propagation may not throw exact error types but instead throw .invalidData
-    private func handleResponse(data: Data, response: URLResponse) throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
+    private func handleTokenRetrievalResponse(data: Data, response: URLResponse) throws(RedditOAuthFlowError) -> TokenRetrievalDTO {
         if (400...499).contains((response as? HTTPURLResponse)?.statusCode ?? 0) {
             throw .invalidCredentials
         }
