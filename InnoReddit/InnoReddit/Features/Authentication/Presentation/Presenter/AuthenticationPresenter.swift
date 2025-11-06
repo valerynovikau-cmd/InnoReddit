@@ -23,9 +23,10 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
             var errorTitle: String
             var errorMessage: String
             do {
-                let code = try await self.webAuthSessionService.startSession()
+                let scopes: [AuthScopes] = [.edit, .read]
+                let code = try await self.webAuthSessionService.startSession(scopes: scopes)
                 
-                try await self.retrieveTokensUseCase.execute(code: code)
+                try await self.retrieveTokensUseCase.execute(code: code, scopes: scopes)
                 self.input?.enableLoginButton()
                 self.router.goToMainFlow()
                 return

@@ -8,7 +8,7 @@
 import AuthenticationServices
 
 protocol ASWebAuthSessionServiceProtocol {
-    func startSession() async throws -> String
+    func startSession(scopes: [AuthScopes]) async throws -> String
 }
 
 enum AuthenticationSessionError: Error {
@@ -89,11 +89,7 @@ final class ASWebAuthSessionService: NSObject {
 // MARK: - Authentication Session request
 
 extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
-    func startSession() async throws(AuthenticationSessionError) -> String {
-        let scopes: [AuthScopes] = [
-            .read,
-            .identity
-        ]
+    func startSession(scopes: [AuthScopes]) async throws(AuthenticationSessionError) -> String {
         
         let authURL = try self.assembleAuthURL(scope: scopes, duration: .permanent)
         let callbackScheme = try self.redirectURLScheme
