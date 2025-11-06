@@ -6,6 +6,7 @@
 //
 
 protocol AuthenticationViewProtocol: AnyObject {
+    var output: AuthenticationViewPresenterProtocol? { get set }
     func showAlert(title: String, message: String)
     func disableLoginButton()
     func enableLoginButton()

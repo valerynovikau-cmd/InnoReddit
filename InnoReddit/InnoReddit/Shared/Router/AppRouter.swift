@@ -23,13 +23,17 @@ final class AppRouter: RouterProtocol {
 
 extension AppRouter: AppRouterProtocol {
     func showAuthenticationScreen() {
-        let presenter = AuthenticationPresenter()
-        let authenticationVC = AuthenticationViewController()
+        let presenter = Container.shared.authenticationPresenter.resolve()
+        let authenticationVC = Container.shared.authenticationView.resolve()
         
         authenticationVC.output = presenter
         presenter.input = authenticationVC
-
-        self.navigationController.setViewControllers([authenticationVC], animated: false)
+        
+        guard let authVC = authenticationVC as? UIViewController else {
+            return
+        }
+        
+        self.navigationController.setViewControllers([authVC], animated: false)
         self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
     }

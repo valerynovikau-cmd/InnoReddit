@@ -6,6 +6,7 @@
 //
 
 import Factory
+import UIKit
 
 extension Container {
     var authenticationRouter: Factory<AuthenticationRouterProtocol> {
@@ -20,9 +21,15 @@ extension Container {
         }
     }
     
-//    var authenticationPresenter: Factory<AuthenticationViewOutput> {
-//        self { @MainActor in
-//            AuthenticationPresenter(router: self.authenticationRouter())
-//        }
-//    }
+    var authenticationPresenter: Factory<AuthenticationViewPresenterProtocol> {
+        self { @MainActor in
+            AuthenticationPresenter()
+        }
+    }
+    
+    var authenticationView: Factory<AuthenticationViewProtocol> {
+        self { @MainActor in
+            AuthenticationViewController()
+        }
+    }
 }
