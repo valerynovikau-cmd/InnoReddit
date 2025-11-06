@@ -224,7 +224,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SWIFTGEN=\"$SRCROOT/InnoReddit/SwiftGen/bin/swiftgen\"\n\nif [ -f \"$SWIFTGEN\" ]; then\n    \"$SWIFTGEN\" config run --config \"$SRCROOT/InnoReddit/swiftgen.yml\"\nelse\n    echo \"warning: SwiftGen binary not found at $SWIFTGEN\"\nfi\n";
+			shellScript = "/opt/homebrew/bin/swiftgen config run --config \"$SRCROOT/InnoReddit/swiftgen.yml\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
