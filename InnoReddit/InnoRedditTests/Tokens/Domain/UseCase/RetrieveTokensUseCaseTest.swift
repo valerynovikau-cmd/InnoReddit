@@ -63,7 +63,7 @@ final class RetrieveTokensUseCaseTest: XCTestCase {
         }
     }
     
-    func test_usSuccessfulRetrieval() async throws {
+    func test_unsuccessfulRetrieval() async throws {
         Container.shared.tokenRepository.register {
             let mock = MockTokenRepository()
             mock.needToSucceed = false
