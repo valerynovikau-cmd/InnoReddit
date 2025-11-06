@@ -9,7 +9,7 @@
 
 final class MockASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
     
-    func startSession() async throws -> String {
+    func startSession(scopes: [AuthScopes]) async throws -> String {
         return ""
     }
 }

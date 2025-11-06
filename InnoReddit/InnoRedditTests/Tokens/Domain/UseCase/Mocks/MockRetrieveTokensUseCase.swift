@@ -9,7 +9,7 @@
 
 final class MockRetrieveTokensUseCase: RetrieveTokensUseCaseProtocol {
     var needToSucceed: Bool = true
-    func execute(code: String) async throws {
+    func execute(code: String, scopes: [AuthScopes]) async throws {
         if !needToSucceed {
             throw TokenError.unknownError
         }

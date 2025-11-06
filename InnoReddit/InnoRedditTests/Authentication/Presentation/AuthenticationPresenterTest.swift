@@ -32,6 +32,6 @@ final class AuthenticationPresenterTest: XCTestCase {
             return usecase
         }
         
-//        let presenter = Container.shared.authenticationPresenter.resolve()
+        let presenter = Container.shared.authenticationPresenter.resolve()
     }
 }

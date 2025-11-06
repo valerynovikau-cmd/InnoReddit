@@ -38,7 +38,7 @@ final class RetrieveTokensUseCaseTest: XCTestCase {
         }
         let useCase = Container.shared.retrieveTokensUseCase.resolve()
         
-        try await useCase.execute(code: "")
+        try await useCase.execute(code: "", scopes: self.tokenToRetrieve.scope)
     }
     
     func test_successfulRetrieval_unSuccessfulSaving() async throws {
@@ -56,7 +56,7 @@ final class RetrieveTokensUseCaseTest: XCTestCase {
         let useCase = Container.shared.retrieveTokensUseCase.resolve()
         
         do {
-            try await useCase.execute(code: "")
+            try await useCase.execute(code: "", scopes: self.tokenToRetrieve.scope)
             XCTFail("No error was thrown")
         } catch {
             XCTAssertNotNil(error as? TokenStorageError)
@@ -76,7 +76,7 @@ final class RetrieveTokensUseCaseTest: XCTestCase {
         let useCase = Container.shared.retrieveTokensUseCase.resolve()
         
         do {
-            try await useCase.execute(code: "")
+            try await useCase.execute(code: "", scopes: self.tokenToRetrieve.scope)
             XCTFail("No error was thrown")
         } catch {
             XCTAssertNotNil(error as? TokenError)
