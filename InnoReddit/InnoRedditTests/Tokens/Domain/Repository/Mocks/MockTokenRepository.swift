@@ -25,7 +25,9 @@ final class MockTokenRepository: TokenRepositoryProtocol {
         return tokenRetrievalToReturn
     }
     
-    func invalidateTokens() async throws(TokenError) {
-        throw .unknownError
+    func invalidateTokens(tokenToRevoke: String, tokenAccessType: TokenAccessType) async throws(TokenError) {
+        if !needToSucceed {
+            throw .invalidResponse
+        }
     }
 }
