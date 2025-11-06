@@ -9,6 +9,7 @@ import XCTest
 import Factory
 @testable import InnoReddit
 
+@MainActor
 final class SaveTokensUseCaseTest: XCTestCase {
     
     override func setUp() {
@@ -17,25 +18,24 @@ final class SaveTokensUseCaseTest: XCTestCase {
     }
     
     func test_savedToken_savedCorrectly() throws {
-//        let accessToken = "access_token"
-//        let refreshToken = "refresh_token"
+        let accessToken = "access_token"
+        let refreshToken = "refresh_token"
         
-//        Container.shared.tokenStorageRepository.register {
-//            MockTokenStorageRepository()
-//        }
-        let skebob = SaveTokensUseCase()
+        Container.shared.tokenStorageRepository.register {
+            MockTokenStorageRepository()
+        }
         
-//        let saveUseCase = Container.shared.saveTokensUseCase.resolve()
-//        let getAccessTokenUseCase = Container.shared.getAccessTokenUseCase.resolve()
-//        let getRefreshTokenUseCase = Container.shared.getRefreshTokenUseCase.resolve()
-//        
-//        try saveUseCase.execute(accessToken: accessToken, refreshToken: refreshToken)
-//        
-//        let accessTokenResult = try getAccessTokenUseCase.execute()
-//        let refreshTokenResult = try getRefreshTokenUseCase.execute()
-//        
-//        XCTAssertEqual(accessToken, accessTokenResult)
-//        XCTAssertEqual(refreshToken, refreshTokenResult)
+        let saveUseCase = Container.shared.saveTokensUseCase.resolve()
+        let getAccessTokenUseCase = Container.shared.getAccessTokenUseCase.resolve()
+        let getRefreshTokenUseCase = Container.shared.getRefreshTokenUseCase.resolve()
+        
+        try saveUseCase.execute(accessToken: accessToken, refreshToken: refreshToken)
+        
+        let accessTokenResult = try getAccessTokenUseCase.execute()
+        let refreshTokenResult = try getRefreshTokenUseCase.execute()
+        
+        XCTAssertEqual(accessToken, accessTokenResult)
+        XCTAssertEqual(refreshToken, refreshTokenResult)
     }
     
     
