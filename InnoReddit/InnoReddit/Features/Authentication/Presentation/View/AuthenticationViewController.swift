@@ -28,6 +28,7 @@ struct AuthenticationViewControllerValues {
     static let loginButtonLabelFontSize: CGFloat = 18
     static let loginButtonCornerRadius: CGFloat = 10
     static let loginButtonHeight: CGFloat = 50
+    static let loginButtonDisablingAnimationDuration: TimeInterval = 0.1
 }
 
 class AuthenticationViewController: UIViewController {
@@ -248,11 +249,17 @@ class AuthenticationViewController: UIViewController {
 
 extension AuthenticationViewController: AuthenticationViewProtocol {
     func disableLoginButton() {
-        self.loginButton.isEnabled = false
+        UIView.animate(withDuration: constants.loginButtonDisablingAnimationDuration) {
+            self.loginButton.isEnabled = false
+            self.loginButton.alpha = 0.75
+        }
     }
     
     func enableLoginButton() {
-        self.loginButton.isEnabled = true
+        UIView.animate(withDuration: constants.loginButtonDisablingAnimationDuration) {
+            self.loginButton.isEnabled = true
+            self.loginButton.alpha = 1
+        }
     }
     
     func showAlert(title: String, message: String) {
@@ -264,7 +271,8 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
 
 #Preview {
     ViewControllerPreview {
-        AuthenticationViewController()
+        let view = AuthenticationViewController()
+        return view
     }
     .ignoresSafeArea()
 }
