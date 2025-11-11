@@ -269,6 +269,10 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
     }
 }
 
+extension AuthenticationViewController: NavigationBarDisplayable {
+    var prefersNavigationBarHidden: Bool { true }
+}
+
 #Preview {
     ViewControllerPreview {
         let view = AuthenticationViewController()
