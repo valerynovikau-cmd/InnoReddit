@@ -20,11 +20,11 @@ protocol APIClient: AnyObject {
     
     func send(request: URLRequest) async throws -> APIResponse
     
-    func onTokenRefreshed(response: APIResponse)
+    func onTokenRefreshed(response: TokenRetrievalDTO) throws
     
-    var defaultHeaders: ((_ additionalHeaders: [String: String]) -> [String: String])? { get }
+    func defaultHeaders(additionalHeaders: [String: String]) throws -> [String: String]
     
-    func getRefreshToken() -> String
+    func getRefreshToken() throws -> String
 }
 
 extension APIClient {
@@ -51,7 +51,8 @@ extension APIClient {
             if response.statusCode == 401 {
                 let refreshRequest = try self.buildRefreshTokenRequest(refreshToken: self.getRefreshToken())
                 let refreshResponse = try await self.send(request: refreshRequest)
-                self.onTokenRefreshed(response: refreshResponse)
+                let decodedRefreshResponse: TokenRetrievalDTO = try self.decodeData(response: refreshResponse)
+                try self.onTokenRefreshed(response: decodedRefreshResponse)
                 continue
             }
             break
@@ -96,10 +97,9 @@ extension APIClient {
         }
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        if let headers = self.defaultHeaders?(additionalHeaders) {
-            request.allHTTPHeaderFields = headers
-        }
+        
+        let headers = try self.defaultHeaders(additionalHeaders: additionalHeaders)
+        request.allHTTPHeaderFields = headers
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let body {
             request.httpBody = try? JSONEncoder().encode(body)
