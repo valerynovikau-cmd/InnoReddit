@@ -76,3 +76,7 @@ Package.resolved
 *.tmp
 *.bak
 
+# =========================
+# Test folder for basic implementation testing purposes
+# =========================
+TestingPurposes/
