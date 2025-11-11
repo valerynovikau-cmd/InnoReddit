@@ -5,7 +5,7 @@
 //  Created by Валерий Новиков on 31.10.25.
 //
 
-enum AuthScopes: String {
+enum AuthScopes: String, CaseIterable {
     case identity
     case edit
     case flair
