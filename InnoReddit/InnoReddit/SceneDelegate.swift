@@ -6,18 +6,18 @@
 //
 
 import UIKit
+import Factory
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
-    var window: UIWindow?
-
+    
+    var appRouter: AppRouterProtocol?
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        self.window = UIWindow(windowScene: windowScene)
-        let vc = DefaultViewController()
-        let navigationVC = UINavigationController(rootViewController: vc)
-        self.window?.rootViewController = navigationVC
-        self.window?.makeKeyAndVisible()
+        let window = UIWindow(windowScene: windowScene)
+        
+        self.appRouter = Container.shared.appRouter(window)
+        self.appRouter?.showAuthenticationScreen()
     }
 }
 
