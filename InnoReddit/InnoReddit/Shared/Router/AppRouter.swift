@@ -10,14 +10,17 @@ import Factory
 
 protocol AppRouterProtocol: AnyObject {
     func showAuthenticationScreen()
+    func showMainApp()
 }
 
 final class AppRouter: RouterProtocol {
     @Injected(\.rootNavigationController) var navigationController: UINavigationController
-    private(set) var window: UIWindow?
+    private var window: UIWindow?
     
-    init(window: UIWindow?) {
+    init(window: UIWindow? = nil) {
         self.window = window
+        self.window?.rootViewController = navigationController
+        self.window?.makeKeyAndVisible()
     }
 }
 
@@ -33,8 +36,11 @@ extension AppRouter: AppRouterProtocol {
             return
         }
         
-        self.navigationController.setViewControllers([authVC], animated: false)
-        self.window?.rootViewController = navigationController
-        self.window?.makeKeyAndVisible()
+        self.navigationController.setViewControllers([authVC], animated: true)
+    }
+    
+    //Here tab bar creation will be in the future
+    func showMainApp() {
+        self.navigationController.setViewControllers([], animated: true)
     }
 }

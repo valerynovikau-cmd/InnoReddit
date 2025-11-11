@@ -11,7 +11,13 @@ import UIKit
 extension Container {
     var rootNavigationController: Factory<UINavigationController> {
         self { @MainActor in
-            UINavigationController()
+            IRNavigationController()
+        }.singleton
+    }
+    
+    var mainFeedNavigationController: ParameterFactory<UIViewController, UINavigationController> {
+        self { @MainActor vc in
+            IRNavigationController(rootViewController: vc)
         }.singleton
     }
 }
