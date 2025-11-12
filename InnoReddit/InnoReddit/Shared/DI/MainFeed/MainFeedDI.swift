@@ -14,4 +14,22 @@ extension Container {
             MainFeedViewController()
         }
     }
+    
+    var mainFeedPresenter: Factory<MainFeedPresenterProtocol> {
+        self { @MainActor in
+            MainFeedPresenter()
+        }
+    }
+    
+    var mainFeedNetworkService: Factory<MainFeedNetworkServiceProtocol> {
+        self { @MainActor in
+            MainFeedNetworkService()
+        }
+    }
+    
+    var mainFeedModelMapper: Factory<MainFeedModelMapperProtocol> {
+        self { @MainActor in
+            MainFeedModelMapper()
+        }
+    }
 }
