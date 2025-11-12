@@ -61,7 +61,8 @@ extension AppRouter: AppRouterProtocol {
             guard let mainFeedVC = (mainFeedView as? UIViewController) else {
                 return nil
             }
-            vc = mainFeedVC
+            let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve(mainFeedVC)
+            vc = mainFeedNavigationController
         case .createPost:
             vc = UIViewController()
         case .settings:
