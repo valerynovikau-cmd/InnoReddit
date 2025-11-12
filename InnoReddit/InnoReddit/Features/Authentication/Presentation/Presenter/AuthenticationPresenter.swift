@@ -55,7 +55,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func goToMainFlowIfAuthenticated() {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
-//            self.router.showMainApp()
+            self.router.showMainApp()
         } catch { }
     }
 }
