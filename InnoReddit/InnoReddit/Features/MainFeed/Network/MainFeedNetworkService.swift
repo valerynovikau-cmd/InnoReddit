@@ -1,0 +1,63 @@
+//
+//  MainFeedNetworkService.swift
+//  InnoReddit
+//
+//  Created by Валерий Новиков on 12.11.25.
+//
+
+import Foundation
+import Factory
+
+protocol MainFeedNetworkServiceProtocol {
+    func getHotPosts() async throws -> ListingResponseDTO
+}
+
+final class MainFeedNetworkService: MainFeedNetworkServiceProtocol {
+    var baseURL: URL = URL(string: "https://oauth.reddit.com")!
+    @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
+    
+    func getHotPosts() async throws -> ListingResponseDTO {
+        var queryParams: [String: String]?
+//        queryParams = [
+//            "limit": "5"
+//        ]
+        let response: ListingResponseDTO = try await self.sendRequest(path: "/hot", httpMethod: .GET, queryParams: queryParams)
+        return response
+    }
+}
+
+extension MainFeedNetworkService: APIClient {
+    func send(request: URLRequest) async throws -> APIResponse {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        return APIResponse(statusCode: httpResponse.statusCode, data: data)
+    }
+    
+    func onTokenRefreshed(response: TokenRetrievalDTO) throws {
+        guard let refreshToken = response.refreshToken else {
+            throw APIError.invalidResponse
+        }
+        try self.tokenStorageRepository.saveTokens(
+            accessToken: response.accessToken,
+            refreshToken: refreshToken
+        )
+    }
+    
+    func defaultHeaders(additionalHeaders: [String : String]) throws -> [String : String] {
+        var dict = additionalHeaders
+        let accessToken = try self.tokenStorageRepository.getToken(tokenAccessType: .accessToken)
+        guard let userAgent = Bundle.main.infoDictionary?["User-Agent"] as? String else {
+            throw NSError()
+        }
+        
+        dict["User-Agent"] = userAgent
+        dict["Authorization"] = "Bearer \(accessToken)"
+        return dict
+    }
+    
+    func getRefreshToken() throws -> String {
+        return try self.tokenStorageRepository.getToken(tokenAccessType: .refreshToken)
+    }
+}
