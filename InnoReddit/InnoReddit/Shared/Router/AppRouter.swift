@@ -58,10 +58,15 @@ extension AppRouter: AppRouterProtocol {
         switch item {
         case .mainFeed:
             let mainFeedView = Container.shared.mainFeedView.resolve()
+            let mainFeedPresenter = Container.shared.mainFeedPresenter.resolve()
+            mainFeedView.output = mainFeedPresenter
+            mainFeedPresenter.input = mainFeedView
+            
             guard let mainFeedVC = (mainFeedView as? UIViewController) else {
                 return nil
             }
             let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve(mainFeedVC)
+            
             vc = mainFeedNavigationController
         case .createPost:
             vc = UIViewController()
