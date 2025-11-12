@@ -6,6 +6,13 @@ strings:
       output: Features/Authentication/Presentation/Resources/LocalizableStrings/AuthenticationLocalizableStrings+Generated.swift
       params:
         enumName: AuthenticationLocalizableStrings
+  - inputs:
+      - Features/TabBar/Resources/LocalizableStrings/en.lproj/TabBarLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/TabBar/Resources/LocalizableStrings/TabBarLocalizableStrings+Generated.swift
+      params:
+        enumName: TabBarLocalizableStrings
 
 xcassets:
   inputs:

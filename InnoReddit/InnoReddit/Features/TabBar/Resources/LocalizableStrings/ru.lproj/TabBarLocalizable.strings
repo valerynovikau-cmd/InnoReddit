@@ -1,0 +1,11 @@
+/* 
+  TabBarLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 11.11.25.
+  
+*/
+
+"mainFeedTabBarTitle" = "Главная";
+"createPostTabBarTitle" = "Создать";
+"settingsTabBarTitle" = "Настройки";
