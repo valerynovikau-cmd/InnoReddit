@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>User-Agent</key>
+	<string>ios:valerynovikau.InnoReddit:v1.0 (by /u/badkrasotka)</string>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
 	<key>CFBundleURLTypes</key>
