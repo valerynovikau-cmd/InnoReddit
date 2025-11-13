@@ -23,3 +23,9 @@ struct Post: Identifiable {
     let authorName: String
     let commentsCount: Int
 }
+
+extension Post: Hashable {
+    static func == (lhs: Post, rhs: Post) -> Bool {
+        lhs.id == rhs.id
+    }
+}

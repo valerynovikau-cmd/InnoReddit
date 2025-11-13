@@ -120,8 +120,8 @@ class PostsViewController: UIViewController {
         self.configureUI()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         if self.output?.posts.isEmpty ?? false {
             self.output?.preformPostsRetrieval()
         }
@@ -137,10 +137,12 @@ extension PostsViewController: NavigationBarDisplayable {
 extension PostsViewController: PostsViewProtocol {
     func onPostsUpdated() {
         guard let posts = self.output?.posts else { return }
+        let postIDs = posts.map(\.id)
+
         var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
         snapshot.appendSections([.main])
-        let postIDs = posts.map(\.id)
         snapshot.appendItems(postIDs, toSection: .main)
+        
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }

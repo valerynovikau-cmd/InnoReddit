@@ -14,3 +14,7 @@ struct PostImage: Identifiable {
     let previewWidth: Int?
     let previewHeight: Int?
 }
+
+extension PostImage: Hashable {
+    
+}

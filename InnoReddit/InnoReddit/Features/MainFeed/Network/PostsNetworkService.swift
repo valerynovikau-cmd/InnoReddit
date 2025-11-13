@@ -8,14 +8,6 @@
 import Foundation
 import Factory
 
-enum MainFeedCategory: String {
-    case best = "/best"
-    case hot = "/hot"
-    case new = "/new"
-    case top = "/top"
-    case rising = "/rising"
-}
-
 protocol PostsNetworkServiceProtocol {
     func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO
 }

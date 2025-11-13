@@ -16,6 +16,7 @@ final class PostsPresenter {
     private(set) var postsAfter: String?
     private(set) var isRetrievingPosts: Bool = false
     private let category: MainFeedCategory
+    private var seenPostsIDs: Set<String> = []
     
     init (category: MainFeedCategory) {
         self.category = category
@@ -31,7 +32,17 @@ extension PostsPresenter: PostsPresenterProtocol {
                 
                 let posts = try await self.networkService.getPosts(after: nil, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
-                self.posts = mappedPosts
+                
+                let uniquePosts = mappedPosts.filter { post in
+                    if self.seenPostsIDs.contains(post.id) {
+                        return false
+                    } else {
+                        self.seenPostsIDs.insert(post.id)
+                        return true
+                    }
+                }
+                self.posts = uniquePosts
+                
                 self.postsAfter = posts.data.after
                 
                 self.isRetrievingPosts = false
@@ -55,7 +66,17 @@ extension PostsPresenter: PostsPresenterProtocol {
                 
                 let posts = try await self.networkService.getPosts(after: after, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
-                self.posts.append(contentsOf: mappedPosts)
+                
+                let uniquePosts = mappedPosts.filter { post in
+                    if self.seenPostsIDs.contains(post.id) {
+                        return false
+                    } else {
+                        self.seenPostsIDs.insert(post.id)
+                        return true
+                    }
+                }
+                self.posts.append(contentsOf: uniquePosts)
+    
                 self.postsAfter = posts.data.after
                 
                 self.isRetrievingPosts = false

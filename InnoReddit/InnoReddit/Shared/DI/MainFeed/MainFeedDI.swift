@@ -15,9 +15,9 @@ extension Container {
         }
     }
     
-    var postsPresenter: Factory<PostsPresenterProtocol> {
-        self { @MainActor in
-            PostsPresenter(category: .hot)
+    var postsPresenter: ParameterFactory<MainFeedCategory, PostsPresenterProtocol> {
+        self { @MainActor category in
+            PostsPresenter(category: category)
         }
     }
     
