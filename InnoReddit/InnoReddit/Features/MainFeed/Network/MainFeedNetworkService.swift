@@ -46,7 +46,7 @@ extension MainFeedNetworkService: APIClient {
     }
     
     func defaultHeaders(additionalHeaders: [String : String]) throws -> [String : String] {
-        var dict = additionalHeaders
+        var dict: [String:String] = [:]
         let accessToken = try self.tokenStorageRepository.getToken(tokenAccessType: .accessToken)
         guard let userAgent = Bundle.main.infoDictionary?["User-Agent"] as? String else {
             throw NSError()
@@ -54,6 +54,9 @@ extension MainFeedNetworkService: APIClient {
         
         dict["User-Agent"] = userAgent
         dict["Authorization"] = "Bearer \(accessToken)"
+        for (key, value) in additionalHeaders {
+            dict[key] = value
+        }
         return dict
     }
     
