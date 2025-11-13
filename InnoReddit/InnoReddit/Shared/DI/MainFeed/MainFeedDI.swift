@@ -9,27 +9,27 @@ import Factory
 import UIKit
 
 extension Container {
-    var mainFeedView: Factory<MainFeedViewProtocol> {
+    var postsView: Factory<PostsViewProtocol> {
         self { @MainActor in
-            MainFeedViewController()
+            PostsViewController()
         }
     }
     
-    var mainFeedPresenter: Factory<MainFeedPresenterProtocol> {
+    var postsPresenter: Factory<PostsPresenterProtocol> {
         self { @MainActor in
-            MainFeedPresenter()
+            PostsPresenter(category: .hot)
         }
     }
     
-    var mainFeedNetworkService: Factory<MainFeedNetworkServiceProtocol> {
+    var postsNetworkService: Factory<PostsNetworkServiceProtocol> {
         self { @MainActor in
-            MainFeedNetworkService()
+            PostsNetworkService()
         }
     }
     
-    var mainFeedModelMapper: Factory<MainFeedModelMapperProtocol> {
+    var postsModelMapper: Factory<PostsModelMapperProtocol> {
         self { @MainActor in
-            MainFeedModelMapper()
+            PostsModelMapper()
         }
     }
 }

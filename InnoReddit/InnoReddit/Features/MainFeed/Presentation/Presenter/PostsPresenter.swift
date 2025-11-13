@@ -9,8 +9,8 @@ import Factory
 
 final class PostsPresenter {
     weak var input: PostsViewProtocol?
-    @Injected(\.mainFeedNetworkService) private var networkService: MainFeedNetworkServiceProtocol
-    @Injected(\.mainFeedModelMapper) private var modelMapper: MainFeedModelMapperProtocol
+    @Injected(\.postsNetworkService) private var networkService: PostsNetworkServiceProtocol
+    @Injected(\.postsModelMapper) private var modelMapper: PostsModelMapperProtocol
     
     private(set) var posts: [Post] = []
     private(set) var postsAfter: String?

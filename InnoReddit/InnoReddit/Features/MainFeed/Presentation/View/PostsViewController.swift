@@ -14,7 +14,7 @@ private enum Section: Int {
 }
 
 class PostsViewController: UIViewController {
-    var output: MainFeedPresenterProtocol?
+    var output: PostsPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
     // MARK: UI Elemenets
