@@ -83,7 +83,7 @@ class MainFeedViewController: UIViewController {
                 for: indexPath
             ) as? PostCell else { return UICollectionViewCell() }
             
-            if let post = self.output?.hotPosts.first(where: { $0.id == postIdentifier }) {
+            if let post = self.output?.posts.first(where: { $0.id == postIdentifier }) {
                 cell.configure(with: post)
             }
             return cell
@@ -122,8 +122,8 @@ class MainFeedViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if self.output?.hotPosts.isEmpty ?? false {
-            self.output?.preformHotPostsRetrieval()
+        if self.output?.posts.isEmpty ?? false {
+            self.output?.preformPostsRetrieval()
         }
     }
 }
@@ -135,40 +135,22 @@ extension MainFeedViewController: NavigationBarDisplayable {
 }
 
 extension MainFeedViewController: MainFeedViewProtocol {
-    func onHotPostsUpdated() {
-        guard let posts = self.output?.hotPosts else { return }
+    func onPostsUpdated() {
+        guard let posts = self.output?.posts else { return }
         var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
         snapshot.appendSections([.main])
         let postIDs = posts.map(\.id)
         snapshot.appendItems(postIDs, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
-    
-    func onBestPostsUpdated() {
-        
-    }
-    
-    func onNewPostsUpdated() {
-        
-    }
-    
-    func onTopPostsUpdated() {
-        
-    }
-    
-    func onRisingPostsUpdated() {
-        
-    }
-    
-    
 }
 
 extension MainFeedViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let id = dataSource.itemIdentifier(for: indexPath),
-              self.output?.hotPosts.last?.id == id
+              self.output?.posts.last?.id == id
         else { return }
-        self.output?.performHotPostsPaginatedRetrieval()
+        self.output?.performPostsPaginatedRetrieval()
     }
 }
 

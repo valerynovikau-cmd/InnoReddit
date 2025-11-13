@@ -7,17 +7,11 @@
 
 protocol MainFeedPresenterProtocol: AnyObject {
     var input: MainFeedViewProtocol? { get set }
-    var isRetrievingHotPosts: Bool { get }
+    var isRetrievingPosts: Bool { get }
     
-    var bestPosts: [Post] { get }
+    var posts: [Post] { get }
+    var postsAfter: String? { get }
     
-    var hotPosts: [Post] { get }
-    var hotPostsAfter: String? { get }
-    
-    var newPosts: [Post] { get }
-    var topPosts: [Post] { get }
-    var risingPosts: [Post] { get }
-    
-    func preformHotPostsRetrieval()
-    func performHotPostsPaginatedRetrieval()
+    func preformPostsRetrieval()
+    func performPostsPaginatedRetrieval()
 }

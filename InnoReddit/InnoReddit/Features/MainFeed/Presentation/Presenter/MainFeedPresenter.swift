@@ -12,32 +12,32 @@ final class MainFeedPresenter {
     @Injected(\.mainFeedNetworkService) private var networkService: MainFeedNetworkServiceProtocol
     @Injected(\.mainFeedModelMapper) private var modelMapper: MainFeedModelMapperProtocol
     
-    private(set) var bestPosts: [Post] = []
-    private(set) var hotPosts: [Post] = []
-    private(set) var hotPostsAfter: String?
-    private(set) var newPosts: [Post] = []
-    private(set) var topPosts: [Post] = []
-    private(set) var risingPosts: [Post] = []
+    private(set) var posts: [Post] = []
+    private(set) var postsAfter: String?
+    private(set) var isRetrievingPosts: Bool = false
+    private let category: MainFeedCategory
     
-    private(set) var isRetrievingHotPosts: Bool = false
+    init (category: MainFeedCategory) {
+        self.category = category
+    }
 }
 
 extension MainFeedPresenter: MainFeedPresenterProtocol {
-    func preformHotPostsRetrieval() {
+    func preformPostsRetrieval() {
         Task {
             do {
-                guard !self.isRetrievingHotPosts else { return }
-                self.isRetrievingHotPosts = true
+                guard !self.isRetrievingPosts else { return }
+                self.isRetrievingPosts = true
                 
-                let posts = try await self.networkService.getHotPosts(after: nil)
+                let posts = try await self.networkService.getPosts(after: nil, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
-                self.hotPosts = mappedPosts
-                self.hotPostsAfter = posts.data.after
+                self.posts = mappedPosts
+                self.postsAfter = posts.data.after
                 
-                self.isRetrievingHotPosts = false
-                self.input?.onHotPostsUpdated()
+                self.isRetrievingPosts = false
+                self.input?.onPostsUpdated()
             } catch {
-                self.isRetrievingHotPosts = false
+                self.isRetrievingPosts = false
                 //Это не bad practice если тебе было весело
                 print(error)
                 fatalError()
@@ -45,23 +45,23 @@ extension MainFeedPresenter: MainFeedPresenterProtocol {
         }
     }
     
-    func performHotPostsPaginatedRetrieval() {
+    func performPostsPaginatedRetrieval() {
         Task {
             do {
-                guard let after = self.hotPostsAfter else { return }
+                guard let after = self.postsAfter else { return }
                 
-                guard !self.isRetrievingHotPosts else { return }
-                self.isRetrievingHotPosts = true
+                guard !self.isRetrievingPosts else { return }
+                self.isRetrievingPosts = true
                 
-                let posts = try await self.networkService.getHotPosts(after: after)
+                let posts = try await self.networkService.getPosts(after: after, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
-                self.hotPosts.append(contentsOf: mappedPosts)
-                self.hotPostsAfter = posts.data.after
+                self.posts.append(contentsOf: mappedPosts)
+                self.postsAfter = posts.data.after
                 
-                self.isRetrievingHotPosts = false
-                self.input?.onHotPostsUpdated()
+                self.isRetrievingPosts = false
+                self.input?.onPostsUpdated()
             } catch {
-                self.isRetrievingHotPosts = false
+                self.isRetrievingPosts = false
                 //Это не bad practice если тебе было весело
                 print(error)
                 fatalError()

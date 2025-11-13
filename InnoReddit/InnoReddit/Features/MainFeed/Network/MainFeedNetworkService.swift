@@ -8,20 +8,28 @@
 import Foundation
 import Factory
 
+enum MainFeedCategory: String {
+    case best = "/best"
+    case hot = "/hot"
+    case new = "/new"
+    case top = "/top"
+    case rising = "/rising"
+}
+
 protocol MainFeedNetworkServiceProtocol {
-    func getHotPosts(after: String?) async throws -> ListingResponseDTO
+    func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO
 }
 
 final class MainFeedNetworkService: MainFeedNetworkServiceProtocol {
     var baseURL: URL = URL(string: "https://oauth.reddit.com")!
     @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
     
-    func getHotPosts(after: String?) async throws -> ListingResponseDTO {
+    func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO {
         var queryParams: [String: String] = [:]
         if let after = after {
             queryParams["after"] = after
         }
-        let response: ListingResponseDTO = try await self.sendRequest(path: "/hot", httpMethod: .GET, queryParams: queryParams)
+        let response: ListingResponseDTO = try await self.sendRequest(path: category.rawValue, httpMethod: .GET, queryParams: queryParams)
         return response
     }
 }
