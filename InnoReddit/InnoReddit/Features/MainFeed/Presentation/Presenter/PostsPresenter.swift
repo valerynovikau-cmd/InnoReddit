@@ -1,5 +1,5 @@
 //
-//  MainFeedPresenter.swift
+//  PostsPresenter.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 11.11.25.
@@ -7,8 +7,8 @@
 
 import Factory
 
-final class MainFeedPresenter {
-    weak var input: MainFeedViewProtocol?
+final class PostsPresenter {
+    weak var input: PostsViewProtocol?
     @Injected(\.mainFeedNetworkService) private var networkService: MainFeedNetworkServiceProtocol
     @Injected(\.mainFeedModelMapper) private var modelMapper: MainFeedModelMapperProtocol
     
@@ -22,7 +22,7 @@ final class MainFeedPresenter {
     }
 }
 
-extension MainFeedPresenter: MainFeedPresenterProtocol {
+extension PostsPresenter: PostsPresenterProtocol {
     func preformPostsRetrieval() {
         Task {
             do {

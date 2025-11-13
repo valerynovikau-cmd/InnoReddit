@@ -1,5 +1,5 @@
 //
-//  MainFeedNetworkService.swift
+//  PostsNetworkService.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 12.11.25.
@@ -16,11 +16,11 @@ enum MainFeedCategory: String {
     case rising = "/rising"
 }
 
-protocol MainFeedNetworkServiceProtocol {
+protocol PostsNetworkServiceProtocol {
     func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO
 }
 
-final class MainFeedNetworkService: MainFeedNetworkServiceProtocol {
+final class PostsNetworkService: PostsNetworkServiceProtocol {
     var baseURL: URL = URL(string: "https://oauth.reddit.com")!
     @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
     
@@ -34,7 +34,7 @@ final class MainFeedNetworkService: MainFeedNetworkServiceProtocol {
     }
 }
 
-extension MainFeedNetworkService: APIClient {
+extension PostsNetworkService: APIClient {
     func send(request: URLRequest) async throws -> APIResponse {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {

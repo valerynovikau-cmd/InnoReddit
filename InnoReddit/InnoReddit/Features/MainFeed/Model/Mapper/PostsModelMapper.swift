@@ -7,11 +7,11 @@
 
 import Foundation
 
-protocol MainFeedModelMapperProtocol {
+protocol PostsModelMapperProtocol {
     func map(from: ListingResponseDTO) -> [Post]
 }
 
-final class MainFeedModelMapper: MainFeedModelMapperProtocol {
+final class PostsModelMapper: PostsModelMapperProtocol {
     func map(from modelToMap: ListingResponseDTO) -> [Post] {
         let posts = modelToMap.data.children.compactMap({ child in
             let data = child.data

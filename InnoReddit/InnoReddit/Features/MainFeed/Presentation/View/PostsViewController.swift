@@ -1,5 +1,5 @@
 //
-//  MainFeedViewController.swift
+//  PostsViewController.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 11.11.25.
@@ -13,7 +13,7 @@ private enum Section: Int {
     case main
 }
 
-class MainFeedViewController: UIViewController {
+class PostsViewController: UIViewController {
     var output: MainFeedPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
@@ -128,13 +128,13 @@ class MainFeedViewController: UIViewController {
     }
 }
 
-extension MainFeedViewController: NavigationBarDisplayable {
+extension PostsViewController: NavigationBarDisplayable {
     var prefersNavigationBarHidden: Bool {
         true
     }
 }
 
-extension MainFeedViewController: MainFeedViewProtocol {
+extension PostsViewController: PostsViewProtocol {
     func onPostsUpdated() {
         guard let posts = self.output?.posts else { return }
         var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
@@ -145,7 +145,7 @@ extension MainFeedViewController: MainFeedViewProtocol {
     }
 }
 
-extension MainFeedViewController: UICollectionViewDelegate {
+extension PostsViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let id = dataSource.itemIdentifier(for: indexPath),
               self.output?.posts.last?.id == id
@@ -156,7 +156,7 @@ extension MainFeedViewController: UICollectionViewDelegate {
 
 #Preview {
     ViewControllerPreview {
-        let view = MainFeedViewController()
+        let view = PostsViewController()
         return view
     }
     .ignoresSafeArea()

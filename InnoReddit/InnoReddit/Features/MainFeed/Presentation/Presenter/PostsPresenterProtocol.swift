@@ -1,12 +1,12 @@
 //
-//  MainFeedPresenterProtocol.swift
+//  PostsPresenterProtocol.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 11.11.25.
 //
 
-protocol MainFeedPresenterProtocol: AnyObject {
-    var input: MainFeedViewProtocol? { get set }
+protocol PostsPresenterProtocol: AnyObject {
+    var input: PostsViewProtocol? { get set }
     var isRetrievingPosts: Bool { get }
     
     var posts: [Post] { get }
