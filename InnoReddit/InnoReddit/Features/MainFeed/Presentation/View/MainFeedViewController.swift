@@ -30,8 +30,21 @@ class MainFeedViewController: UIViewController {
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                   heightDimension: .estimated(80))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
+            
+            let footerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(60)
+            )
+            let footer = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: footerSize,
+                elementKind: UICollectionView.elementKindSectionFooter,
+                alignment: .bottom
+            )
+                        
             let section = NSCollectionLayoutSection(group: group)
+            section.boundarySupplementaryItems = [footer]
             section.interGroupSpacing = 8
             section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
             return section
@@ -41,6 +54,11 @@ class MainFeedViewController: UIViewController {
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseIdentifier)
+        collectionView.register(
+            IRActivityIndicatorCollectionViewFooter.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.identifier
+        )
         return collectionView
     }()
     
@@ -60,14 +78,28 @@ class MainFeedViewController: UIViewController {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView
         ) { collectionView, indexPath, postIdentifier in
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: PostCell.reuseIdentifier,
                 for: indexPath
-            ) as! PostCell
+            ) as? PostCell else { return UICollectionViewCell() }
+            
             if let post = self.output?.hotPosts.first(where: { $0.id == postIdentifier }) {
                 cell.configure(with: post)
             }
             return cell
+        }
+        
+        dataSource.supplementaryViewProvider = { collectionView, elementKind, indexPath in
+            guard elementKind == UICollectionView.elementKindSectionFooter else { return nil }
+            guard let footer = collectionView.dequeueReusableSupplementaryView(
+                ofKind: elementKind,
+                withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.identifier,
+                for: indexPath) as? IRActivityIndicatorCollectionViewFooter
+            else {
+                return nil
+            }
+            footer.startAnimating()
+            return footer
         }
         
         var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
@@ -90,7 +122,9 @@ class MainFeedViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.output?.preformHotPostsRetrieval()
+        if self.output?.hotPosts.isEmpty ?? false {
+            self.output?.preformHotPostsRetrieval()
+        }
     }
 }
 
@@ -130,10 +164,11 @@ extension MainFeedViewController: MainFeedViewProtocol {
 }
 
 extension MainFeedViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        guard let id = dataSource.itemIdentifier(for: indexPath) else { return }
-//        print(self.output?.hotPosts.last?.id == id)
-//        output?.preformHotPostsRetrieval(for: id)
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let id = dataSource.itemIdentifier(for: indexPath),
+              self.output?.hotPosts.last?.id == id
+        else { return }
+        self.output?.performHotPostsPaginatedRetrieval()
     }
 }
 

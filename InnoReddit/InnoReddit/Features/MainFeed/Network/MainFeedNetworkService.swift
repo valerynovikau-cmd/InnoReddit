@@ -9,18 +9,18 @@ import Foundation
 import Factory
 
 protocol MainFeedNetworkServiceProtocol {
-    func getHotPosts() async throws -> ListingResponseDTO
+    func getHotPosts(after: String?) async throws -> ListingResponseDTO
 }
 
 final class MainFeedNetworkService: MainFeedNetworkServiceProtocol {
     var baseURL: URL = URL(string: "https://oauth.reddit.com")!
     @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
     
-    func getHotPosts() async throws -> ListingResponseDTO {
-        var queryParams: [String: String]?
-//        queryParams = [
-//            "limit": "5"
-//        ]
+    func getHotPosts(after: String?) async throws -> ListingResponseDTO {
+        var queryParams: [String: String] = [:]
+        if let after = after {
+            queryParams["after"] = after
+        }
         let response: ListingResponseDTO = try await self.sendRequest(path: "/hot", httpMethod: .GET, queryParams: queryParams)
         return response
     }
