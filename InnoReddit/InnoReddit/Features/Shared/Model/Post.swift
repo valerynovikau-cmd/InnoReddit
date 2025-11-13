@@ -7,9 +7,7 @@
 
 import Foundation
 
-#warning("почитать почему без этого ошибка")
-nonisolated
-struct Post: Hashable, Sendable {
+struct Post: Identifiable {
     let subreddit: String?
     let text: String?
     let authorId: String?
@@ -24,12 +22,4 @@ struct Post: Hashable, Sendable {
     let id: String
     let authorName: String
     let commentsCount: Int
-    
-    static func == (lhs: Post, rhs: Post) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
 }

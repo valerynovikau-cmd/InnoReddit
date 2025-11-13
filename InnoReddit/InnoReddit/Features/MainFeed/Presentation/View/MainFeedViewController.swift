@@ -15,7 +15,7 @@ private enum Section: Int {
 
 class MainFeedViewController: UIViewController {
     var output: MainFeedPresenterProtocol?
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Post>!
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
     // MARK: UI Elemenets
     
@@ -57,18 +57,20 @@ class MainFeedViewController: UIViewController {
     
     // MARK: - Diffable Data Source
     private func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Post>(
+        dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView
-        ) { collectionView, indexPath, post in
+        ) { collectionView, indexPath, postIdentifier in
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: PostCell.reuseIdentifier,
                 for: indexPath
             ) as! PostCell
-            cell.configure(with: post)
+            if let post = self.output?.hotPosts.first(where: { $0.id == postIdentifier }) {
+                cell.configure(with: post)
+            }
             return cell
         }
         
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Post>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
         snapshot.appendSections([.main])
         dataSource.apply(snapshot, animatingDifferences: false)
     }
@@ -101,9 +103,10 @@ extension MainFeedViewController: NavigationBarDisplayable {
 extension MainFeedViewController: MainFeedViewProtocol {
     func onHotPostsUpdated() {
         guard let posts = self.output?.hotPosts else { return }
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Post>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Post.ID>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(posts, toSection: .main)
+        let postIDs = posts.map(\.id)
+        snapshot.appendItems(postIDs, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
@@ -126,7 +129,13 @@ extension MainFeedViewController: MainFeedViewProtocol {
     
 }
 
-extension MainFeedViewController: UICollectionViewDelegate { }
+extension MainFeedViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        guard let id = dataSource.itemIdentifier(for: indexPath) else { return }
+//        print(self.output?.hotPosts.last?.id == id)
+//        output?.preformHotPostsRetrieval(for: id)
+    }
+}
 
 #Preview {
     ViewControllerPreview {
