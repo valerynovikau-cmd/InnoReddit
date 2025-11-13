@@ -15,8 +15,7 @@ final class MainFeedModelMapper: MainFeedModelMapperProtocol {
     func map(from modelToMap: ListingResponseDTO) -> [Post] {
         let posts = modelToMap.data.children.compactMap({ child in
             let data = child.data
-#warning("поменять")
-            let date = Date()
+            let date = Date(timeIntervalSince1970: TimeInterval(floatLiteral: data.created))
             let images: [PostImage]? = data.preview?.images?.compactMap({ image in
                 var previewUrl: String?
                 var previewHeight: Int?
