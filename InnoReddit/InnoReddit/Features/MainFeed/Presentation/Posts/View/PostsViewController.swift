@@ -13,6 +13,8 @@ protocol PostsViewProtocol: AnyObject {
     func onPostsUpdated()
     func onLoadingStarted()
     func onLoadingFinished()
+    
+    func shouldScrollToTop()
 }
 
 struct PostsViewControllerValues {
@@ -212,6 +214,11 @@ extension PostsViewController: PostsViewProtocol {
     
     func onLoadingFinished() {
         footer?.stopAnimating()
+    }
+    
+    func shouldScrollToTop() {
+        let scrollTargetIndexPath = IndexPath(row: 0, section: 0)
+        self.collectionView.scrollToItem(at: scrollTargetIndexPath, at: .top, animated: true)
     }
 }
 

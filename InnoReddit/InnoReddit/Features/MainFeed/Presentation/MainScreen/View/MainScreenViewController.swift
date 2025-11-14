@@ -10,6 +10,7 @@ import Factory
 
 protocol MainScreenViewProtocol {
     func setPageControllerViewControllers(controllersWithCategoriesStrings: [(UIViewController, String)])
+    func scrollCurrentViewControllerToTop()
 }
 
 struct MainScreenViewControllerValues {
@@ -140,6 +141,11 @@ extension MainScreenViewController: MainScreenViewProtocol {
         self.pageViewController.setViewControllers([self.controllers[0]], direction: .forward, animated: false)
         self.currentIndex = 0
         self.segmentedControl.selectedSegmentIndex = self.currentIndex
+    }
+    
+    func scrollCurrentViewControllerToTop() {
+        guard let vc = self.pageViewController.viewControllers?.first as? PostsViewProtocol else { return }
+        vc.shouldScrollToTop()
     }
 }
 

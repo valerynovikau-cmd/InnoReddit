@@ -94,10 +94,22 @@ extension AppRouter: AppRouterProtocol {
 
 extension AppRouter: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        if let index = tabBarController.viewControllers?.firstIndex(of: viewController), index == IRTabBarItem.createPost.rawValue {
-            let vc = UIViewController()
-            self.navigationController.pushViewController(vc, animated: true)
-            return false
+        if let index = tabBarController.viewControllers?.firstIndex(of: viewController) {
+            switch index {
+            case IRTabBarItem.createPost.rawValue:
+                let vc = UIViewController()
+                self.navigationController.pushViewController(vc, animated: true)
+                return false
+            case IRTabBarItem.mainFeed.rawValue:
+                if tabBarController.selectedIndex == index,
+                   let navigationVC = viewController as? IRNavigationController,
+                   let mainScreenVC = navigationVC.topViewController as? MainScreenViewProtocol
+                {
+                    mainScreenVC.scrollCurrentViewControllerToTop()
+                }
+            default:
+                return true
+            }
         }
         return true
     }
