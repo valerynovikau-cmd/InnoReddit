@@ -41,6 +41,8 @@ extension PostsPresenter: PostsPresenterProtocol {
                 guard !self.isRetrievingPosts else { return }
                 self.isRetrievingPosts = true
                 
+                self.seenPostsIDs = []
+                
                 let posts = try await self.networkService.getPosts(after: nil, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
                 
@@ -57,12 +59,10 @@ extension PostsPresenter: PostsPresenterProtocol {
                 self.postsAfter = posts.data.after
                 
                 self.isRetrievingPosts = false
+                self.input?.onLoadingFinished()
                 self.input?.onPostsUpdated()
             } catch {
-                self.isRetrievingPosts = false
-                //Это не bad practice если тебе было весело
-                print(error)
-                fatalError()
+                self.errorHandling(error: error)
             }
         }
     }
@@ -74,6 +74,7 @@ extension PostsPresenter: PostsPresenterProtocol {
                 
                 guard !self.isRetrievingPosts else { return }
                 self.isRetrievingPosts = true
+                self.input?.onLoadingStarted()
                 
                 let posts = try await self.networkService.getPosts(after: after, category: self.category)
                 let mappedPosts = self.modelMapper.map(from: posts)
@@ -91,13 +92,19 @@ extension PostsPresenter: PostsPresenterProtocol {
                 self.postsAfter = posts.data.after
                 
                 self.isRetrievingPosts = false
+                self.input?.onLoadingFinished()
                 self.input?.onPostsUpdated()
             } catch {
-                self.isRetrievingPosts = false
-                //Это не bad practice если тебе было весело
-                print(error)
-                fatalError()
+                self.errorHandling(error: error)
             }
         }
+    }
+    
+    private func errorHandling(error: Error) {
+        self.isRetrievingPosts = false
+        self.input?.onLoadingFinished()
+        //Это не bad practice если тебе было весело
+        print(error)
+        fatalError()
     }
 }

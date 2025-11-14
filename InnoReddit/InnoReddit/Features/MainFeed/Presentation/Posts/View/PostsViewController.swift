@@ -11,6 +11,8 @@ import SwiftUI
 protocol PostsViewProtocol: AnyObject {
     var output: PostsPresenterProtocol? { get set }
     func onPostsUpdated()
+    func onLoadingStarted()
+    func onLoadingFinished()
 }
 
 struct PostsViewControllerValues {
@@ -79,17 +81,23 @@ class PostsViewController: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseIdentifier)
-        collectionView.register(
-            PostsFooter.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-            withReuseIdentifier: PostsFooter.reuseIdentifier
-        )
         return collectionView
     }()
     
     private func configureCollectionView() {
         collectionView.delegate = self
+        collectionView.register(
+            PostCell.self,
+            forCellWithReuseIdentifier: PostCell.reuseIdentifier
+        )
+        
+        collectionView.register(
+            PostsFooter.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: PostsFooter.reuseIdentifier
+        )
+        
+        
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -98,6 +106,24 @@ class PostsViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
+    // MARK: - Refresh control
+    private lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        return refreshControl
+    }()
+    
+    private func configureRefreshControl() {
+        self.collectionView.refreshControl = self.refreshControl
+        self.refreshControl.addTarget(self, action: #selector(refreshControlValueChanged), for: .valueChanged)
+    }
+    
+    @objc private func refreshControlValueChanged() {
+        self.output?.preformPostsRetrieval()
+    }
+    
+    // MARK: - Collection view footer
+    private weak var footer: PostsFooter?
     
     // MARK: - Diffable Data Source
     private func configureDataSource() {
@@ -115,7 +141,7 @@ class PostsViewController: UIViewController {
             return cell
         }
         
-        dataSource.supplementaryViewProvider = { collectionView, elementKind, indexPath in
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, elementKind, indexPath in
             guard elementKind == UICollectionView.elementKindSectionFooter else { return nil }
             guard let footer = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind,
@@ -124,7 +150,10 @@ class PostsViewController: UIViewController {
             else {
                 return nil
             }
-            footer.startAnimating()
+            if self?.output?.posts.isEmpty ?? false {
+                footer.startAnimating()
+            }
+            self?.footer = footer
             return footer
         }
         
@@ -139,6 +168,7 @@ class PostsViewController: UIViewController {
         self.configureRootView()
         self.configureCollectionView()
         self.configureDataSource()
+        self.configureRefreshControl()
     }
     
     override func viewDidLoad() {
@@ -162,6 +192,8 @@ extension PostsViewController: NavigationBarDisplayable {
 
 extension PostsViewController: PostsViewProtocol {
     func onPostsUpdated() {
+        self.refreshControl.endRefreshing()
+        
         guard let posts = self.output?.posts else { return }
         let postIDs = posts.map(\.id)
 
@@ -171,6 +203,14 @@ extension PostsViewController: PostsViewProtocol {
         
         dataSource.apply(snapshot, animatingDifferences: true)
     }
+    
+    func onLoadingStarted() {
+        footer?.startAnimating()
+    }
+    
+    func onLoadingFinished() {
+        footer?.stopAnimating()
+    }
 }
 
 extension PostsViewController: UICollectionViewDelegate {
@@ -178,6 +218,7 @@ extension PostsViewController: UICollectionViewDelegate {
         guard let id = dataSource.itemIdentifier(for: indexPath),
               self.output?.posts.last?.id == id
         else { return }
+        
         self.output?.performPostsPaginatedRetrieval()
     }
 }

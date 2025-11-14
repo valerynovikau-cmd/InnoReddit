@@ -57,7 +57,6 @@ extension APIClient {
                 let refreshRequest = try self.buildRefreshTokenRequest(refreshToken: self.getRefreshToken())
                 let refreshResponse = try await self.send(request: refreshRequest)
                 do {
-                    printJsonData(data: refreshResponse.data)
                     let decodedRefreshResponse: TokenRetrievalDTO = try self.decodeData(response: refreshResponse)
                     try self.onTokenRefreshed(response: decodedRefreshResponse)
                 } catch {
@@ -72,16 +71,6 @@ extension APIClient {
             throw APIError.networkError(statusCode: response.statusCode)
         }
         return try self.decodeData(response: response)
-    }
-    
-    private func printJsonData(data: Data) {
-        if
-            let object = try? JSONSerialization.jsonObject(with: data),
-            let prettyData = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
-            let prettyString = String(data: prettyData, encoding: .utf8)
-        {
-            print(prettyString)
-        }
     }
     
     private func buildRefreshTokenRequest(refreshToken: String) throws -> URLRequest {

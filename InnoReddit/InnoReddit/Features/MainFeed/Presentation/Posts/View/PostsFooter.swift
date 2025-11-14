@@ -14,7 +14,6 @@ final class PostsFooter: UICollectionReusableView {
     
     private lazy var activityIndicatorView: UIActivityIndicatorView = {
         let activityIndicatorView = UIActivityIndicatorView(style: .large)
-        activityIndicatorView.color = Asset.Colors.innoOrangeColor.color
         activityIndicatorView.hidesWhenStopped = true
         activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         return activityIndicatorView
