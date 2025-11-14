@@ -8,7 +8,7 @@
 import UIKit
 
 final class IRActivityIndicatorCollectionViewFooter: UICollectionReusableView {
-    static let identifier = "IRActivityIndicatorCollectionViewFooter"
+    static let reuseIdentifier = "IRActivityIndicatorCollectionViewFooter"
     
     // MARK: - Activity indicator view
     
