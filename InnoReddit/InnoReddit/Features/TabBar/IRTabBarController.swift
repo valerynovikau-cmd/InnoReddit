@@ -46,14 +46,47 @@ class IRTabBarController: UITabBarController {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = Asset.Colors.innoBackgroundColor.color
         
-        appearance.stackedLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: Asset.Colors.innoOrangeColor.color]
+        let stackedLayoutAppearance = appearance.stackedLayoutAppearance
+        stackedLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        stackedLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: Asset.Colors.innoOrangeColor.color
+        ]
         
-        appearance.stackedLayoutAppearance.normal.iconColor = .gray
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        stackedLayoutAppearance.normal.iconColor = .gray
+        stackedLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.gray
+        ]
+        
+        appearance.stackedLayoutAppearance = stackedLayoutAppearance
+        
+        let compactInlineLayoutAppearance = appearance.compactInlineLayoutAppearance
+        compactInlineLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        compactInlineLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: Asset.Colors.innoOrangeColor.color
+        ]
+        
+        compactInlineLayoutAppearance.normal.iconColor = .gray
+        compactInlineLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.gray
+        ]
+        
+        appearance.compactInlineLayoutAppearance = compactInlineLayoutAppearance
+        
+        let inlineLayoutAppearance = appearance.inlineLayoutAppearance
+        inlineLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        inlineLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: Asset.Colors.innoOrangeColor.color
+        ]
+        
+        inlineLayoutAppearance.normal.iconColor = .gray
+        inlineLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.gray
+        ]
+        
+        appearance.inlineLayoutAppearance = inlineLayoutAppearance
+        
         
         tabBar.standardAppearance = appearance
-        tabBar.scrollEdgeAppearance = appearance
     }
 }
 
