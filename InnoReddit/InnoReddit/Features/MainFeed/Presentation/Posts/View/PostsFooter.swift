@@ -1,5 +1,5 @@
 //
-//  IRActivityIndicatorCollectionViewFooter.swift
+//  PostsFooter.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 13.11.25.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class IRActivityIndicatorCollectionViewFooter: UICollectionReusableView {
-    static let reuseIdentifier = "IRActivityIndicatorCollectionViewFooter"
+final class PostsFooter: UICollectionReusableView {
+    static let reuseIdentifier = "PostsFooter"
     
     // MARK: - Activity indicator view
     

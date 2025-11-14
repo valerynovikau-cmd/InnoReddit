@@ -81,9 +81,9 @@ class PostsViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseIdentifier)
         collectionView.register(
-            IRActivityIndicatorCollectionViewFooter.self,
+            PostsFooter.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-            withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.reuseIdentifier
+            withReuseIdentifier: PostsFooter.reuseIdentifier
         )
         return collectionView
     }()
@@ -119,8 +119,8 @@ class PostsViewController: UIViewController {
             guard elementKind == UICollectionView.elementKindSectionFooter else { return nil }
             guard let footer = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind,
-                withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.reuseIdentifier,
-                for: indexPath) as? IRActivityIndicatorCollectionViewFooter
+                withReuseIdentifier: PostsFooter.reuseIdentifier,
+                for: indexPath) as? PostsFooter
             else {
                 return nil
             }
