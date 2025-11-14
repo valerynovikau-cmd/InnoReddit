@@ -57,19 +57,27 @@ extension AppRouter: AppRouterProtocol {
         
         switch item {
         case .mainFeed:
-//            let postsView = Container.shared.postsView.resolve()
-//            let postsPresenter = Container.shared.postsPresenter.resolve(.hot)
-//            postsView.output = postsPresenter
-//            postsPresenter.input = postsView
-//            
-//            guard let postsVC = (postsView as? UIViewController) else {
-//                return nil
-//            }
-//            let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve(postsVC)
-//            
-//            vc = mainFeedNavigationController
-            let mainScreenVC = MainScreenViewController()
-            let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve(mainScreenVC)
+            let mainScreenView = Container.shared.mainScreenView.resolve()
+            let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve()
+            
+            let controllersWithCategoriesStrings: [(UIViewController, String)] = MainFeedCategory.allCases.compactMap {
+                let view = Container.shared.postsView.resolve()
+                let presenter = Container.shared.postsPresenter.resolve($0)
+                view.output = presenter
+                presenter.input = view
+                guard let vc = (view as? UIViewController) else {
+                    return nil
+                }
+                return (vc, $0.titleString)
+            }
+            
+            mainScreenView.setPageControllerViewControllers(controllersWithCategoriesStrings: controllersWithCategoriesStrings)
+            
+            guard let mainScreenVC = (mainScreenView as? UIViewController) else {
+                return nil
+            }
+            mainFeedNavigationController.setViewControllers([mainScreenVC], animated: false)
+            
             vc = mainFeedNavigationController
         case .createPost:
             vc = UIViewController()

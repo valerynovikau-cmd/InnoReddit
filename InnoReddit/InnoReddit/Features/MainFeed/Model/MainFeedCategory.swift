@@ -6,10 +6,30 @@
 //
 
 
-enum MainFeedCategory: String, CaseIterable {
-    case best = "/best"
-    case hot = "/hot"
-    case new = "/new"
-    case top = "/top"
-    case rising = "/rising"
+enum MainFeedCategory: CaseIterable {
+    case best
+    case hot
+    case new
+    case top
+    case rising
+    
+    var urlPath: String {
+        switch self {
+        case .best: return "/best"
+        case .hot: return "/hot"
+        case .new: return "/new"
+        case .top: return "/top"
+        case .rising: return "/rising"
+        }
+    }
+    
+    var titleString: String {
+        switch self {
+        case .best: return MainScreenStrings.bestTab
+        case .hot: return MainScreenStrings.hotTab
+        case .new: return MainScreenStrings.newTab
+        case .top: return MainScreenStrings.topTab
+        case .rising: return MainScreenStrings.risingTab
+        }
+    }
 }

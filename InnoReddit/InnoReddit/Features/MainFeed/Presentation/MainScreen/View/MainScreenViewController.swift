@@ -8,6 +8,10 @@
 import UIKit
 import Factory
 
+protocol MainScreenViewProtocol {
+    func setPageControllerViewControllers(controllersWithCategoriesStrings: [(UIViewController, String)])
+}
+
 struct MainScreenViewControllerValues {
     static let segmentedControlSidesPadding: CGFloat = 8
     static let pageViewControllerTopPadding: CGFloat = 8
@@ -76,35 +80,28 @@ final class MainScreenViewController: UIViewController {
     
     // MARK: - PageViewController
     
-    private var pageViewController: UIPageViewController!
-    private var controllers: [UIViewController] = []
+    private lazy var pageViewController: UIPageViewController = {
+        let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+        pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        return pageViewController
+    }()
+    
     private var currentIndex = 0
+    private var controllers: [UIViewController] = []
     
     private func configurePageViewController() {
-        pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
         pageViewController.didMove(toParent: self)
         pageViewController.dataSource = self
         pageViewController.delegate = self
         
-        pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             pageViewController.view.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: constants.pageViewControllerTopPadding),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-        
-        controllers = MainFeedCategory.allCases.compactMap {
-            let vc = Container.shared.postsView.resolve()
-            let presenter = Container.shared.postsPresenter.resolve($0)
-            vc.output = presenter
-            presenter.input = vc
-            return vc as? UIViewController
-        }
-        
-        pageViewController.setViewControllers([controllers[0]], direction: .forward, animated: false)
     }
     
     // MARK: - General view UI configuration
@@ -127,6 +124,22 @@ final class MainScreenViewController: UIViewController {
 extension MainScreenViewController: NavigationBarDisplayable {
     var prefersNavigationBarHidden: Bool {
         true
+    }
+}
+
+extension MainScreenViewController: MainScreenViewProtocol {
+    func setPageControllerViewControllers(controllersWithCategoriesStrings: [(UIViewController, String)]) {
+        guard controllersWithCategoriesStrings.count > 0 else { return }
+        
+        self.segmentedControl.removeAllSegments()
+        self.controllers = controllersWithCategoriesStrings.enumerated().compactMap { (index, element) in
+            self.segmentedControl.insertSegment(withTitle: element.1, at: index, animated: false)
+            return element.0
+        }
+        
+        self.pageViewController.setViewControllers([self.controllers[0]], direction: .forward, animated: false)
+        self.currentIndex = 0
+        self.segmentedControl.selectedSegmentIndex = self.currentIndex
     }
 }
 

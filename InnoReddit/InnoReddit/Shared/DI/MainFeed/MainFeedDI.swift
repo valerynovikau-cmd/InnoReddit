@@ -9,7 +9,7 @@ import Factory
 import UIKit
 
 extension Container {
-    var mainScreenView: Factory<UIViewController> {
+    var mainScreenView: Factory<MainScreenViewProtocol> {
         self { @MainActor in
             MainScreenViewController()
         }

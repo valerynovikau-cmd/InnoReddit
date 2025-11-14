@@ -21,7 +21,7 @@ final class PostsNetworkService: PostsNetworkServiceProtocol {
         if let after = after {
             queryParams["after"] = after
         }
-        let response: ListingResponseDTO = try await self.sendRequest(path: category.rawValue, httpMethod: .GET, queryParams: queryParams)
+        let response: ListingResponseDTO = try await self.sendRequest(path: category.urlPath, httpMethod: .GET, queryParams: queryParams)
         return response
     }
 }
