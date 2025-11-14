@@ -8,6 +8,13 @@
 import UIKit
 import SwiftUI
 
+protocol AuthenticationViewProtocol: AnyObject {
+    var output: AuthenticationViewPresenterProtocol? { get set }
+    func showAlert(title: String, message: String)
+    func disableLoginButton()
+    func enableLoginButton()
+}
+
 struct AuthenticationViewControllerValues {
     static let interItemSpacing: CGFloat = 10
     static let containerViewTopBottomInnerPadding: CGFloat = 30

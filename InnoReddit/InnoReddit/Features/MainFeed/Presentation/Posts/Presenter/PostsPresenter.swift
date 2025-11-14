@@ -7,6 +7,17 @@
 
 import Factory
 
+protocol PostsPresenterProtocol: AnyObject {
+    var input: PostsViewProtocol? { get set }
+    var isRetrievingPosts: Bool { get }
+    
+    var posts: [Post] { get }
+    var postsAfter: String? { get }
+    
+    func preformPostsRetrieval()
+    func performPostsPaginatedRetrieval()
+}
+
 final class PostsPresenter {
     weak var input: PostsViewProtocol?
     @Injected(\.postsNetworkService) private var networkService: PostsNetworkServiceProtocol

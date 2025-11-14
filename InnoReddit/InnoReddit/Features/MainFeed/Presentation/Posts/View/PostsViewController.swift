@@ -8,12 +8,33 @@
 import UIKit
 import SwiftUI
 
-// MARK: - Section Enum
+protocol PostsViewProtocol: AnyObject {
+    var output: PostsPresenterProtocol? { get set }
+    func onPostsUpdated()
+}
+
+struct PostsViewControllerValues {
+    static let collectionViewInterItemSpacing: CGFloat = 8
+    static let collectionViewInterGroupSpacing: CGFloat = 8
+    
+    static let collectionViewTopPadding: CGFloat = 0
+    static let collectionViewBottomPadding: CGFloat = 0
+    static let collectionViewSidesPadding: CGFloat = 8
+    
+    static let collectionViewItemHeightEstimated: CGFloat = 80
+    static let collectionViewItemFractionalWidth: CGFloat = 1.0
+    
+    static let collectionViewFooterHeightEstimated: CGFloat = 50
+    static let collectionViewFooterFractionalWidth: CGFloat = 1.0
+}
+
 private enum Section: Int {
     case main
 }
 
 class PostsViewController: UIViewController {
+    typealias constants = PostsViewControllerValues
+    
     var output: PostsPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
@@ -27,15 +48,15 @@ class PostsViewController: UIViewController {
     // MARK: - Collection view
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewCompositionalLayout { _, _ in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                  heightDimension: .estimated(80))
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(constants.collectionViewItemFractionalWidth),
+                                                  heightDimension: .estimated(constants.collectionViewItemHeightEstimated))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             
             let footerSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .absolute(60)
+                widthDimension: .fractionalWidth(constants.collectionViewFooterFractionalWidth),
+                heightDimension: .estimated(constants.collectionViewFooterHeightEstimated)
             )
             let footer = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: footerSize,
@@ -45,8 +66,13 @@ class PostsViewController: UIViewController {
                         
             let section = NSCollectionLayoutSection(group: group)
             section.boundarySupplementaryItems = [footer]
-            section.interGroupSpacing = 8
-            section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+            section.interGroupSpacing = constants.collectionViewInterGroupSpacing
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: constants.collectionViewTopPadding,
+                leading: constants.collectionViewSidesPadding,
+                bottom: constants.collectionViewBottomPadding,
+                trailing: constants.collectionViewSidesPadding
+            )
             return section
         }
         
@@ -57,7 +83,7 @@ class PostsViewController: UIViewController {
         collectionView.register(
             IRActivityIndicatorCollectionViewFooter.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-            withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.identifier
+            withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.reuseIdentifier
         )
         return collectionView
     }()
@@ -93,7 +119,7 @@ class PostsViewController: UIViewController {
             guard elementKind == UICollectionView.elementKindSectionFooter else { return nil }
             guard let footer = collectionView.dequeueReusableSupplementaryView(
                 ofKind: elementKind,
-                withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.identifier,
+                withReuseIdentifier: IRActivityIndicatorCollectionViewFooter.reuseIdentifier,
                 for: indexPath) as? IRActivityIndicatorCollectionViewFooter
             else {
                 return nil
