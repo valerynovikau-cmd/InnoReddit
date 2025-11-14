@@ -13,6 +13,13 @@ strings:
       output: Features/TabBar/Resources/LocalizableStrings/TabBarLocalizableStrings+Generated.swift
       params:
         enumName: TabBarLocalizableStrings
+  - inputs:
+      - Features/MainFeed/Presentation/Resources/LozalizableStrings/en.lproj/MainScreenLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/MainFeed/Presentation/Resources/LozalizableStrings/MainScreenLocalizableStrings+Generated.swift
+      params:
+        enumName: MainScreenStrings
 
 xcassets:
   inputs:
