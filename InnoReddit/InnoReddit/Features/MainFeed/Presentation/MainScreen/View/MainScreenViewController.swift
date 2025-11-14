@@ -8,8 +8,13 @@
 import UIKit
 import Factory
 
+struct MainScreenViewControllerValues {
+    static let segmentedControlSidesPadding: CGFloat = 8
+    static let pageViewControllerTopPadding: CGFloat = 8
+}
+
 final class MainScreenViewController: UIViewController {
-    
+    typealias constants = MainScreenViewControllerValues
     // MARK: UI Elements
     
     // MARK: - Root view
@@ -22,7 +27,7 @@ final class MainScreenViewController: UIViewController {
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Поиск"
+        searchBar.placeholder = MainScreenStrings.searchBarPlaceholder
         searchBar.searchBarStyle = .minimal
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
@@ -40,7 +45,13 @@ final class MainScreenViewController: UIViewController {
     // MARK: - Segmented control
     
     private lazy var segmentedControl: UISegmentedControl = {
-        let segmentedControl = UISegmentedControl(items: ["Best", "Hot", "New", "Top", "Rising"])
+        let segmentedControl = UISegmentedControl(items: [
+            MainScreenStrings.bestTab,
+            MainScreenStrings.hotTab,
+            MainScreenStrings.newTab,
+            MainScreenStrings.topTab,
+            MainScreenStrings.risingTab,
+        ])
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
         return segmentedControl
@@ -49,10 +60,9 @@ final class MainScreenViewController: UIViewController {
     private func configureSegmentedControl() {
         view.addSubview(segmentedControl)
         NSLayoutConstraint.activate([
-//            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 4),
-            segmentedControl.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 4),
-            segmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
-            segmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8)
+            segmentedControl.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: constants.segmentedControlSidesPadding),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -constants.segmentedControlSidesPadding)
         ])
         segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
     }
@@ -71,7 +81,6 @@ final class MainScreenViewController: UIViewController {
     private var currentIndex = 0
     
     private func configurePageViewController() {
-        // Создаём PageViewController
         pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
@@ -81,13 +90,12 @@ final class MainScreenViewController: UIViewController {
         
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            pageViewController.view.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
+            pageViewController.view.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: constants.pageViewControllerTopPadding),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             pageViewController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             pageViewController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        // Создаём контроллеры для каждой вкладки
         controllers = MainFeedCategory.allCases.compactMap {
             let vc = Container.shared.postsView.resolve()
             let presenter = Container.shared.postsPresenter.resolve($0)
@@ -96,7 +104,6 @@ final class MainScreenViewController: UIViewController {
             return vc as? UIViewController
         }
         
-        // Показываем первый
         pageViewController.setViewControllers([controllers[0]], direction: .forward, animated: false)
     }
     
@@ -124,19 +131,28 @@ extension MainScreenViewController: NavigationBarDisplayable {
 }
 
 extension MainScreenViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
         guard let index = controllers.firstIndex(of: viewController), index > 0 else { return nil }
         return controllers[index - 1]
     }
     
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
         guard let index = controllers.firstIndex(of: viewController), index < controllers.count - 1 else { return nil }
         return controllers[index + 1]
     }
     
-    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool,
-                            previousViewControllers: [UIViewController],
-                            transitionCompleted completed: Bool) {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
         if completed, let visibleVC = pageViewController.viewControllers?.first,
            let index = controllers.firstIndex(of: visibleVC) {
             segmentedControl.selectedSegmentIndex = index
