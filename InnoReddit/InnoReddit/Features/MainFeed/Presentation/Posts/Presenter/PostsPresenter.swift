@@ -9,10 +9,13 @@ import Factory
 
 protocol PostsPresenterProtocol: AnyObject {
     var input: PostsViewProtocol? { get set }
+    var router: MainScreenRouterProtocol? { get set }
     var isRetrievingPosts: Bool { get }
     
     var posts: [Post] { get }
     var postsAfter: String? { get }
+    
+    func didSelectPost(post: Post)
     
     func preformPostsRetrieval()
     func performPostsPaginatedRetrieval()
@@ -20,6 +23,8 @@ protocol PostsPresenterProtocol: AnyObject {
 
 final class PostsPresenter {
     weak var input: PostsViewProtocol?
+    var router: MainScreenRouterProtocol?
+    
     @Injected(\.postsNetworkService) private var networkService: PostsNetworkServiceProtocol
     @Injected(\.postsModelMapper) private var modelMapper: PostsModelMapperProtocol
     
@@ -35,6 +40,11 @@ final class PostsPresenter {
 }
 
 extension PostsPresenter: PostsPresenterProtocol {
+    
+    func didSelectPost(post: Post) {
+        self.router?.showPostDetails(post: post)
+    }
+    
     func preformPostsRetrieval() {
         Task {
             do {

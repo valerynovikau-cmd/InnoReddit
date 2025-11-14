@@ -9,7 +9,7 @@ import UIKit
 import Factory
 
 protocol MainScreenRouterProtocol: AnyObject {
-    
+    func showPostDetails(post: Post)
 }
 
 final class MainScreenRouter: RouterProtocol {
@@ -17,5 +17,7 @@ final class MainScreenRouter: RouterProtocol {
 }
 
 extension MainScreenRouter: MainScreenRouterProtocol {
-    
+    func showPostDetails(post: Post) {
+        
+    }
 }

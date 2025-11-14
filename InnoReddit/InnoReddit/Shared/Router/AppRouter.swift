@@ -59,12 +59,14 @@ extension AppRouter: AppRouterProtocol {
         case .mainFeed:
             let mainScreenView = Container.shared.mainScreenView.resolve()
             let mainFeedNavigationController = Container.shared.mainFeedNavigationController.resolve()
+            let mainScreenRouter = Container.shared.mainScreenRouter.resolve()
             
             let controllersWithCategoriesStrings: [(UIViewController, String)] = MainFeedCategory.allCases.compactMap {
                 let view = Container.shared.postsView.resolve()
                 let presenter = Container.shared.postsPresenter.resolve($0)
                 view.output = presenter
                 presenter.input = view
+                presenter.router = mainScreenRouter
                 guard let vc = (view as? UIViewController) else {
                     return nil
                 }
