@@ -7,11 +7,16 @@
 
 
 import UIKit
+import SwiftUI
+import Kingfisher
 
 struct PostCellValues {
-    static let cornerRadius: CGFloat = 10
+    static let outerCornerRadius: CGFloat = 10
+    static let previewImageCornerRadius: CGFloat = 5
     
-    static let titleLabelFontSize: CGFloat = 16
+    static let subredditImageSize: CGFloat = 24
+    
+    static let titleLabelFontSize: CGFloat = 20
     static let titleLabelNumberOfLines: Int = 0
     
     static let bodyLabelFontSize: CGFloat = 14
@@ -19,8 +24,10 @@ struct PostCellValues {
     
     static let stackSpacing: CGFloat = 6
     
-    static let stackTopBottomPadding: CGFloat = 8
-    static let stackSidesPadding: CGFloat = 12
+    static let stackPadding: CGFloat = 12
+    static let stackInterSpacing: CGFloat = 8
+    
+    static let buttonSize: CGFloat = 35
 }
 
 final class PostCell: UICollectionViewCell {
@@ -34,8 +41,8 @@ final class PostCell: UICollectionViewCell {
     
     // MARK: - Content view
     private func configureContentView() {
-        contentView.backgroundColor = .secondarySystemBackground
-        contentView.layer.cornerRadius = constants.cornerRadius
+        contentView.backgroundColor = Asset.Colors.innoSecondaryBackgroundColor.color
+        contentView.layer.cornerRadius = constants.outerCornerRadius
         contentView.layer.masksToBounds = true
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleContentViewTap))
@@ -48,11 +55,72 @@ final class PostCell: UICollectionViewCell {
         self.onPostTap?(post)
     }
     
+    // MARK: - Subreddit image
+    private lazy var subredditImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private func configureSubredditImageView() {
+        NSLayoutConstraint.activate([
+            subredditImageView.widthAnchor.constraint(equalToConstant: constants.subredditImageSize),
+            subredditImageView.heightAnchor.constraint(equalTo: subredditImageView.widthAnchor)
+        ])
+    }
+    
+    // MARK: - Subreddit label
+    private lazy var subredditLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.numberOfLines = 1
+        label.textColor = .secondaryLabel
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        label.lineBreakMode = .byTruncatingTail
+        return label
+    }()
+    
+    // MARK: - Date label
+    private lazy var dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.numberOfLines = 1
+        label.textColor = .secondaryLabel
+        label.textAlignment = .right
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return label
+    }()
+    
+    // MARK: - Top info stack view
+    private lazy var topInfoStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = constants.stackSpacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private func configureTopInfoStackView() {
+        topInfoStackView.addArrangedSubview(subredditImageView)
+        topInfoStackView.addArrangedSubview(subredditLabel)
+        topInfoStackView.addArrangedSubview(dateLabel)
+        contentView.addSubview(topInfoStackView)
+        NSLayoutConstraint.activate([
+            topInfoStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: constants.stackPadding),
+            topInfoStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: constants.stackPadding),
+            topInfoStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -constants.stackPadding),
+        ])
+    }
+    
     // MARK: - Title label
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: constants.titleLabelFontSize)
         label.numberOfLines = constants.titleLabelNumberOfLines
+        label.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        label.textAlignment = .natural
         return label
     }()
     
@@ -62,11 +130,22 @@ final class PostCell: UICollectionViewCell {
         label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
         label.numberOfLines = constants.bodyLabelNumberOfLines
         label.textColor = .secondaryLabel
+        label.textAlignment = .natural
         return label
     }()
     
-    // MARK: - Stack view
-    private lazy var stackView: UIStackView = {
+    // MARK: - Post image view
+    private lazy var postImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.layer.cornerRadius = constants.previewImageCornerRadius
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    // MARK: - Post content stack view
+    private lazy var postContentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = constants.stackSpacing
@@ -74,22 +153,222 @@ final class PostCell: UICollectionViewCell {
         return stack
     }()
     
-    private func configureStackView() {
-        stackView.addArrangedSubview(titleLabel)
-        stackView.addArrangedSubview(bodyLabel)
-        contentView.addSubview(stackView)
+    private func configurePostContentStackView() {
+        postContentStackView.addArrangedSubview(titleLabel)
+        contentView.addSubview(postContentStackView)
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: constants.stackTopBottomPadding),
-            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: constants.stackSidesPadding),
-            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -constants.stackSidesPadding),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -constants.stackTopBottomPadding)
+            postContentStackView.topAnchor.constraint(equalTo: topInfoStackView.bottomAnchor, constant: constants.stackInterSpacing),
+            postContentStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: constants.stackPadding),
+            postContentStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -constants.stackPadding),
         ])
+    }
+    
+    // MARK: - Upvote button
+    private lazy var upvoteButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "arrow.up"), for: .normal)
+        return button
+    }()
+    
+    // MARK: - Score label
+    private lazy var scoreLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = Asset.Colors.innoOrangeColor.color
+        label.numberOfLines = 1
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        return label
+    }()
+    
+    // MARK: - Downvote button
+    private lazy var downvoteButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "arrow.down"), for: .normal)
+        return button
+    }()
+    
+    // MARK: - Score buttons stack
+    private lazy var scoreButtonsStackView: UIStackView = {
+        let stack = UIStackView()
+        return stack
+    }()
+    
+    private func configureScoreButtonsStackView() {
+        scoreButtonsStackView.addArrangedSubview(upvoteButton)
+        scoreButtonsStackView.addArrangedSubview(scoreLabel)
+        scoreButtonsStackView.addArrangedSubview(downvoteButton)
+    }
+    
+    // MARK: - Bookmark button
+    private lazy var bookmarkButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "bookmark"), for: .normal)
+        return button
+    }()
+    
+    // MARK: - Share button
+    private lazy var shareButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+        return button
+    }()
+    
+    // MARK: - Community buttons stack
+    private lazy var communityButtonsStackView: UIStackView = {
+        let stack = UIStackView()
+        return stack
+    }()
+    
+    private func configureCommunityButtonsStackView() {
+        communityButtonsStackView.addArrangedSubview(bookmarkButton)
+        communityButtonsStackView.addArrangedSubview(shareButton)
+    }
+    
+    // MARK: - Comment button
+    private lazy var commentButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "message"), for: .normal)
+        return button
+    }()
+    
+    // MARK: - Comment count label
+    private lazy var commentCountLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .label
+        label.numberOfLines = 1
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        return label
+    }()
+    
+    // MARK: - Comment stack
+    private lazy var commentStack: UIStackView = {
+        let stack = UIStackView()
+        return stack
+    }()
+    
+    private func configureCommentStack() {
+        commentStack.addArrangedSubview(commentButton)
+        commentStack.addArrangedSubview(commentCountLabel)
+    }
+    
+    // MARK: - Spacer view
+    private lazy var spacerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return view
+    }()
+    
+    // MARK: - Bottom stacks stack
+    private lazy var bottomStacksStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = constants.stackSpacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private func configureBottomStacksStack() {
+        bottomStacksStack.addArrangedSubview(scoreButtonsStackView)
+        bottomStacksStack.addArrangedSubview(commentStack)
+        bottomStacksStack.addArrangedSubview(spacerView)
+        bottomStacksStack.addArrangedSubview(communityButtonsStackView)
+        contentView.addSubview(bottomStacksStack)
+        NSLayoutConstraint.activate([
+            bottomStacksStack.topAnchor.constraint(equalTo: postContentStackView.bottomAnchor, constant: constants.stackInterSpacing),
+            bottomStacksStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: constants.stackPadding),
+            bottomStacksStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -constants.stackPadding),
+            bottomStacksStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -constants.stackPadding)
+        ])
+    }
+    
+    // MARK: - Buttons configuration
+    private func configureButtons() {
+        let buttons = [
+            upvoteButton,
+            downvoteButton,
+            commentButton,
+            bookmarkButton,
+            shareButton
+        ]
+        for button in buttons {
+            button.tintColor = .label
+            button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                button.widthAnchor.constraint(equalToConstant: constants.buttonSize),
+                button.heightAnchor.constraint(equalTo: button.widthAnchor)
+            ])
+        }
+    }
+    
+    // MARK: - Buttons stacks configuration
+    private func configureButtonsStacks() {
+        let stacks = [
+            scoreButtonsStackView,
+            commentStack,
+            communityButtonsStackView
+        ]
+        for stack in stacks {
+            stack.axis = .horizontal
+//            stack.layer.borderWidth = 1.5
+//            stack.layer.borderColor = UIColor.secondaryLabel.cgColor
+//            stack.layer.cornerRadius = 10
+//            stack.clipsToBounds = true
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        }
     }
     
     // MARK: - General UI configuration
     private func configureUI() {
         self.configureContentView()
-        self.configureStackView()
+        self.configureSubredditImageView()
+        self.configureTopInfoStackView()
+        self.configureButtons()
+        self.configureCommentStack()
+        self.configurePostContentStackView()
+        self.configureScoreButtonsStackView()
+        self.configureCommunityButtonsStackView()
+        self.configureBottomStacksStack()
+        self.configureButtonsStacks()
+        
+//        self.debugColors()
+    }
+    
+    
+    func debugColors() {
+        contentView.backgroundColor = .systemGreen
+        
+        subredditImageView.backgroundColor = .systemRed
+        subredditLabel.backgroundColor = .systemBlue
+        dateLabel.backgroundColor = .systemPink
+        topInfoStackView.backgroundColor = .systemPurple
+        
+        titleLabel.backgroundColor = .systemRed
+        bodyLabel.backgroundColor = .systemBlue
+        postImageView.backgroundColor = .systemYellow
+        postContentStackView.backgroundColor = .systemPurple
+        
+        upvoteButton.backgroundColor = .systemRed
+        scoreLabel.backgroundColor = .systemBlue
+        downvoteButton.backgroundColor = .systemPink
+        scoreButtonsStackView.backgroundColor = .systemPurple
+        
+        commentButton.backgroundColor = .systemRed
+        commentCountLabel.backgroundColor = .systemBlue
+        commentStack.backgroundColor = .systemCyan
+        
+        bookmarkButton.backgroundColor = .systemYellow
+        shareButton.backgroundColor = .systemRed
+        communityButtonsStackView.backgroundColor = .systemPurple
+        
+        spacerView.backgroundColor = .systemCyan
+        bottomStacksStack.backgroundColor = .systemBrown
     }
     
     override init(frame: CGRect) {
@@ -104,7 +383,72 @@ final class PostCell: UICollectionViewCell {
     func configure(post: Post, onPostTap: @escaping ((Post) -> ())) {
         self.post = post
         self.onPostTap = onPostTap
-        titleLabel.text = self.post?.title ?? "No title"
-        bodyLabel.text = self.post?.text ?? " No text"
+        
+        if let text = post.text, !text.isEmpty {
+            postContentStackView.addArrangedSubview(bodyLabel)
+            bodyLabel.text = text
+        }
+        titleLabel.text = post.title ?? "No title"
+        
+        subredditImageView.kf.setImage(
+            with: URL(string: "https://b.thumbs.redditmedia.com/5nA4tXZ4zptbzjzcHKXB5YojF_gGF5jOM0jEaQb4Hzg.png"),
+            options: [
+                .processor(RoundCornerImageProcessor(radius: .heightFraction(0.5))),
+                .transition(.fade(0.1)),
+            ]
+        )
+        
+        subredditLabel.text = "r/\(post.subreddit ?? "[deleted]")"
+        
+        postImageView.kf.setImage(
+            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
+            options: [
+                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
+                .transition(.fade(0.1)),
+            ]
+        )
+        
+        postContentStackView.addArrangedSubview(postImageView)
+        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
+        
+        
+        scoreLabel.text = "\(post.score)"
+        commentCountLabel.text = "\(post.commentsCount)  "
+        
+        let dateFormatter = RelativeDateTimeFormatter()
+        dateFormatter.dateTimeStyle = .numeric
+        let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
+        dateLabel.text = relativeDate
     }
+}
+
+#Preview {
+    ViewControllerPreview {
+        let vc = UIViewController()
+        let cell = PostCell()
+        let post = Post(
+            subreddit: "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest",
+            text: "Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text ",
+            authorId: "skebob",
+            saved: false,
+            title: "Sample title",
+            downs: 0,
+            ups: 0,
+            score: 120000,
+            created: Date().addingTimeInterval(-3600),
+            images: nil,
+            subredditId: "skebob",
+            id: "skebob",
+            authorName: "authorName",
+            commentsCount: 11241
+        )
+        cell.configure(post: post, onPostTap: { post in })
+        cell.debugColors()
+        vc.view = cell
+        return vc
+    }
+    .frame(maxHeight: 600)
+    .padding(.horizontal, 8)
+    .ignoresSafeArea()
+    .background(Color(Asset.Colors.innoBackgroundColor.color))
 }
