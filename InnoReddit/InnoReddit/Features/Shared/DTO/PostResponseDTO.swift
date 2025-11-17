@@ -19,6 +19,6 @@ struct PostResponseDTO: Decodable {
     let preview: MediaResponseDTO?
     let subredditId: String
     let id: String
-    let author: String
+    let author: String?
     let numComments: Int
 }

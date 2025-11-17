@@ -20,7 +20,7 @@ struct Post: Identifiable {
     let images: [PostImage]?
     let subredditId: String
     let id: String
-    let authorName: String
+    let authorName: String?
     let commentsCount: Int
 }
 
