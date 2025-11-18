@@ -321,7 +321,7 @@ final class PostCell: UICollectionViewCell {
         self.configureScoreButtonsStackView()
         self.configureBottomStacksStack()
         
-        let _ = self.contentView.subviews.compactMap { $0.translatesAutoresizingMaskIntoConstraints = false }
+        for view in self.contentView.subviews { view.translatesAutoresizingMaskIntoConstraints = false }
     }
     
     func debugColors() {
