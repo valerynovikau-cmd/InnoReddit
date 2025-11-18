@@ -1,0 +1,12 @@
+//
+//  Config.xcconfig
+//  InnoReddit
+//
+//  Created by Валерий Новиков on 18.11.25.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+URL_SCHEME = valerynovikau.InnoReddit
+CLIENT_ID = L2fkQt56tvcH2467gjpdGA
