@@ -9,27 +9,16 @@ import UIKit
 import SwiftUI
 import Kingfisher
 
-protocol PostCellProtocol {
-    var onPostTap: ((Post) -> Void)? { get set }
-    var onUpvoteTap: ((Post) -> Void)? { get set }
-    var onDownvoteTap: ((Post) -> Void)? { get set }
-    var onCommentTap: ((Post) -> Void)? { get set }
-    var onBookmarkTap: ((Post) -> Void)? { get set }
-    var onSubredditTap: ((Post) -> Void)? { get set }
+protocol PostCellProtocol: AnyObject {
+    func configure(output: PostCellPresenterProtocol)
     
-    func configure(post: Post)
+    func onSubredditIconURLRetrieved(subredditIconURL: String?)
 }
 
 final class PostCell: UICollectionViewCell {
     static let reuseIdentifier = "PostCell"
-    private var post: Post?
-    
-    var onPostTap: ((Post) -> Void)?
-    var onUpvoteTap: ((Post) -> Void)?
-    var onDownvoteTap: ((Post) -> Void)?
-    var onCommentTap: ((Post) -> Void)?
-    var onBookmarkTap: ((Post) -> Void)?
-    var onSubredditTap: ((Post) -> Void)?
+    var output: PostCellPresenterProtocol?
+//    private var post: Post?
     
     // MARK: UI elements
     private struct PostCellValues {
@@ -37,6 +26,7 @@ final class PostCell: UICollectionViewCell {
         static let previewImageCornerRadius: CGFloat = 5
 
         static let subredditImageSize: CGFloat = 24
+        static let subredditCornerRadius: Radius = .heightFraction(0.5)
         
         static let titleLabelFontSize: CGFloat = 20
         static let titleLabelNumberOfLines: Int = 0
@@ -50,6 +40,8 @@ final class PostCell: UICollectionViewCell {
         static let stackInterSpacing: CGFloat = 8
         
         static let buttonSize: CGFloat = 35
+        
+        static let bottomLabelsFontSize: CGFloat = 16
     }
     
     private enum PostCellButtonType: String {
@@ -73,8 +65,7 @@ final class PostCell: UICollectionViewCell {
     }
     
     @objc private func handleContentViewTap() {
-        guard let post = self.post else { return }
-        self.onPostTap?(post)
+        self.onPostTap()
     }
     
     // MARK: - Subreddit image
@@ -94,8 +85,7 @@ final class PostCell: UICollectionViewCell {
     }
     
     @objc private func handleSubredditTap() {
-        guard let post = self.post else { return }
-        self.onSubredditTap?(post)
+        self.onSubredditTap()
     }
     
     // MARK: - Subreddit label
@@ -198,8 +188,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     @objc private func handleUpvoteTap() {
-        guard let post = self.post else { return }
-        self.onUpvoteTap?(post)
+        self.onUpvoteTap()
     }
     
     // MARK: - Score label
@@ -207,7 +196,7 @@ final class PostCell: UICollectionViewCell {
         let label = UILabel()
         label.numberOfLines = 1
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: constants.bodyLabelFontSize, weight: .medium)
+        label.font = .systemFont(ofSize: constants.bottomLabelsFontSize, weight: .medium)
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return label
     }()
@@ -225,8 +214,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     @objc private func handleDownvoteTap() {
-        guard let post = self.post else { return }
-        self.onDownvoteTap?(post)
+        self.onDownvoteTap()
     }
     
     // MARK: - Score buttons stack
@@ -252,8 +240,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     @objc private func handleBookmarkTap() {
-        guard let post = self.post else { return }
-        self.onBookmarkTap?(post)
+        self.onBookmarkTap()
     }
     
     // MARK: - Comment button
@@ -265,8 +252,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     @objc private func handleCommentTap() {
-        guard let post = self.post else { return }
-        self.onCommentTap?(post)
+        self.onCommentTap()
     }
     
     // MARK: - Spacer view
@@ -324,36 +310,53 @@ final class PostCell: UICollectionViewCell {
         for view in self.contentView.subviews { view.translatesAutoresizingMaskIntoConstraints = false }
     }
     
-    func debugColors() {
-        contentView.backgroundColor = .systemGreen
+    private func setupHeaderInfo() {
+        guard let post = self.output?.post else { return }
+        let dateFormatter = RelativeDateTimeFormatter()
+        dateFormatter.dateTimeStyle = .numeric
+        let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
+        dateLabel.text = relativeDate
         
-        subredditImageView.backgroundColor = .systemRed
-        subredditLabel.backgroundColor = .systemBlue
-        dateLabel.backgroundColor = .systemPink
-        topInfoStackView.backgroundColor = .systemPurple
-        
-        titleLabel.backgroundColor = .systemRed
-        bodyLabel.backgroundColor = .systemBlue
-        postImageView.backgroundColor = .systemYellow
-        postContentStackView.backgroundColor = .systemPurple
-        
-        upvoteButton.backgroundColor = .systemRed
-        scoreLabel.backgroundColor = .systemBlue
-        downvoteButton.backgroundColor = .systemPink
-        scoreButtonsStackView.backgroundColor = .systemPurple
-        
-        commentButton.backgroundColor = .systemRed
-        commentStack.backgroundColor = .systemCyan
-        
-        bookmarkButton.backgroundColor = .systemYellow
-        
-        spacerView.backgroundColor = .systemCyan
-        bottomStacksStack.backgroundColor = .systemBrown
+        subredditLabel.text = "r/\(post.subreddit ?? MainScreenStrings.deletedSubreddit)"
+    }
+    
+    private func setupBodyTextInfo() {
+        guard let post = self.output?.post else { return }
+        if let text = post.text, !text.isEmpty {
+            postContentStackView.addArrangedSubview(bodyLabel)
+            bodyLabel.text = text
+        }
+        titleLabel.text = post.title ?? ""
+    }
+    
+    private func setupBodyImage() {
+//        guard let post = self.output?.post else { return }
+        postImageView.kf.setImage(
+            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
+            options: [
+                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
+                .transition(.fade(0.1)),
+                .forceTransition
+            ]
+        )
+        postContentStackView.addArrangedSubview(postImageView)
+        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
+    }
+    
+    private func setupBottomButtonsInfo() {
+        guard let post = self.output?.post else { return }
+        scoreLabel.text = "\(post.score)"
+        commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bottomLabelsFontSize)
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.configureUI()
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        subredditImageView.image = nil
     }
     
     required init?(coder: NSCoder) {
@@ -362,84 +365,80 @@ final class PostCell: UICollectionViewCell {
 }
 
 extension PostCell: PostCellProtocol {
-    func configure(post: Post) {
-        self.post = post
-        self.setupHeaderInfo()
-        self.setupBodyInfo()
-        self.setupBottomButtonsInfo()
-    }
-    
-    private func setupHeaderInfo() {
-        guard let post = self.post else { return }
-        let dateFormatter = RelativeDateTimeFormatter()
-        dateFormatter.dateTimeStyle = .numeric
-        let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
-        dateLabel.text = relativeDate
-        
+    func onSubredditIconURLRetrieved(subredditIconURL: String?) {
+        guard let subredditIconURL else { return }
         subredditImageView.kf.setImage(
-            with: URL(string: "https://b.thumbs.redditmedia.com/5nA4tXZ4zptbzjzcHKXB5YojF_gGF5jOM0jEaQb4Hzg.png"),
+            with: URL(string: subredditIconURL),
             options: [
-                .processor(RoundCornerImageProcessor(radius: .heightFraction(0.5))),
+                .processor(RoundCornerImageProcessor(radius: constants.subredditCornerRadius)),
                 .transition(.fade(0.1)),
             ]
         )
-        
-        subredditLabel.text = "r/\(post.subreddit ?? MainScreenStrings.deletedSubreddit)"
     }
     
-    private func setupBodyInfo() {
-        guard let post = self.post else { return }
-        if let text = post.text, !text.isEmpty {
-            postContentStackView.addArrangedSubview(bodyLabel)
-            bodyLabel.text = text
-        }
-        titleLabel.text = post.title ?? ""
+    func onPostTap() {
         
-        postImageView.kf.setImage(
-            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
-            options: [
-                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
-                .transition(.fade(0.1)),
-            ]
-        )
-        postContentStackView.addArrangedSubview(postImageView)
-        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
     }
     
-    private func setupBottomButtonsInfo() {
-        guard let post = self.post else { return }
-        scoreLabel.text = "\(post.score)"
-        commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bodyLabelFontSize)
+    func onUpvoteTap() {
+        
+    }
+    
+    func onDownvoteTap() {
+        
+    }
+    
+    func onCommentTap() {
+        
+    }
+    
+    func onBookmarkTap() {
+        
+    }
+    
+    func onSubredditTap() {
+        
+    }
+    
+    func configure(output: PostCellPresenterProtocol) {
+        self.output = output
+        
+        self.setupHeaderInfo()
+        self.setupBodyTextInfo()
+        self.setupBodyImage()
+        self.setupBottomButtonsInfo()
+        
+        self.output?.retrieveSubredditIconURL()
     }
 }
 
-#Preview {
-    ViewControllerPreview {
-        let vc = UIViewController()
-        let cell = PostCell()
-        let post = Post(
-            subreddit: "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest",
-            text: "Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text ",
-            authorId: "skebob",
-            saved: false,
-            title: "Sample title",
-            downs: 0,
-            ups: 0,
-            score: 120000,
-            created: Date().addingTimeInterval(-3600),
-            images: nil,
-            subredditId: "skebob",
-            id: "skebob",
-            authorName: "authorName",
-            commentsCount: 11241
-        )
-        cell.configure(post: post)
-        cell.debugColors()
-        vc.view = cell
-        return vc
-    }
-    .frame(maxHeight: 600)
-    .padding(.horizontal, 8)
-    .ignoresSafeArea()
-    .background(Color(Asset.Colors.innoBackgroundColor.color))
-}
+//#Preview {
+//    ViewControllerPreview {
+//        let vc = UIViewController()
+//        let cell = PostCell()
+//        let post = Post(
+//            subreddit: "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest",
+//            text: "Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text ",
+////            text: "",
+//            authorId: "skebob",
+//            saved: false,
+//            title: "Sample title",
+//            downs: 0,
+//            ups: 0,
+//            score: 120000,
+//            created: Date().addingTimeInterval(-3600),
+//            images: nil,
+//            subredditId: "skebob",
+//            id: "skebob",
+//            authorName: "authorName",
+//            commentsCount: 11241
+//        )
+//        cell.configure(post: post)
+//        vc.view = cell
+//        return vc
+//    }
+//    .frame(maxHeight: 600)
+//    .padding(.horizontal, 8)
+//    .ignoresSafeArea()
+//    .background(Color(Asset.Colors.innoBackgroundColor.color))
+//}

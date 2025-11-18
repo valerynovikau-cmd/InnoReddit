@@ -10,6 +10,7 @@ import Factory
 
 protocol PostsNetworkServiceProtocol {
     func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO
+    func getSubredditIconURL(subredditName: String) async throws -> SubredditResponseDTO
 }
 
 final class PostsNetworkService: PostsNetworkServiceProtocol {
@@ -22,6 +23,11 @@ final class PostsNetworkService: PostsNetworkServiceProtocol {
             queryParams["after"] = after
         }
         let response: ListingResponseDTO = try await self.sendRequest(path: category.urlPath, httpMethod: .GET, queryParams: queryParams)
+        return response
+    }
+    
+    func getSubredditIconURL(subredditName: String) async throws -> SubredditResponseDTO {
+        let response: SubredditResponseDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
         return response
     }
 }

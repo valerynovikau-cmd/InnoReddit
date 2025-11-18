@@ -17,32 +17,32 @@ protocol PostsViewProtocol: AnyObject {
     func shouldScrollToTop()
 }
 
-struct PostsViewControllerValues {
-    static let collectionViewInterItemSpacing: CGFloat = 8
-    static let collectionViewInterGroupSpacing: CGFloat = 8
-    
-    static let collectionViewTopPadding: CGFloat = 0
-    static let collectionViewBottomPadding: CGFloat = 0
-    static let collectionViewSidesPadding: CGFloat = 8
-    
-    static let collectionViewItemHeightEstimated: CGFloat = 80
-    static let collectionViewItemFractionalWidth: CGFloat = 1.0
-    
-    static let collectionViewFooterHeightEstimated: CGFloat = 50
-    static let collectionViewFooterFractionalWidth: CGFloat = 1.0
-}
-
 private enum Section: Int {
     case main
 }
 
 class PostsViewController: UIViewController {
-    typealias constants = PostsViewControllerValues
     
     var output: PostsPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
     // MARK: UI Elemenets
+    private struct PostsViewControllerValues {
+        static let collectionViewInterItemSpacing: CGFloat = 8
+        static let collectionViewInterGroupSpacing: CGFloat = 8
+        
+        static let collectionViewTopPadding: CGFloat = 0
+        static let collectionViewBottomPadding: CGFloat = 0
+        static let collectionViewSidesPadding: CGFloat = 8
+        
+        static let collectionViewItemHeightEstimated: CGFloat = 80
+        static let collectionViewItemFractionalWidth: CGFloat = 1.0
+        
+        static let collectionViewFooterHeightEstimated: CGFloat = 50
+        static let collectionViewFooterFractionalWidth: CGFloat = 1.0
+    }
+    
+    private typealias constants = PostsViewControllerValues
     
     // MARK: - Root view
     private func configureRootView() {
@@ -140,7 +140,9 @@ class PostsViewController: UIViewController {
             if let output = self.output,
                let post = output.posts.first(where: { $0.id == postIdentifier })
             {
-                cell.configure(post: post) //, onPostTap: output.didSelectPost)
+                let cellOutput = PostCellPresenter(post: post)
+                cell.configure(output: cellOutput)
+                cellOutput.input = cell
             }
             return cell
         }

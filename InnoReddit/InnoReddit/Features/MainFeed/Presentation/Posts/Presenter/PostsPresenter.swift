@@ -33,6 +33,7 @@ final class PostsPresenter {
     private(set) var isRetrievingPosts: Bool = false
     private let category: MainFeedCategory
     private var seenPostsIDs: Set<String> = []
+    private var seenSubredditIconsURL: [String:String] = [:]
     
     init (category: MainFeedCategory) {
         self.category = category
@@ -46,7 +47,8 @@ extension PostsPresenter: PostsPresenterProtocol {
     }
     
     func preformPostsRetrieval() {
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             do {
                 guard !self.isRetrievingPosts else { return }
                 self.isRetrievingPosts = true
@@ -78,7 +80,8 @@ extension PostsPresenter: PostsPresenterProtocol {
     }
     
     func performPostsPaginatedRetrieval() {
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             do {
                 guard let after = self.postsAfter else { return }
                 
