@@ -30,7 +30,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 
                 try await self?.retrieveTokensUseCase.execute(code: code, scopes: scopes)
                 self?.input?.enableLoginButton()
-                self?.router.goToMainFlow()
+                self?.router.showMainApp()
                 return
             } catch let error as AuthenticationSessionError {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
@@ -55,7 +55,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func goToMainFlowIfAuthenticated() {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
-//            self.router.showMainApp()
+            self.router.showMainApp()
         } catch { }
     }
 }
