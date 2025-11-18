@@ -80,3 +80,8 @@ Package.resolved
 # Test folder for basic implementation testing purposes
 # =========================
 TestingPurposes/
+
+# =========================
+# SwiftGen generated resource files
+# =========================
+*+Generated.swift

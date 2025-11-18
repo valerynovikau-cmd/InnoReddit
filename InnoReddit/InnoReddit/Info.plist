@@ -12,15 +12,15 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>valerynovikau.InnoReddit</string>
+			<string>$(URL_SCHEME)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>valerynovikau.InnoReddit</string>
+				<string>$(URL_SCHEME)</string>
 			</array>
 		</dict>
 	</array>
 	<key>ClientID</key>
-	<string>L2fkQt56tvcH2467gjpdGA</string>
+	<string>$(CLIENT_ID)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
