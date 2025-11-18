@@ -31,40 +31,32 @@ final class ASWebAuthSessionService: NSObject {
     
     // MARK: - Authentication URL assembly methods
     
-    private var components: URLComponents {
+    private lazy var components: URLComponents = {
         var comp = URLComponents()
         comp.scheme = "https"
         comp.host = "www.reddit.com"
         return comp
-    }
+    }()
     
-    private var clientID: String {
-        get throws(AuthenticationSessionError) {
-            guard let id = Bundle.main.infoDictionary?["ClientID"] as? String else {
-                throw .invalidClientData
-            }
-            return id
-        }
-    }
+    private lazy var clientID: String? = {
+        return ConfigParameterManager.clientID
+    }()
     
-    private var redirectURLScheme: String {
-        get throws(AuthenticationSessionError) {
-            guard let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]],
-                  let urlSchemes = urlTypes.first?["CFBundleURLSchemes"] as? [String],
-                  let callbackScheme = urlSchemes.first
-            else {
-                throw .invalidClientData
-            }
-            return callbackScheme
-        }
-    }
+    private lazy var redirectURLScheme: String? = {
+        return ConfigParameterManager.callbackScheme
+    }()
     
     private func assembleAuthURL(scope: [AuthScopes], duration: TokenDuration) throws(AuthenticationSessionError) -> URL {
         let state = UUID().uuidString
         let authScopesString = scope.map(\.rawValue).joined(separator: " ")
         
-        let clientID = try self.clientID
-        let redirectUri = try self.redirectURLScheme + "://auth"
+        guard
+            let clientID = self.clientID,
+            let redirectURLScheme = self.redirectURLScheme
+        else {
+            throw .invalidRequest
+        }
+        let redirectURL = redirectURLScheme + "://auth"
         let duration = duration.rawValue
         
         var comp = self.components
@@ -73,7 +65,7 @@ final class ASWebAuthSessionService: NSObject {
             URLQueryItem(name: "client_id", value: clientID),
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "state", value: state),
-            URLQueryItem(name: "redirect_uri", value: redirectUri),
+            URLQueryItem(name: "redirect_uri", value: redirectURL),
             URLQueryItem(name: "duration", value: duration),
             URLQueryItem(name: "scope", value: authScopesString)
         ]
@@ -92,7 +84,7 @@ extension ASWebAuthSessionService: ASWebAuthSessionServiceProtocol {
     func startSession(scopes: [AuthScopes]) async throws(AuthenticationSessionError) -> String {
         
         let authURL = try self.assembleAuthURL(scope: scopes, duration: .permanent)
-        let callbackScheme = try self.redirectURLScheme
+        let callbackScheme = self.redirectURLScheme
         
         guard
             let url = (try? await withCheckedThrowingContinuation { continuation in

@@ -21,16 +21,16 @@ final class AuthenticationPresenter {
 extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func didTapAuthenticateWithReddit() {
         self.input?.disableLoginButton()
-        Task {
+        Task { [weak self] in
             var errorTitle: String
             var errorMessage: String
             do {
                 let scopes: [AuthScopes] = [.edit, .read]
-                let code = try await self.webAuthSessionService.startSession(scopes: scopes)
+                guard let code = try await self?.webAuthSessionService.startSession(scopes: scopes) else { return }
                 
-                try await self.retrieveTokensUseCase.execute(code: code, scopes: scopes)
-                self.input?.enableLoginButton()
-                self.router.showMainApp()
+                try await self?.retrieveTokensUseCase.execute(code: code, scopes: scopes)
+                self?.input?.enableLoginButton()
+                self?.router.goToMainFlow()
                 return
             } catch let error as AuthenticationSessionError {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
@@ -38,7 +38,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 case .accessDenied:
                     errorMessage = AuthenticationLocalizableStrings.accessDeniedErrorMessage
                 case .invalidResponseURL:
-                    self.input?.enableLoginButton()
+                    self?.input?.enableLoginButton()
                     return
                 default:
                     errorMessage = AuthenticationLocalizableStrings.serverErrorMessage
@@ -47,8 +47,8 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
                 errorMessage = AuthenticationLocalizableStrings.authenticationErrorMessage
             }
-            self.input?.enableLoginButton()
-            self.input?.showAlert(title: errorTitle, message: errorMessage)
+            self?.input?.enableLoginButton()
+            self?.input?.showAlert(title: errorTitle, message: errorMessage)
         }
     }
     
