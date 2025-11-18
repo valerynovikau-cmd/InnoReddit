@@ -5,44 +5,61 @@
 //  Created by Валерий Новиков on 12.11.25.
 //
 
-
 import UIKit
 import SwiftUI
 import Kingfisher
 
-struct PostCellValues {
-    static let outerCornerRadius: CGFloat = 10
-    static let previewImageCornerRadius: CGFloat = 5
+protocol PostCellProtocol {
+    var onPostTap: ((Post) -> Void)? { get set }
+    var onUpvoteTap: ((Post) -> Void)? { get set }
+    var onDownvoteTap: ((Post) -> Void)? { get set }
+    var onCommentTap: ((Post) -> Void)? { get set }
+    var onBookmarkTap: ((Post) -> Void)? { get set }
+    var onSubredditTap: ((Post) -> Void)? { get set }
     
-    static let subredditImageSize: CGFloat = 24
-    
-    static let titleLabelFontSize: CGFloat = 20
-    static let titleLabelNumberOfLines: Int = 0
-    
-    static let bodyLabelFontSize: CGFloat = 14
-    static let bodyLabelNumberOfLines: Int = 3
-    
-    static let stackSpacing: CGFloat = 6
-    
-    static let stackPadding: CGFloat = 12
-    static let stackInterSpacing: CGFloat = 8
-    
-    static let buttonSize: CGFloat = 35
+    func configure(post: Post)
 }
 
 final class PostCell: UICollectionViewCell {
-    typealias constants = PostCellValues
     static let reuseIdentifier = "PostCell"
-    
     private var post: Post?
-    private var onPostTap: ((Post) -> Void)?
-    private var onUpvoteTap: ((Post) -> Void)?
-    private var onDownvoteTap: ((Post) -> Void)?
-    private var onCommentTap: ((Post) -> Void)?
-    private var onBookmarkTap: ((Post) -> Void)?
-    private var onSubredditTap: ((Post) -> Void)?
+    
+    var onPostTap: ((Post) -> Void)?
+    var onUpvoteTap: ((Post) -> Void)?
+    var onDownvoteTap: ((Post) -> Void)?
+    var onCommentTap: ((Post) -> Void)?
+    var onBookmarkTap: ((Post) -> Void)?
+    var onSubredditTap: ((Post) -> Void)?
     
     // MARK: UI elements
+    private struct PostCellValues {
+        static let outerCornerRadius: CGFloat = 10
+        static let previewImageCornerRadius: CGFloat = 5
+
+        static let subredditImageSize: CGFloat = 24
+        
+        static let titleLabelFontSize: CGFloat = 20
+        static let titleLabelNumberOfLines: Int = 0
+        
+        static let bodyLabelFontSize: CGFloat = 14
+        static let bodyLabelNumberOfLines: Int = 3
+        
+        static let stackSpacing: CGFloat = 6
+        
+        static let stackPadding: CGFloat = 12
+        static let stackInterSpacing: CGFloat = 8
+        
+        static let buttonSize: CGFloat = 35
+    }
+    
+    private enum PostCellButtonType: String {
+        case upvote = "arrow.up"
+        case downvote = "arrow.down"
+        case comment = "message"
+        case bookmark = "bookmark"
+    }
+
+    private typealias constants = PostCellValues
     
     // MARK: - Content view
     private func configureContentView() {
@@ -63,7 +80,9 @@ final class PostCell: UICollectionViewCell {
     // MARK: - Subreddit image
     private lazy var subredditImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleSubredditTap))
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(tapGestureRecognizer)
         return imageView
     }()
     
@@ -72,6 +91,11 @@ final class PostCell: UICollectionViewCell {
             subredditImageView.widthAnchor.constraint(equalToConstant: constants.subredditImageSize),
             subredditImageView.heightAnchor.constraint(equalTo: subredditImageView.widthAnchor)
         ])
+    }
+    
+    @objc private func handleSubredditTap() {
+        guard let post = self.post else { return }
+        self.onSubredditTap?(post)
     }
     
     // MARK: - Subreddit label
@@ -103,7 +127,6 @@ final class PostCell: UICollectionViewCell {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = constants.stackSpacing
-        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
@@ -143,7 +166,6 @@ final class PostCell: UICollectionViewCell {
     private lazy var postImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.layer.cornerRadius = constants.previewImageCornerRadius
         imageView.clipsToBounds = true
         return imageView
@@ -154,7 +176,6 @@ final class PostCell: UICollectionViewCell {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = constants.stackSpacing
-        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
@@ -170,38 +191,49 @@ final class PostCell: UICollectionViewCell {
     
     // MARK: - Upvote button
     private lazy var upvoteButton: IRPostCellButton = {
-        let button = IRPostCellButton()
-        button.setSystemImageConfiguration(systemName: "arrow.up")
+        let button = IRPostCellButton(size: constants.buttonSize)
+        button.setSystemImageConfiguration(systemName: PostCellButtonType.upvote.rawValue)
+        button.addTarget(self, action: #selector(handleUpvoteTap), for: .touchUpInside)
         return button
     }()
+    
+    @objc private func handleUpvoteTap() {
+        guard let post = self.post else { return }
+        self.onUpvoteTap?(post)
+    }
     
     // MARK: - Score label
     private lazy var scoreLabel: UILabel = {
         let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 1
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize, weight: .medium)
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return label
     }()
     
     private func scoreLabelConfiguration() {
-        NSLayoutConstraint.activate([
-            scoreLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: constants.buttonSize)
-        ])
+        scoreLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: constants.buttonSize / 2).isActive = true
     }
     
     // MARK: - Downvote button
     private lazy var downvoteButton: IRPostCellButton = {
-        let button = IRPostCellButton()
-        button.setSystemImageConfiguration(systemName: "arrow.down")
+        let button = IRPostCellButton(size: constants.buttonSize)
+        button.setSystemImageConfiguration(systemName: PostCellButtonType.downvote.rawValue)
+        button.addTarget(self, action: #selector(handleDownvoteTap), for: .touchUpInside)
         return button
     }()
+    
+    @objc private func handleDownvoteTap() {
+        guard let post = self.post else { return }
+        self.onDownvoteTap?(post)
+    }
     
     // MARK: - Score buttons stack
     private lazy var scoreButtonsStackView: UIStackView = {
         let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return stack
     }()
     
@@ -213,22 +245,33 @@ final class PostCell: UICollectionViewCell {
     
     // MARK: - Bookmark button
     private lazy var bookmarkButton: IRPostCellButton = {
-        let button = IRPostCellButton()
-        button.setSystemImageConfiguration(systemName: "bookmark")
+        let button = IRPostCellButton(size: constants.buttonSize)
+        button.setSystemImageConfiguration(systemName: PostCellButtonType.bookmark.rawValue)
+        button.addTarget(self, action: #selector(handleBookmarkTap), for: .touchUpInside)
         return button
     }()
     
+    @objc private func handleBookmarkTap() {
+        guard let post = self.post else { return }
+        self.onBookmarkTap?(post)
+    }
+    
     // MARK: - Comment button
     private lazy var commentButton: IRPostCellButton = {
-        let button = IRPostCellButton()
-        button.setSystemImageConfiguration(systemName: "message")
+        let button = IRPostCellButton(size: constants.buttonSize)
+        button.setSystemImageConfiguration(systemName: PostCellButtonType.comment.rawValue)
+        button.addTarget(self, action: #selector(handleCommentTap), for: .touchUpInside)
         return button
     }()
+    
+    @objc private func handleCommentTap() {
+        guard let post = self.post else { return }
+        self.onCommentTap?(post)
+    }
     
     // MARK: - Spacer view
     private lazy var spacerView: UIView = {
         let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
         view.setContentHuggingPriority(.defaultLow, for: .horizontal)
         return view
     }()
@@ -236,6 +279,8 @@ final class PostCell: UICollectionViewCell {
     // MARK: - Comment stack
     private lazy var commentStack: UIStackView = {
         let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return stack
     }()
     
@@ -250,7 +295,6 @@ final class PostCell: UICollectionViewCell {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = constants.stackSpacing
-        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
@@ -266,51 +310,19 @@ final class PostCell: UICollectionViewCell {
         ])
     }
     
-    // MARK: - Buttons configuration
-    private func configureButtons() {
-        let buttons = [
-            upvoteButton,
-            downvoteButton,
-            commentButton,
-            bookmarkButton
-        ]
-        for button in buttons {
-            NSLayoutConstraint.activate([
-                button.heightAnchor.constraint(equalToConstant: constants.buttonSize),
-                button.widthAnchor.constraint(greaterThanOrEqualToConstant: constants.buttonSize)
-            ])
-        }
-    }
-    
-    // MARK: - Buttons stacks configuration
-    private func configureButtonsStacks() {
-        let stacks = [
-            scoreButtonsStackView,
-            commentStack
-        ]
-        for stack in stacks {
-            stack.axis = .horizontal
-            stack.translatesAutoresizingMaskIntoConstraints = false
-            stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        }
-    }
-    
     // MARK: - General UI configuration
     private func configureUI() {
         self.configureContentView()
         self.configureSubredditImageView()
         self.configureTopInfoStackView()
-        self.configureButtons()
         self.scoreLabelConfiguration()
         self.configureCommentStack()
         self.configurePostContentStackView()
         self.configureScoreButtonsStackView()
         self.configureBottomStacksStack()
-        self.configureButtonsStacks()
         
-//        self.debugColors()
+        let _ = self.contentView.subviews.compactMap { $0.translatesAutoresizingMaskIntoConstraints = false }
     }
-    
     
     func debugColors() {
         contentView.backgroundColor = .systemGreen
@@ -347,16 +359,22 @@ final class PostCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    func configure(post: Post, onPostTap: @escaping ((Post) -> ())) {
+}
+
+extension PostCell: PostCellProtocol {
+    func configure(post: Post) {
         self.post = post
-        self.onPostTap = onPostTap
-        
-        if let text = post.text, !text.isEmpty {
-            postContentStackView.addArrangedSubview(bodyLabel)
-            bodyLabel.text = text
-        }
-        titleLabel.text = post.title ?? "No title"
+        self.setupHeaderInfo()
+        self.setupBodyInfo()
+        self.setupBottomButtonsInfo()
+    }
+    
+    private func setupHeaderInfo() {
+        guard let post = self.post else { return }
+        let dateFormatter = RelativeDateTimeFormatter()
+        dateFormatter.dateTimeStyle = .numeric
+        let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
+        dateLabel.text = relativeDate
         
         subredditImageView.kf.setImage(
             with: URL(string: "https://b.thumbs.redditmedia.com/5nA4tXZ4zptbzjzcHKXB5YojF_gGF5jOM0jEaQb4Hzg.png"),
@@ -366,27 +384,32 @@ final class PostCell: UICollectionViewCell {
             ]
         )
         
-        subredditLabel.text = "r/\(post.subreddit ?? "[deleted]")"
+        subredditLabel.text = "r/\(post.subreddit ?? MainScreenStrings.deletedSubreddit)"
+    }
+    
+    private func setupBodyInfo() {
+        guard let post = self.post else { return }
+        if let text = post.text, !text.isEmpty {
+            postContentStackView.addArrangedSubview(bodyLabel)
+            bodyLabel.text = text
+        }
+        titleLabel.text = post.title ?? ""
         
-//        postImageView.kf.setImage(
-//            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
-//            options: [
-//                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
-//                .transition(.fade(0.1)),
-//            ]
-//        )
-//        
-//        postContentStackView.addArrangedSubview(postImageView)
-//        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
-        
-        
+        postImageView.kf.setImage(
+            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
+            options: [
+                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
+                .transition(.fade(0.1)),
+            ]
+        )
+        postContentStackView.addArrangedSubview(postImageView)
+        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
+    }
+    
+    private func setupBottomButtonsInfo() {
+        guard let post = self.post else { return }
         scoreLabel.text = "\(post.score)"
         commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bodyLabelFontSize)
-        
-        let dateFormatter = RelativeDateTimeFormatter()
-        dateFormatter.dateTimeStyle = .numeric
-        let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
-        dateLabel.text = relativeDate
     }
 }
 
@@ -410,7 +433,7 @@ final class PostCell: UICollectionViewCell {
             authorName: "authorName",
             commentsCount: 11241
         )
-        cell.configure(post: post, onPostTap: { post in })
+        cell.configure(post: post)
         cell.debugColors()
         vc.view = cell
         return vc

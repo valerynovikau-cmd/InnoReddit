@@ -8,21 +8,40 @@
 import UIKit
 
 class IRPostCellButton: UIButton {
-
-    private let insetSize: CGFloat = 2
-    private let imagePadding: CGFloat = 5
-    private let imagePointSize: CGFloat = 18
+    private let insetSize: CGFloat
+    private let imagePadding: CGFloat
+    private let imagePointSize: CGFloat
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(
+        size: CGFloat,
+        insetSize: CGFloat = 2,
+        imagePadding: CGFloat = 5,
+        imagePointSize: CGFloat = 18,
+        tintColor: UIColor = .label
+    ) {
+        self.insetSize = insetSize
+        self.imagePadding = imagePadding
+        self.imagePointSize = imagePointSize
+        super.init(frame: .zero)
+        
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.tintColor = .label
+        self.tintColor = tintColor
         self.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         
         var configuration = UIButton.Configuration.plain()
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: insetSize, leading: insetSize, bottom: insetSize, trailing: insetSize)
+        configuration.contentInsets = NSDirectionalEdgeInsets(
+            top: insetSize,
+            leading: insetSize,
+            bottom: insetSize,
+            trailing: insetSize
+        )
         configuration.imagePadding = imagePadding
         self.configuration = configuration
+        
+        NSLayoutConstraint.activate([
+            self.heightAnchor.constraint(equalToConstant: size),
+            self.widthAnchor.constraint(greaterThanOrEqualToConstant: size)
+        ])
     }
     
     func setSystemImageConfiguration(systemName: String) {
@@ -33,7 +52,7 @@ class IRPostCellButton: UIButton {
     
     func setTitleConfiguration(titleText: String, fontSize: CGFloat) {
         var container = AttributeContainer()
-        container.font = UIFont.systemFont(ofSize: fontSize)
+        container.font = UIFont.systemFont(ofSize: fontSize, weight: .medium)
         self.configuration?.attributedTitle = AttributedString(titleText, attributes: container)
     }
     

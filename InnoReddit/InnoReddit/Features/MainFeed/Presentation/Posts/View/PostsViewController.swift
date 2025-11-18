@@ -140,7 +140,7 @@ class PostsViewController: UIViewController {
             if let output = self.output,
                let post = output.posts.first(where: { $0.id == postIdentifier })
             {
-                cell.configure(post: post, onPostTap: output.didSelectPost)
+                cell.configure(post: post) //, onPostTap: output.didSelectPost)
             }
             return cell
         }
