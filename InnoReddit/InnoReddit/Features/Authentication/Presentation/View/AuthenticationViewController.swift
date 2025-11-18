@@ -8,34 +8,35 @@
 import UIKit
 import SwiftUI
 
-struct AuthenticationViewControllerValues {
-    static let interItemSpacing: CGFloat = 10
-    static let containerViewTopBottomInnerPadding: CGFloat = 30
-    static let containerViewSidesInnerPadding: CGFloat = 20
-    
-    static let containerViewPadding: CGFloat = 25
-    static let containerViewCornerRadius: CGFloat = 25
-    static let containerViewBorderWidth: CGFloat = 2
-    
-    static let redditImageContainerWidth: CGFloat = 100
-    static let redditImageContainerCornerRadius: CGFloat = 50
-    static let redditImageContainerBorderWidth: CGFloat = 2
-    static let redditImageSizeMultiplierToContainer: CGFloat = 0.75
-    
-    static let primaryLabelFontSize: CGFloat = 30
-    static let secondaryLabelFontSize: CGFloat = 14
-    
-    static let loginButtonLabelFontSize: CGFloat = 18
-    static let loginButtonCornerRadius: CGFloat = 10
-    static let loginButtonHeight: CGFloat = 50
-    static let loginButtonDisablingAnimationDuration: TimeInterval = 0.1
-}
-
 class AuthenticationViewController: UIViewController {
-    typealias constants = AuthenticationViewControllerValues
+    
     var output: AuthenticationViewPresenterProtocol?
     
     // MARK: UI Elements
+    private struct AuthenticationViewControllerValues {
+        static let interItemSpacing: CGFloat = 10
+        static let containerViewTopBottomInnerPadding: CGFloat = 30
+        static let containerViewSidesInnerPadding: CGFloat = 20
+        
+        static let containerViewPadding: CGFloat = 25
+        static let containerViewCornerRadius: CGFloat = 25
+        static let containerViewBorderWidth: CGFloat = 2
+        
+        static let redditImageContainerWidth: CGFloat = 100
+        static let redditImageContainerCornerRadius: CGFloat = 50
+        static let redditImageContainerBorderWidth: CGFloat = 2
+        static let redditImageSizeMultiplierToContainer: CGFloat = 0.75
+        
+        static let primaryLabelFontSize: CGFloat = 30
+        static let secondaryLabelFontSize: CGFloat = 14
+        
+        static let loginButtonLabelFontSize: CGFloat = 18
+        static let loginButtonCornerRadius: CGFloat = 10
+        static let loginButtonHeight: CGFloat = 50
+        static let loginButtonDisablingAnimationDuration: TimeInterval = 0.1
+    }
+    
+    private typealias constants = AuthenticationViewControllerValues
     
     // MARK: - Gradient
     private lazy var gradient: CAGradientLayer = {
