@@ -26,7 +26,6 @@ final class PostCell: UICollectionViewCell {
         static let previewImageCornerRadius: CGFloat = 5
 
         static let subredditImageSize: CGFloat = 24
-        static let subredditCornerRadius: Radius = .heightFraction(0.5)
         
         static let titleLabelFontSize: CGFloat = 20
         static let titleLabelNumberOfLines: Int = 0
@@ -73,7 +72,11 @@ final class PostCell: UICollectionViewCell {
         let imageView = UIImageView()
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleSubredditTap))
         imageView.isUserInteractionEnabled = true
+        imageView.contentMode = .scaleAspectFit
         imageView.addGestureRecognizer(tapGestureRecognizer)
+        imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        imageView.layer.cornerRadius = constants.subredditImageSize / 2
+        imageView.clipsToBounds = true
         return imageView
     }()
     
@@ -366,14 +369,16 @@ final class PostCell: UICollectionViewCell {
 
 extension PostCell: PostCellProtocol {
     func onSubredditIconURLRetrieved(subredditIconURL: String?) {
-        guard let subredditIconURL else { return }
-        subredditImageView.kf.setImage(
-            with: URL(string: subredditIconURL),
-            options: [
-                .processor(RoundCornerImageProcessor(radius: constants.subredditCornerRadius)),
-                .transition(.fade(0.1)),
-            ]
-        )
+        if let subredditIconURL, !subredditIconURL.isEmpty {
+            subredditImageView.kf.setImage(
+                with: URL(string: subredditIconURL),
+                options: [
+                    .transition(.fade(0.1))
+                ]
+            )
+        } else {
+            subredditImageView.image = Asset.Images.defaultSubredditAvatar.image
+        }
     }
     
     func onPostTap() {

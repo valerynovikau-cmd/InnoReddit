@@ -40,10 +40,15 @@ final class PostCellPresenter {
 extension PostCellPresenter: PostCellPresenterProtocol {
     func retrieveSubredditIconURL() {
         Task { [weak self] in
-            guard let self, let subreddit = post.subreddit else { return }
+            guard let self else { return }
+            
+            guard let subreddit = post.subreddit else {
+                self.shouldSetIcon(subredditIconURL: nil, subreddit: nil)
+                return
+            }
             
             if let url = await cache.getItem(key: subreddit) {
-                self.input?.onSubredditIconURLRetrieved(subredditIconURL: url)
+                self.shouldSetIcon(subredditIconURL: url, subreddit: subreddit)
                 return
             }
             
@@ -53,12 +58,17 @@ extension PostCellPresenter: PostCellPresenterProtocol {
                 iconURL = response.data.iconImg
                 if let iconURL {
                     await cache.setItem(key: subreddit, value: iconURL)
+                    self.shouldSetIcon(subredditIconURL: iconURL, subreddit: subreddit)
+                } else {
+                    self.shouldSetIcon(subredditIconURL: nil, subreddit: subreddit)
                 }
-            } catch {
-                
-            }
-            self.input?.onSubredditIconURLRetrieved(subredditIconURL: iconURL)
+            } catch { }
         }
+    }
+    
+    private func shouldSetIcon(subredditIconURL: String?, subreddit: String?) {
+        guard subreddit == self.post.subreddit else { return }
+        self.input?.onSubredditIconURLRetrieved(subredditIconURL: subredditIconURL)
     }
     
     func onPostTap() {
