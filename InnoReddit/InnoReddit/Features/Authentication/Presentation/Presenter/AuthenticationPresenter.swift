@@ -10,7 +10,9 @@ import Factory
 
 final class AuthenticationPresenter {
     weak var input: AuthenticationViewProtocol?
-    @Injected(\.authenticationRouter) private var router: AuthenticationRouterProtocol
+    private var router: AppRouterProtocol {
+        Container.shared.appRouter(nil)
+    }
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
     @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCaseProtocol
     @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCaseProtocol
@@ -29,7 +31,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 
                 try await self.retrieveTokensUseCase.execute(code: code, scopes: scopes)
                 self.input?.enableLoginButton()
-                self.router.goToMainFlow()
+                self.router.showMainApp()
                 return
             } catch let error as AuthenticationSessionError {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
@@ -54,7 +56,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func goToMainFlowIfAuthenticated() {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
-            self.router.goToMainFlow()
+            self.router.showMainApp()
         } catch { }
     }
 }
