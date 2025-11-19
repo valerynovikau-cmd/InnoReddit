@@ -44,4 +44,10 @@ extension Container {
             PostsModelMapper()
         }
     }
+    
+    var subredditIconsMemoryCache: Factory<SubredditIconsMemoryCache> {
+        self { @MainActor in
+            SubredditIconsMemoryCache()
+        }.singleton
+    }
 }

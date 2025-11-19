@@ -26,7 +26,9 @@ protocol PostCellPresenterProtocol: AnyObject {
 final class PostCellPresenter {
     weak var input: PostCellProtocol?
     var router: MainScreenRouterProtocol?
+    
     @Injected(\.postsNetworkService) private var networkService: PostsNetworkServiceProtocol
+    @Injected(\.subredditIconsMemoryCache) private var cache: SubredditIconsMemoryCache
     
     private(set) var post: Post
     
@@ -39,10 +41,19 @@ extension PostCellPresenter: PostCellPresenterProtocol {
     func retrieveSubredditIconURL() {
         Task { [weak self] in
             guard let self, let subreddit = post.subreddit else { return }
+            
+            if let url = await cache.getItem(key: subreddit) {
+                self.input?.onSubredditIconURLRetrieved(subredditIconURL: url)
+                return
+            }
+            
             var iconURL: String?
             do {
                 let response = try await self.networkService.getSubredditIconURL(subredditName: subreddit)
                 iconURL = response.data.iconImg
+                if let iconURL {
+                    await cache.setItem(key: subreddit, value: iconURL)
+                }
             } catch {
                 
             }
