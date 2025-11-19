@@ -39,7 +39,7 @@ extension APIClient {
         differentBaseURL: URL? = nil
     ) async throws -> T {
         
-        var response: APIResponse!
+        var response: APIResponse?
         for _ in 0...2 {
             
             let request = try self.buildRequest(
@@ -53,7 +53,7 @@ extension APIClient {
             )
             
             response = try await self.send(request: request)
-            if response.statusCode == 401 {
+            if response?.statusCode == 401 {
                 let refreshRequest = try self.buildRefreshTokenRequest(refreshToken: self.getRefreshToken())
                 let refreshResponse = try await self.send(request: refreshRequest)
                 do {
@@ -67,8 +67,11 @@ extension APIClient {
             break
         }
         
-        guard (200...299).contains(response.statusCode) else {
-            throw APIError.networkError(statusCode: response.statusCode)
+        guard
+            let response,
+            (200...299).contains(response.statusCode)
+        else {
+            throw APIError.networkError(statusCode: response?.statusCode ?? 400)
         }
         return try self.decodeData(response: response)
     }
