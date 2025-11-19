@@ -35,7 +35,7 @@ extension APIClient {
         queryParams: [String: String]? = nil,
         body: Encodable? = nil,
         additionalHeaders: [String: String] = [:]
-    ) async throws -> T {
+    ) async throws(APIError) -> T {
         
         var response: APIResponse?
         for _ in 0...2 {
@@ -96,7 +96,7 @@ extension APIClient {
         return decodedResponse
     }
     
-    private func buildRefreshTokenRequest(refreshToken: String) throws -> URLRequest {
+    private func buildRefreshTokenRequest(refreshToken: String) throws(APIError) -> URLRequest {
         let path = "/api/v1/access_token"
         let body = RefreshTokenDTO(grantType: "refresh_token", refreshToken: refreshToken)
         return try self.buildRequest(
@@ -114,7 +114,7 @@ extension APIClient {
         queryParams: [String: String]? = nil,
         body: Encodable? = nil,
         additionalHeaders: [String: String] = [:]
-    ) throws -> URLRequest {
+    ) throws(APIError) -> URLRequest {
         guard var urlComponents = URLComponents(
             url: baseURL.appendingPathComponent(path),
             resolvingAgainstBaseURL: false
@@ -139,8 +139,11 @@ extension APIClient {
         request.allHTTPHeaderFields = headers
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let body {
-            guard let encodedBody = try? JSONEncoder().encode(body) else {
-                throw APIError.invalidRequest
+            let encodedBody: Data
+            do {
+                encodedBody = try JSONEncoder().encode(body)
+            } catch {
+                throw APIError.parsingError(error)
             }
             request.httpBody = encodedBody
         }
