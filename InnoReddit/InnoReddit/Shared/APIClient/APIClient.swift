@@ -11,7 +11,7 @@ enum APIError: Error {
     case networkError(statusCode: Int)
     case APIErrorMessage(message: String)
     case invalidResponse
-    case invalidRequestData
+    case invalidRequest
     case parsingError(Error)
     case unknown
 }
@@ -33,6 +33,9 @@ extension APIClient {
         path: String,
         httpMethod: HTTPMethod,
         queryParams: [String: String]? = nil,
+        body: Encodable? = nil,
+        additionalHeaders: [String: String] = [:]
+    ) async throws(APIError) -> T {
         jsonBody: Encodable? = nil,
         urlEncodedBody: [String: String]? = nil,
         additionalHeaders: [String: String] = [:],
@@ -52,15 +55,32 @@ extension APIClient {
                 differentBaseURL: differentBaseURL
             )
             
-            response = try await self.send(request: request)
+            response = try? await self.send(request: request)
+            
             if response?.statusCode == 401 {
-                let refreshRequest = try self.buildRefreshTokenRequest(refreshToken: self.getRefreshToken())
-                let refreshResponse = try await self.send(request: refreshRequest)
+                guard let refreshRequest = try? self.buildRefreshTokenRequest(refreshToken: self.getRefreshToken()) else {
+                    throw APIError.invalidRequest
+                }
+                
+                let refreshResponse = try? await self.send(request: refreshRequest)
+                guard
+                    let refreshResponse,
+                    (200...299).contains(refreshResponse.statusCode)
+                else {
+                    throw APIError.networkError(statusCode: refreshResponse?.statusCode ?? 400)
+                }
+                
+                let decodedRefreshResponse: TokenRetrievalDTO
                 do {
-                    let decodedRefreshResponse: TokenRetrievalDTO = try self.decodeData(response: refreshResponse)
+                    decodedRefreshResponse = try self.decodeData(response: refreshResponse)
+                } catch {
+                    throw APIError.parsingError(error)
+                }
+                
+                do {
                     try self.onTokenRefreshed(response: decodedRefreshResponse)
                 } catch {
-                    print(error)
+                    throw APIError.APIErrorMessage(message: "Failed to handle refresh_token")
                 }
                 continue
             }
@@ -73,10 +93,17 @@ extension APIClient {
         else {
             throw APIError.networkError(statusCode: response?.statusCode ?? 400)
         }
-        return try self.decodeData(response: response)
+        
+        let decodedResponse: T
+        do {
+             decodedResponse = try self.decodeData(response: response)
+        } catch {
+            throw APIError.parsingError(error)
+        }
+        return decodedResponse
     }
     
-    private func buildRefreshTokenRequest(refreshToken: String) throws -> URLRequest {
+    private func buildRefreshTokenRequest(refreshToken: String) throws(APIError) -> URLRequest {
         let baseURL = URL(string: "https://www.reddit.com")!
         let path = "/api/v1/access_token"
         
@@ -113,7 +140,7 @@ extension APIClient {
         urlEncodedBody: [String: String]? = nil,
         additionalHeaders: [String: String] = [:],
         differentBaseURL: URL? = nil
-    ) throws -> URLRequest {
+    ) throws(APIError) -> URLRequest {
         guard (urlEncodedBody == nil && jsonBody == nil) ||
               (urlEncodedBody == nil && jsonBody != nil) ||
               (urlEncodedBody != nil && jsonBody == nil)
@@ -132,20 +159,25 @@ extension APIClient {
             url: url,
             resolvingAgainstBaseURL: false
         ) else {
-            throw APIError.invalidRequestData
+            throw APIError.invalidRequest
         }
         
         if let queryParams = queryParams {
             urlComponents.queryItems = queryParams.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
         guard let url = urlComponents.url else {
-            throw APIError.invalidRequestData
+            throw APIError.invalidRequest
         }
         
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         
-        let headers = try self.defaultHeaders(additionalHeaders: additionalHeaders)
+        var headers: [String: String] = [:]
+        do {
+            headers = try self.defaultHeaders(additionalHeaders: additionalHeaders)
+        } catch {
+            throw APIError.invalidRequest
+        }
         request.allHTTPHeaderFields = headers
         if request.value(forHTTPHeaderField: "Content-Type") == nil {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
