@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
 import Kingfisher
 
 protocol PostCellProtocol: AnyObject {
@@ -416,34 +415,3 @@ extension PostCell: PostCellProtocol {
         self.output?.retrieveSubredditIconURL()
     }
 }
-
-//#Preview {
-//    ViewControllerPreview {
-//        let vc = UIViewController()
-//        let cell = PostCell()
-//        let post = Post(
-//            subreddit: "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest",
-//            text: "Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text ",
-////            text: "",
-//            authorId: "skebob",
-//            saved: false,
-//            title: "Sample title",
-//            downs: 0,
-//            ups: 0,
-//            score: 120000,
-//            created: Date().addingTimeInterval(-3600),
-//            images: nil,
-//            subredditId: "skebob",
-//            id: "skebob",
-//            authorName: "authorName",
-//            commentsCount: 11241
-//        )
-//        cell.configure(post: post)
-//        vc.view = cell
-//        return vc
-//    }
-//    .frame(maxHeight: 600)
-//    .padding(.horizontal, 8)
-//    .ignoresSafeArea()
-//    .background(Color(Asset.Colors.innoBackgroundColor.color))
-//}

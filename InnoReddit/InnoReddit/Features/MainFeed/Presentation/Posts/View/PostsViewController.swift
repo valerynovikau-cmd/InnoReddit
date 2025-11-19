@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
 
 protocol PostsViewProtocol: AnyObject {
     var output: PostsPresenterProtocol? { get set }
@@ -232,12 +231,4 @@ extension PostsViewController: UICollectionViewDelegate {
         
         self.output?.performPostsPaginatedRetrieval()
     }
-}
-
-#Preview {
-    ViewControllerPreview {
-        let view = PostsViewController()
-        return view
-    }
-    .ignoresSafeArea()
 }

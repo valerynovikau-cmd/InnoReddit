@@ -85,3 +85,8 @@ TestingPurposes/
 # SwiftGen generated resource files
 # =========================
 *+Generated.swift
+
+# =========================
+# Preview files
+# =========================
+*+Preview.swift
