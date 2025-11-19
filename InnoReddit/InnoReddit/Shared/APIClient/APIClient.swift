@@ -33,14 +33,11 @@ extension APIClient {
         path: String,
         httpMethod: HTTPMethod,
         queryParams: [String: String]? = nil,
-        body: Encodable? = nil,
-        additionalHeaders: [String: String] = [:]
-    ) async throws(APIError) -> T {
         jsonBody: Encodable? = nil,
         urlEncodedBody: [String: String]? = nil,
         additionalHeaders: [String: String] = [:],
         differentBaseURL: URL? = nil
-    ) async throws -> T {
+    ) async throws(APIError) -> T {
         
         var response: APIResponse?
         for _ in 0...2 {
@@ -112,7 +109,7 @@ extension APIClient {
             "refresh_token": refreshToken
         ]
         guard let clientId = Bundle.main.infoDictionary?["ClientID"] as? String else {
-            throw APIError.invalidRequestData
+            throw APIError.invalidRequest
         }
         
         let credentials = "\(clientId):"
@@ -145,7 +142,7 @@ extension APIClient {
               (urlEncodedBody == nil && jsonBody != nil) ||
               (urlEncodedBody != nil && jsonBody == nil)
         else {
-            throw APIError.invalidRequestData
+            throw APIError.invalidRequest
         }
         
         var url: URL!
