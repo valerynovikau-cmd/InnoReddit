@@ -20,7 +20,7 @@ final class RetrieveTokensUseCase: RetrieveTokensUseCaseProtocol {
         let retrievedScopes = tokenRetrieval.scope
         guard
             let refreshToken = tokenRetrieval.refreshToken,
-            scopes == retrievedScopes
+            Set(scopes) == Set(retrievedScopes)
         else {
             throw TokenError.invalidResponse
         }

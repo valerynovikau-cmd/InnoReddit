@@ -26,7 +26,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
             var errorTitle: String
             var errorMessage: String
             do {
-                let scopes: [AuthScopes] = [.edit, .read]
+                let scopes: [AuthScopes] = AuthScopes.allCases
                 let code = try await self.webAuthSessionService.startSession(scopes: scopes)
                 
                 try await self.retrieveTokensUseCase.execute(code: code, scopes: scopes)
