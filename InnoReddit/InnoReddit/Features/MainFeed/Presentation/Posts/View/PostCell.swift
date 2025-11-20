@@ -11,13 +11,12 @@ import Kingfisher
 protocol PostCellProtocol: AnyObject {
     func configure(output: PostCellPresenterProtocol)
     
-    func onSubredditIconURLRetrieved(subredditIconURL: String?)
+    func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
 }
 
 final class PostCell: UICollectionViewCell {
     static let reuseIdentifier = "PostCell"
     var output: PostCellPresenterProtocol?
-//    private var post: Post?
     
     // MARK: UI elements
     private struct PostCellValues {
@@ -40,6 +39,8 @@ final class PostCell: UICollectionViewCell {
         static let buttonSize: CGFloat = 35
         
         static let bottomLabelsFontSize: CGFloat = 16
+        
+        static let fadeInAnimationDuration: TimeInterval = 0.1
     }
     
     private enum PostCellButtonType: String {
@@ -137,7 +138,7 @@ final class PostCell: UICollectionViewCell {
     // MARK: - Title label
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: constants.titleLabelFontSize)
+        label.font = .systemFont(ofSize: constants.titleLabelFontSize, weight: .bold)
         label.numberOfLines = constants.titleLabelNumberOfLines
         label.setContentHuggingPriority(.defaultHigh, for: .vertical)
         label.textAlignment = .natural
@@ -147,20 +148,40 @@ final class PostCell: UICollectionViewCell {
     // MARK: - Body label
     private lazy var bodyLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
+        label.font = .systemFont(ofSize: constants.bodyLabelFontSize, weight: .regular)
         label.numberOfLines = constants.bodyLabelNumberOfLines
-        label.textColor = .secondaryLabel
+        label.textColor = .label
         label.textAlignment = .natural
         return label
     }()
     
-    // MARK: - Post image view
-    private lazy var postImageView: UIImageView = {
+    // MARK: - Post image view builder
+    private lazy var postImageViewBuilder: (() -> UIImageView) = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = constants.previewImageCornerRadius
+        imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
         imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let activityIndicator = UIActivityIndicatorView(style: .medium)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        imageView.addSubview(activityIndicator)
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor)
+        ])
+        activityIndicator.startAnimating()
+        
         return imageView
+    }
+    
+    // MARK: - Post images stack view
+    private lazy var postImagesStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = constants.stackSpacing
+        return stack
     }()
     
     // MARK: - Post content stack view
@@ -173,6 +194,7 @@ final class PostCell: UICollectionViewCell {
     
     private func configurePostContentStackView() {
         postContentStackView.addArrangedSubview(titleLabel)
+        postContentStackView.addArrangedSubview(postImagesStackView)
         contentView.addSubview(postContentStackView)
         NSLayoutConstraint.activate([
             postContentStackView.topAnchor.constraint(equalTo: topInfoStackView.bottomAnchor, constant: constants.stackInterSpacing),
@@ -325,24 +347,31 @@ final class PostCell: UICollectionViewCell {
     private func setupBodyTextInfo() {
         guard let post = self.output?.post else { return }
         if let text = post.text, !text.isEmpty {
-            postContentStackView.addArrangedSubview(bodyLabel)
+            postContentStackView.insertArrangedSubview(bodyLabel, at: 1)
             bodyLabel.text = text
         }
         titleLabel.text = post.title ?? ""
     }
     
     private func setupBodyImage() {
-//        guard let post = self.output?.post else { return }
-        postImageView.kf.setImage(
-            with: URL(string: "https://opis-cdn.tinkoffjournal.ru/mercury/03-skebob.png"),
-            options: [
-                .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
-                .transition(.fade(0.1)),
-                .forceTransition
-            ]
-        )
-        postContentStackView.addArrangedSubview(postImageView)
-        postImageView.heightAnchor.constraint(equalTo: postContentStackView.widthAnchor).isActive = true
+        guard let images = self.output?.post.images else { return }
+        for image in images {
+            let imageView = postImageViewBuilder()
+            imageView.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width).isActive = true
+            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor).isActive = true
+            
+            postImagesStackView.addArrangedSubview(imageView)
+            imageView.kf.setImage(
+                with: URL(string: image.fullUrl ?? ""),
+                options: [
+                    .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
+                    .transition(.fade(constants.fadeInAnimationDuration)),
+                    .forceTransition
+                ]) { _ in
+                    let activityIndicator = imageView.subviews.first(where: { $0 is UIActivityIndicatorView })
+                    activityIndicator?.removeFromSuperview()
+                }
+        }
     }
     
     private func setupBottomButtonsInfo() {
@@ -359,6 +388,11 @@ final class PostCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         subredditImageView.image = nil
+        for view in postImagesStackView.arrangedSubviews {
+            postImagesStackView.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        bodyLabel.removeFromSuperview()
     }
     
     required init?(coder: NSCoder) {
@@ -367,16 +401,24 @@ final class PostCell: UICollectionViewCell {
 }
 
 extension PostCell: PostCellProtocol {
-    func onSubredditIconURLRetrieved(subredditIconURL: String?) {
+    func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool) {
         if let subredditIconURL, !subredditIconURL.isEmpty {
+            var options: KingfisherOptionsInfo = []
+            if shouldAnimate {
+                options.append(.transition(.fade(constants.fadeInAnimationDuration)))
+            }
             subredditImageView.kf.setImage(
                 with: URL(string: subredditIconURL),
-                options: [
-                    .transition(.fade(0.1))
-                ]
+                options: options
             )
         } else {
-            subredditImageView.image = Asset.Images.defaultSubredditAvatar.image
+            self.subredditImageView.image = Asset.Images.defaultSubredditAvatar.image
+            if shouldAnimate {
+                subredditImageView.alpha = 0
+                UIView.animate(withDuration: constants.fadeInAnimationDuration) { [weak self] in
+                    self?.subredditImageView.alpha = 1
+                }
+            }
         }
     }
     

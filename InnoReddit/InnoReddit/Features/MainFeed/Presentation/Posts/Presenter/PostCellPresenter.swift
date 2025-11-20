@@ -58,7 +58,7 @@ extension PostCellPresenter: PostCellPresenterProtocol {
                 iconURL = response.data.iconImg
                 if let iconURL {
                     await cache.setItem(key: subreddit, value: iconURL)
-                    self.shouldSetIcon(subredditIconURL: iconURL, subreddit: subreddit)
+                    self.shouldSetIcon(subredditIconURL: iconURL, subreddit: subreddit, shouldAnimate: true)
                 } else {
                     self.shouldSetIcon(subredditIconURL: nil, subreddit: subreddit)
                 }
@@ -66,9 +66,9 @@ extension PostCellPresenter: PostCellPresenterProtocol {
         }
     }
     
-    private func shouldSetIcon(subredditIconURL: String?, subreddit: String?) {
+    private func shouldSetIcon(subredditIconURL: String?, subreddit: String?, shouldAnimate: Bool = false) {
         guard subreddit == self.post.subreddit else { return }
-        self.input?.onSubredditIconURLRetrieved(subredditIconURL: subredditIconURL)
+        self.input?.onSubredditIconURLRetrieved(subredditIconURL: subredditIconURL, shouldAnimate: shouldAnimate)
     }
     
     func onPostTap() {
