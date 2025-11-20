@@ -16,7 +16,8 @@ struct PostResponseDTO: Decodable {
     let ups: Int
     let score: Int
     let created: Double
-    let preview: MediaResponseDTO?
+    let preview: SingleMediaResponseDTO?
+    let mediaMetadata: [String: MultipleMediaResponseDTO]?
     let subredditId: String
     let id: String
     let author: String?

@@ -18,7 +18,9 @@ final class PostsNetworkService: PostsNetworkServiceProtocol {
     @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
     
     func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO {
-        var queryParams: [String: String] = [:]
+        var queryParams: [String: String] = [
+            "raw_json" : "1"
+        ]
         if let after = after {
             queryParams["after"] = after
         }

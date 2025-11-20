@@ -16,7 +16,7 @@ final class PostsModelMapper: PostsModelMapperProtocol {
         let posts = modelToMap.data.children.compactMap({ child in
             let data = child.data
             let date = Date(timeIntervalSince1970: TimeInterval(floatLiteral: data.created))
-            let images: [PostImage]? = data.preview?.images?.compactMap({ image in
+            let singleImages: [PostImage] = data.preview?.images?.compactMap({ image in
                 var previewUrl: String?
                 var previewHeight: Int?
                 var previewWidth: Int?
@@ -39,7 +39,36 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                     previewWidth: previewWidth,
                     previewHeight: previewHeight
                 )
-            })
+            }) ?? []
+            
+            let multipleImages: [PostImage] = data.mediaMetadata?.values.compactMap { (multipleMediaResponseDTO) -> PostImage? in
+                guard let previews = multipleMediaResponseDTO.p,
+                      multipleMediaResponseDTO.e == "Image"
+                else { return nil }
+                
+                var previewUrl: String?
+                var previewHeight: Int?
+                var previewWidth: Int?
+                
+                if previews.count > 0 {
+                    let previewImage = previews.last
+                    previewUrl = previewImage?.u
+                    previewHeight = previewImage?.y
+                    previewWidth = previewImage?.x
+                }
+                
+                return PostImage(
+                    id: multipleMediaResponseDTO.id,
+                    fullUrl: multipleMediaResponseDTO.s?.u,
+                    fullWidth: multipleMediaResponseDTO.s?.x,
+                    fullHeight: multipleMediaResponseDTO.s?.y,
+                    previewUrl: previewUrl,
+                    previewWidth: previewWidth,
+                    previewHeight: previewHeight
+                )
+            } ?? []
+            
+            let images: [PostImage]? = singleImages + multipleImages
             
             return Post(
                 subreddit: data.subreddit,
