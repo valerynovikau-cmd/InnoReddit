@@ -155,27 +155,6 @@ final class PostCell: UICollectionViewCell {
         return label
     }()
     
-    // MARK: - Post image view builder
-    private lazy var postImageViewBuilder: (() -> UIImageView) = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.layer.cornerRadius = constants.previewImageCornerRadius
-        imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
-        imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let activityIndicator = UIActivityIndicatorView(style: .medium)
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        imageView.addSubview(activityIndicator)
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor)
-        ])
-        activityIndicator.startAnimating()
-        
-        return imageView
-    }
-    
     // MARK: - Post images stack view
     private lazy var postImagesStackView: UIStackView = {
         let stack = UIStackView()
@@ -356,21 +335,35 @@ final class PostCell: UICollectionViewCell {
     private func setupBodyImage() {
         guard let images = self.output?.post.images else { return }
         for image in images {
-            let imageView = postImageViewBuilder()
-            imageView.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width).isActive = true
-            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor).isActive = true
+            let imageView = IRPostImageViewBlurredBackground()
+            imageView.layer.cornerRadius = constants.previewImageCornerRadius
+            imageView.clipsToBounds = true
+            NSLayoutConstraint.activate([
+                imageView.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
+                imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor),
+            ])
             
             postImagesStackView.addArrangedSubview(imageView)
-            imageView.kf.setImage(
-                with: URL(string: image.fullUrl ?? ""),
-                options: [
-                    .processor(RoundCornerImageProcessor(cornerRadius: constants.previewImageCornerRadius)),
-                    .transition(.fade(constants.fadeInAnimationDuration)),
-                    .forceTransition
-                ]) { _ in
-                    let activityIndicator = imageView.subviews.first(where: { $0 is UIActivityIndicatorView })
-                    activityIndicator?.removeFromSuperview()
+            
+            Task {
+                let blurImageProcessor = BlurImageProcessor(blurRadius: 20)
+                let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
+                    with: URL(string: image.fullUrl ?? "")!,
+                    options: [
+                        .processor(blurImageProcessor)
+                    ]
+                )
+                await MainActor.run {
+                    imageView.setBackgorundImage(image: imageBlurredResult.image, animationInterval: constants.fadeInAnimationDuration)
                 }
+                
+                let imageResult = try await KingfisherManager.shared.retrieveImage(
+                    with: URL(string: image.fullUrl ?? "")!
+                )
+                await MainActor.run {
+                    imageView.setImage(image: imageResult.image, animationInterval: constants.fadeInAnimationDuration)
+                }
+            }
         }
     }
     
