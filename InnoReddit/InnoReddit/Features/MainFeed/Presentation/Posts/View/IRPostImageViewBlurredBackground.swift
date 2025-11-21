@@ -25,6 +25,7 @@ final class IRPostImageViewBlurredBackground: UIImageView {
     init() {
         super.init(frame: .zero)
         self.contentMode = .scaleAspectFill
+        self.clipsToBounds = true
         self.translatesAutoresizingMaskIntoConstraints = false
         
         self.addSubview(activityIndicator)

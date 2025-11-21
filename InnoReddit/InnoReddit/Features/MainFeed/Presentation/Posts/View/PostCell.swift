@@ -9,14 +9,20 @@ import UIKit
 import Kingfisher
 
 protocol PostCellProtocol: AnyObject {
-    func configure(output: PostCellPresenterProtocol)
+    var output: PostCellPresenterProtocol? { get set }
+    func configure()
     
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
+}
+
+protocol PostCellImageCarouselDelegate: AnyObject {
+    func willShowPostCell(pageViewController: UIPageViewController)
 }
 
 final class PostCell: UICollectionViewCell {
     static let reuseIdentifier = "PostCell"
     var output: PostCellPresenterProtocol?
+    weak var delegate: PostCellImageCarouselDelegate?
     
     // MARK: UI elements
     private struct PostCellValues {
@@ -41,6 +47,8 @@ final class PostCell: UICollectionViewCell {
         static let bottomLabelsFontSize: CGFloat = 16
         
         static let fadeInAnimationDuration: TimeInterval = 0.1
+        
+        static let pageControlPadding: CGFloat = 8
     }
     
     private enum PostCellButtonType: String {
@@ -155,13 +163,49 @@ final class PostCell: UICollectionViewCell {
         return label
     }()
     
-    // MARK: - Post images stack view
-    private lazy var postImagesStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = constants.stackSpacing
-        return stack
-    }()
+    // MARK: - Post images page view controller
+    var postImagesPageViewController: UIPageViewController?
+    var imageControllers: [PostCellImageViewController] = []
+    
+    private func initializePostImagesPageViewController() {
+        postImagesPageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+        postImagesPageViewController?.view.translatesAutoresizingMaskIntoConstraints = false
+        postImagesPageViewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
+        postImagesPageViewController?.view.clipsToBounds = true
+        postImagesPageViewController?.dataSource = self
+        postImagesPageViewController?.delegate = self
+    }
+    
+    private func deinitializePostImagesPageViewController() {
+        postImagesPageViewController?.view.removeFromSuperview()
+        postImagesPageViewController?.removeFromParent()
+        postImagesPageViewController = nil
+        postImagesPageViewController?.dataSource = nil
+        postImagesPageViewController?.delegate = nil
+        imageControllers.removeAll()
+    }
+    
+    // MARK: - Page control
+    private var pageControl: UIPageControl?
+    
+    private func initializePageControl() {
+        pageControl = UIPageControl()
+        guard let pageControl,
+              imageControllers.count > 0
+        else { return }
+        
+        pageControl.currentPage = 0
+        pageControl.hidesForSinglePage = true
+        pageControl.isUserInteractionEnabled = false
+        pageControl.translatesAutoresizingMaskIntoConstraints = false
+        pageControl.numberOfPages = imageControllers.count
+        
+        contentView.addSubview(pageControl)
+        NSLayoutConstraint.activate([
+            pageControl.centerXAnchor.constraint(equalTo: postContentStackView.centerXAnchor),
+            pageControl.bottomAnchor.constraint(equalTo: postContentStackView.bottomAnchor, constant: -constants.pageControlPadding)
+        ])
+    }
     
     // MARK: - Post content stack view
     private lazy var postContentStackView: UIStackView = {
@@ -173,7 +217,6 @@ final class PostCell: UICollectionViewCell {
     
     private func configurePostContentStackView() {
         postContentStackView.addArrangedSubview(titleLabel)
-        postContentStackView.addArrangedSubview(postImagesStackView)
         contentView.addSubview(postContentStackView)
         NSLayoutConstraint.activate([
             postContentStackView.topAnchor.constraint(equalTo: topInfoStackView.bottomAnchor, constant: constants.stackInterSpacing),
@@ -326,45 +369,41 @@ final class PostCell: UICollectionViewCell {
     private func setupBodyTextInfo() {
         guard let post = self.output?.post else { return }
         if let text = post.text, !text.isEmpty {
-            postContentStackView.insertArrangedSubview(bodyLabel, at: 1)
+            postContentStackView.addArrangedSubview(bodyLabel)
             bodyLabel.text = text
         }
         titleLabel.text = post.title ?? ""
     }
     
-    private func setupBodyImage() {
-        guard let images = self.output?.post.images else { return }
-        for image in images {
-            let imageView = IRPostImageViewBlurredBackground()
-            imageView.layer.cornerRadius = constants.previewImageCornerRadius
-            imageView.clipsToBounds = true
-            NSLayoutConstraint.activate([
-                imageView.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
-                imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor),
-            ])
-            
-            postImagesStackView.addArrangedSubview(imageView)
-            
-            Task {
-                let blurImageProcessor = BlurImageProcessor(blurRadius: 20)
-                let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
-                    with: URL(string: image.fullUrl ?? "")!,
-                    options: [
-                        .processor(blurImageProcessor)
-                    ]
-                )
-                await MainActor.run {
-                    imageView.setBackgorundImage(image: imageBlurredResult.image, animationInterval: constants.fadeInAnimationDuration)
-                }
-                
-                let imageResult = try await KingfisherManager.shared.retrieveImage(
-                    with: URL(string: image.fullUrl ?? "")!
-                )
-                await MainActor.run {
-                    imageView.setImage(image: imageResult.image, animationInterval: constants.fadeInAnimationDuration)
-                }
-            }
-        }
+    private func setupPostsImages() {
+        guard let images = self.output?.post.images,
+              images.count > 0
+        else { return }
+        
+        initializePostImagesPageViewController()
+        
+        guard let postImagesPageViewController else { return }
+        delegate?.willShowPostCell(pageViewController: postImagesPageViewController)
+        
+        imageControllers = images.map({ image in
+            let vc = PostCellImageViewController()
+            let output = PostCellImagePresenter(postImage: image)
+            vc.output = output
+            output.input = vc
+            return vc
+        })
+        
+        initializePageControl()
+        
+        let firstVC = imageControllers.first ?? UIViewController()
+        postImagesPageViewController.setViewControllers([firstVC], direction: .forward, animated: false)
+        
+        postContentStackView.addArrangedSubview(postImagesPageViewController.view)
+        
+        NSLayoutConstraint.activate([
+            postImagesPageViewController.view.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
+            postImagesPageViewController.view.heightAnchor.constraint(equalTo: postImagesPageViewController.view.widthAnchor)
+        ])
     }
     
     private func setupBottomButtonsInfo() {
@@ -381,15 +420,55 @@ final class PostCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         subredditImageView.image = nil
-        for view in postImagesStackView.arrangedSubviews {
-            postImagesStackView.removeArrangedSubview(view)
+        for view in postContentStackView.arrangedSubviews.filter({ [weak self] filteringView in
+            filteringView != self?.titleLabel
+        }) {
+            postContentStackView.removeArrangedSubview(view)
             view.removeFromSuperview()
         }
-        bodyLabel.removeFromSuperview()
+        
+        deinitializePostImagesPageViewController()
+        pageControl?.removeFromSuperview()
+        pageControl = nil
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension PostCell: UIPageViewControllerDataSource {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        guard let vc = viewController as? PostCellImageViewController else { return nil }
+        guard let index = imageControllers.firstIndex(of: vc), index > 0 else { return nil }
+        return imageControllers[index - 1]
+    }
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
+        guard let vc = viewController as? PostCellImageViewController else { return nil }
+        guard let index = imageControllers.firstIndex(of: vc), index < imageControllers.count - 1 else { return nil }
+        return imageControllers[index + 1]
+    }
+}
+
+extension PostCell: UIPageViewControllerDelegate {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
+        guard completed,
+              let visibleVC = pageViewController.viewControllers?.first as? PostCellImageViewController,
+              let index = imageControllers.firstIndex(of: visibleVC) else { return }
+        
+        pageControl?.currentPage = index
     }
 }
 
@@ -439,12 +518,11 @@ extension PostCell: PostCellProtocol {
         
     }
     
-    func configure(output: PostCellPresenterProtocol) {
-        self.output = output
+    func configure() {
         
         self.setupHeaderInfo()
         self.setupBodyTextInfo()
-        self.setupBodyImage()
+        self.setupPostsImages()
         self.setupBottomButtonsInfo()
         
         self.output?.retrieveSubredditIconURL()

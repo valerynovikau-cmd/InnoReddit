@@ -130,35 +130,39 @@ class PostsViewController: UIViewController {
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView
-        ) { collectionView, indexPath, postIdentifier in
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: PostCell.reuseIdentifier,
-                for: indexPath
-            ) as? PostCell else { return UICollectionViewCell() }
+        ) { [weak self] collectionView, indexPath, postIdentifier in
+            guard let self,
+                  let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: PostCell.reuseIdentifier,
+                    for: indexPath
+                  ) as? PostCell else { return UICollectionViewCell() }
             
             if let output = self.output,
                let post = output.posts.first(where: { $0.id == postIdentifier })
             {
                 let cellOutput = PostCellPresenter(post: post)
-                cell.configure(output: cellOutput)
+                cell.delegate = self
+                cell.output = cellOutput
                 cellOutput.input = cell
+                cell.configure()
             }
             return cell
         }
         
         dataSource.supplementaryViewProvider = { [weak self] collectionView, elementKind, indexPath in
-            guard elementKind == UICollectionView.elementKindSectionFooter else { return nil }
-            guard let footer = collectionView.dequeueReusableSupplementaryView(
-                ofKind: elementKind,
-                withReuseIdentifier: PostsFooter.reuseIdentifier,
-                for: indexPath) as? PostsFooter
+            guard let self,
+                  elementKind == UICollectionView.elementKindSectionFooter,
+                  let footer = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: elementKind,
+                    withReuseIdentifier: PostsFooter.reuseIdentifier,
+                    for: indexPath) as? PostsFooter
             else {
                 return nil
             }
-            if self?.output?.posts.isEmpty ?? false {
+            if self.output?.posts.isEmpty ?? false {
                 footer.startAnimating()
             }
-            self?.footer = footer
+            self.footer = footer
             return footer
         }
         
@@ -230,5 +234,12 @@ extension PostsViewController: UICollectionViewDelegate {
         else { return }
         
         self.output?.performPostsPaginatedRetrieval()
+    }
+}
+
+extension PostsViewController: PostCellImageCarouselDelegate {
+    func willShowPostCell(pageViewController: UIPageViewController) {
+        addChild(pageViewController)
+        pageViewController.didMove(toParent: self)
     }
 }
