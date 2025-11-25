@@ -10,7 +10,7 @@ import Foundation
 
 protocol PostCellImagePresenterProtocol: AnyObject {
     var input: PostCellImageViewProtocol? { get set }
-    func retrieveImage()
+    func retrieveImage(blurRadius: CGFloat)
 }
 
 final class PostCellImagePresenter {
@@ -25,23 +25,25 @@ final class PostCellImagePresenter {
 }
 
 extension PostCellImagePresenter: PostCellImagePresenterProtocol {
-    func retrieveImage() {
+    func retrieveImage(blurRadius: CGFloat) {
         guard !didRetrieveImage else { return }
         Task {
-            guard let url = postImage.previewUrl ?? postImage.fullUrl else { return }
-            let blurImageProcessor = BlurImageProcessor(blurRadius: 20)
-            let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
-                with: URL(string: url)!,
-                options: [
-                    .processor(blurImageProcessor)
-                ]
-            )
-            
-            let imageResult = try await KingfisherManager.shared.retrieveImage(
-                with: URL(string: url)!
-            )
-            didRetrieveImage = true
-            input?.onImageRetrieved(image: imageResult.image, blurredImage: imageBlurredResult.image)
+            do {
+                guard let url = postImage.previewUrl ?? postImage.fullUrl else { return }
+                let blurImageProcessor = BlurImageProcessor(blurRadius: blurRadius)
+                let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
+                    with: URL(string: url)!,
+                    options: [
+                        .processor(blurImageProcessor)
+                    ]
+                )
+                
+                let imageResult = try await KingfisherManager.shared.retrieveImage(
+                    with: URL(string: url)!
+                )
+                didRetrieveImage = true
+                input?.onImageRetrieved(image: imageResult.image, blurredImage: imageBlurredResult.image)
+            } catch { }
         }
     }
 }

@@ -7,25 +7,16 @@
 
 import Foundation
 
-enum APIError: Error {
-    case networkError(statusCode: Int)
-    case APIErrorMessage(message: String)
-    case invalidResponse
-    case invalidRequest
-    case parsingError(Error)
-    case unknown
-}
-
 protocol APIClient: AnyObject {
     var baseURL: URL { get }
     
-    func send(request: URLRequest) async throws -> APIResponse
+    func send(request: URLRequest) async throws(APIError) -> APIResponse
     
-    func onTokenRefreshed(response: TokenRetrievalDTO) throws
+    func onTokenRefreshed(response: TokenRetrievalDTO) throws(APIError)
     
-    func defaultHeaders(additionalHeaders: [String: String]) throws -> [String: String]
+    func defaultHeaders(additionalHeaders: [String: String]) throws(APIError) -> [String: String]
     
-    func getRefreshToken() throws -> String
+    func getRefreshToken() throws(APIError) -> String
 }
 
 extension APIClient {

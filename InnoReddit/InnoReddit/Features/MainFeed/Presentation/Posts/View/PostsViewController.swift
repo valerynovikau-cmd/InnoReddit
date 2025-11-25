@@ -14,9 +14,11 @@ protocol PostsViewProtocol: AnyObject {
     func onLoadingFinished()
     
     func shouldScrollToTop()
+    
+    func showAlert(title: String?, message: String?)
 }
 
-final class PostsViewController: UIViewController {
+final class PostsViewController: IRBaseViewController {
     
     var output: PostsPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
@@ -224,6 +226,10 @@ extension PostsViewController: PostsViewProtocol {
     
     func onLoadingFinished() {
         footer?.stopAnimating()
+    }
+    
+    func showAlert(title: String?, message: String?) {
+        self.presentAlertController(title: title, message: message)
     }
     
     func shouldScrollToTop() {

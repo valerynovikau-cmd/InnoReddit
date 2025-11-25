@@ -9,15 +9,15 @@ import Foundation
 import Factory
 
 protocol PostsNetworkServiceProtocol {
-    func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO
-    func getSubredditIconURL(subredditName: String) async throws -> SubredditResponseDTO
+    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingResponseDTO
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO
 }
 
 final class PostsNetworkService: PostsNetworkServiceProtocol {
     var baseURL: URL = URL(string: "https://oauth.reddit.com")!
     @Injected(\.tokenStorageRepository) var tokenStorageRepository: TokenStorageRepositoryProtocol
     
-    func getPosts(after: String?, category: MainFeedCategory) async throws -> ListingResponseDTO {
+    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingResponseDTO {
         var queryParams: [String: String] = [
             "raw_json" : "1"
         ]
@@ -28,36 +28,46 @@ final class PostsNetworkService: PostsNetworkServiceProtocol {
         return response
     }
     
-    func getSubredditIconURL(subredditName: String) async throws -> SubredditResponseDTO {
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO {
         let response: SubredditResponseDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
         return response
     }
 }
 
 extension PostsNetworkService: APIClient {
-    func send(request: URLRequest) async throws -> APIResponse {
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+    func send(request: URLRequest) async throws(APIError) -> APIResponse {
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
+            }
+            return APIResponse(statusCode: httpResponse.statusCode, data: data)
+        } catch {
+            throw .invalidResponse
         }
-        return APIResponse(statusCode: httpResponse.statusCode, data: data)
     }
     
-    func onTokenRefreshed(response: TokenRetrievalDTO) throws {
+    func onTokenRefreshed(response: TokenRetrievalDTO) throws(APIError) {
         guard let refreshToken = response.refreshToken else {
             throw APIError.invalidResponse
         }
-        try self.tokenStorageRepository.saveTokens(
-            accessToken: response.accessToken,
-            refreshToken: refreshToken
-        )
+        
+        do {
+            return try self.tokenStorageRepository.saveTokens(
+                accessToken: response.accessToken,
+                refreshToken: refreshToken
+            )
+        } catch {
+            throw .storedCredentialsError
+        }
     }
     
-    func defaultHeaders(additionalHeaders: [String : String]) throws -> [String : String] {
+    func defaultHeaders(additionalHeaders: [String : String]) throws(APIError) -> [String : String] {
         var dict: [String:String] = [:]
-        let accessToken = try self.tokenStorageRepository.getToken(tokenAccessType: .accessToken)
-        guard let userAgent = Bundle.main.infoDictionary?["User-Agent"] as? String else {
-            throw NSError()
+        guard let accessToken = try? self.tokenStorageRepository.getToken(tokenAccessType: .accessToken),
+              let userAgent = ConfigParameterManager.userAgent
+        else {
+            throw .storedCredentialsError
         }
         
         dict["User-Agent"] = userAgent
@@ -68,7 +78,11 @@ extension PostsNetworkService: APIClient {
         return dict
     }
     
-    func getRefreshToken() throws -> String {
-        return try self.tokenStorageRepository.getToken(tokenAccessType: .refreshToken)
+    func getRefreshToken() throws(APIError) -> String {
+        do {
+            return try self.tokenStorageRepository.getToken(tokenAccessType: .refreshToken)
+        } catch {
+            throw .storedCredentialsError
+        }
     }
 }

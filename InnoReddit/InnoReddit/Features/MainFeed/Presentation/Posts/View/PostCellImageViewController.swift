@@ -15,6 +15,7 @@ protocol PostCellImageViewProtocol: AnyObject {
 final class PostCellImageViewController: UIViewController {
     var output: PostCellImagePresenterProtocol?
     private let animationInterval: TimeInterval = 0.1
+    private let blurRadius: CGFloat = 20
     
     private let imageView = IRPostImageViewBlurredBackground()
     
@@ -31,7 +32,7 @@ final class PostCellImageViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.output?.retrieveImage()
+        self.output?.retrieveImage(blurRadius: blurRadius)
     }
 }
 

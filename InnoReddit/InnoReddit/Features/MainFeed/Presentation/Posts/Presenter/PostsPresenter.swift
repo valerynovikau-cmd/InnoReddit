@@ -6,6 +6,7 @@
 //
 
 import Factory
+import Foundation
 
 protocol PostsPresenterProtocol: AnyObject {
     var input: PostsViewProtocol? { get set }
@@ -116,8 +117,12 @@ extension PostsPresenter: PostsPresenterProtocol {
     private func errorHandling(error: Error) {
         self.isRetrievingPosts = false
         self.input?.onLoadingFinished()
-        //Это не bad practice если тебе было весело
-        print(error)
-        fatalError()
+        var errorTitle: String?
+        var errorMessage: String?
+        if let apiError = error as? APIError {
+            errorTitle = apiError.errorTitle
+            errorMessage = apiError.errorMessage
+        }
+        self.input?.showAlert(title: errorTitle, message: errorMessage)
     }
 }
