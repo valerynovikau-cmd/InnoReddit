@@ -270,7 +270,7 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
     }
     
     func showAlert(title: String, message: String) {
-        self.presentAlertController(title: title, message: message, buttonTitle: "OK")
+        self.presentAlertController(title: title, message: message)
     }
 }
 

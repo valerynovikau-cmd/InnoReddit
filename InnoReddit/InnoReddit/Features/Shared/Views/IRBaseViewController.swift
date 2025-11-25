@@ -8,7 +8,7 @@
 import UIKit
 
 class IRBaseViewController: UIViewController {
-    func presentAlertController(title: String?, message: String?, buttonTitle: String?) {
+    func presentAlertController(title: String?, message: String?, buttonTitle: String? = "OK") {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: buttonTitle, style: .default))
         self.present(alert, animated: true)
