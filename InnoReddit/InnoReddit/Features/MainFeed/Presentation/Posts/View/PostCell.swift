@@ -166,7 +166,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     // MARK: - Body label
-    private lazy var bodyLabel: UILabel = {
+    private let bodyLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: constants.bodyLabelFontSize, weight: .regular)
         label.numberOfLines = constants.bodyLabelNumberOfLines

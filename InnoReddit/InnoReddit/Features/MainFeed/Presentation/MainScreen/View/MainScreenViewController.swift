@@ -28,7 +28,7 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - Search bar
-    private lazy var searchBar: UISearchBar = {
+    private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = MainScreenStrings.searchBarPlaceholder
         searchBar.searchBarStyle = .minimal
@@ -46,7 +46,7 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - Segmented control
-    private lazy var segmentedControl: UISegmentedControl = {
+    private let segmentedControl: UISegmentedControl = {
         let segmentedControl = UISegmentedControl(items: [
             MainScreenStrings.bestTab,
             MainScreenStrings.hotTab,
@@ -77,7 +77,7 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - PageViewController
-    private lazy var pageViewController: UIPageViewController = {
+    private let pageViewController: UIPageViewController = {
         let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         return pageViewController
