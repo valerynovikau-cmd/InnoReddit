@@ -90,3 +90,4 @@ TestingPurposes/
 # Preview files
 # =========================
 *+Preview.swift
+ViewControllerPreview.swift
