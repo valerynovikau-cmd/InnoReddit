@@ -14,8 +14,9 @@ protocol PostCellImageViewProtocol: AnyObject {
 
 final class PostCellImageViewController: UIViewController {
     var output: PostCellImagePresenterProtocol?
-    private let imageView = IRPostImageViewBlurredBackground()
     private let animationInterval: TimeInterval = 0.1
+    
+    private let imageView = IRPostImageViewBlurredBackground()
     
     override func viewDidLoad() {
         super.viewDidLoad()

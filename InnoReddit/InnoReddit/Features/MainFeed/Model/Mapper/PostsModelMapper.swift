@@ -43,6 +43,7 @@ final class PostsModelMapper: PostsModelMapperProtocol {
             
             let multipleImages: [PostImage] = data.mediaMetadata?.values.compactMap { (multipleMediaResponseDTO) -> PostImage? in
                 guard let previews = multipleMediaResponseDTO.p,
+                      let id = multipleMediaResponseDTO.id,
                       multipleMediaResponseDTO.e == "Image"
                 else { return nil }
                 
@@ -58,7 +59,7 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                 }
                 
                 return PostImage(
-                    id: multipleMediaResponseDTO.id,
+                    id: id,
                     fullUrl: multipleMediaResponseDTO.s?.u,
                     fullWidth: multipleMediaResponseDTO.s?.x,
                     fullHeight: multipleMediaResponseDTO.s?.y,

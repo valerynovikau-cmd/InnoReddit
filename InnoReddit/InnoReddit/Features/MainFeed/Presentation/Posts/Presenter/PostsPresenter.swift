@@ -17,7 +17,7 @@ protocol PostsPresenterProtocol: AnyObject {
     
     func didSelectPost(post: Post)
     
-    func preformPostsRetrieval()
+    func performPostsRetrieval()
     func performPostsPaginatedRetrieval()
 }
 
@@ -46,7 +46,7 @@ extension PostsPresenter: PostsPresenterProtocol {
         self.router?.showPostDetails(post: post)
     }
     
-    func preformPostsRetrieval() {
+    func performPostsRetrieval() {
         Task { [weak self] in
             guard let self else { return }
             do {

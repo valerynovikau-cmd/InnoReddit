@@ -16,16 +16,16 @@ protocol PostsViewProtocol: AnyObject {
     func shouldScrollToTop()
 }
 
-private enum Section: Int {
-    case main
-}
-
-class PostsViewController: UIViewController {
+final class PostsViewController: UIViewController {
     
     var output: PostsPresenterProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
     // MARK: UI Elemenets
+    private enum Section: Int {
+        case main
+    }
+    
     private struct PostsViewControllerValues {
         static let collectionViewInterItemSpacing: CGFloat = 8
         static let collectionViewInterGroupSpacing: CGFloat = 8
@@ -49,10 +49,12 @@ class PostsViewController: UIViewController {
     }
     
     // MARK: - Collection view
-    private lazy var collectionView: UICollectionView = {
+    private let collectionView: UICollectionView = {
         let layout = UICollectionViewCompositionalLayout { _, _ in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(constants.collectionViewItemFractionalWidth),
-                                                  heightDimension: .estimated(constants.collectionViewItemHeightEstimated))
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(constants.collectionViewItemFractionalWidth),
+                heightDimension: .estimated(constants.collectionViewItemHeightEstimated)
+            )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
@@ -109,7 +111,7 @@ class PostsViewController: UIViewController {
     }
     
     // MARK: - Refresh control
-    private lazy var refreshControl: UIRefreshControl = {
+    private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         return refreshControl
     }()
@@ -120,7 +122,7 @@ class PostsViewController: UIViewController {
     }
     
     @objc private func refreshControlValueChanged() {
-        self.output?.preformPostsRetrieval()
+        self.output?.performPostsRetrieval()
     }
     
     // MARK: - Collection view footer
@@ -135,7 +137,10 @@ class PostsViewController: UIViewController {
                   let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: PostCell.reuseIdentifier,
                     for: indexPath
-                  ) as? PostCell else { return UICollectionViewCell() }
+                  ) as? PostCell
+            else {
+                return UICollectionViewCell()
+            }
             
             if let output = self.output,
                let post = output.posts.first(where: { $0.id == postIdentifier })
@@ -188,7 +193,7 @@ class PostsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if self.output?.posts.isEmpty ?? false {
-            self.output?.preformPostsRetrieval()
+            self.output?.performPostsRetrieval()
         }
     }
 }
@@ -223,6 +228,7 @@ extension PostsViewController: PostsViewProtocol {
     
     func shouldScrollToTop() {
         let scrollTargetIndexPath = IndexPath(row: 0, section: 0)
+        guard self.collectionView.numberOfItems(inSection: scrollTargetIndexPath.section) != 0 else { return }
         self.collectionView.scrollToItem(at: scrollTargetIndexPath, at: .top, animated: true)
     }
 }
@@ -238,8 +244,8 @@ extension PostsViewController: UICollectionViewDelegate {
 }
 
 extension PostsViewController: PostCellImageCarouselDelegate {
-    func willShowPostCell(pageViewController: UIPageViewController) {
-        addChild(pageViewController)
-        pageViewController.didMove(toParent: self)
+    func willShowPostCell(viewController: UIViewController) {
+        addChild(viewController)
+        viewController.didMove(toParent: self)
     }
 }

@@ -13,10 +13,16 @@ protocol PostCellProtocol: AnyObject {
     func configure()
     
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
+    func onPostTap()
+    func onUpvoteTap()
+    func onDownvoteTap()
+    func onCommentTap()
+    func onBookmarkTap()
+    func onSubredditTap()
 }
 
 protocol PostCellImageCarouselDelegate: AnyObject {
-    func willShowPostCell(pageViewController: UIPageViewController)
+    func willShowPostCell(viewController: UIViewController)
 }
 
 final class PostCell: UICollectionViewCell {
@@ -30,12 +36,18 @@ final class PostCell: UICollectionViewCell {
         static let previewImageCornerRadius: CGFloat = 5
 
         static let subredditImageSize: CGFloat = 24
+        static let subredditLabelNumberOfLines: Int = 1
+        static let subredditCornerRadius: CGFloat = subredditImageSize / 2
+        
+        static let dateLabelNumberOfLines: Int = 1
         
         static let titleLabelFontSize: CGFloat = 20
         static let titleLabelNumberOfLines: Int = 0
         
         static let bodyLabelFontSize: CGFloat = 14
         static let bodyLabelNumberOfLines: Int = 3
+        
+        static let scoreLabelNumberOfLines: Int = 1
         
         static let stackSpacing: CGFloat = 6
         
@@ -83,7 +95,7 @@ final class PostCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.addGestureRecognizer(tapGestureRecognizer)
         imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
-        imageView.layer.cornerRadius = constants.subredditImageSize / 2
+        imageView.layer.cornerRadius = constants.subredditCornerRadius
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -100,10 +112,10 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Subreddit label
-    private lazy var subredditLabel: UILabel = {
+    private let subredditLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
-        label.numberOfLines = 1
+        label.numberOfLines = constants.subredditLabelNumberOfLines
         label.textColor = .secondaryLabel
         label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
@@ -112,10 +124,10 @@ final class PostCell: UICollectionViewCell {
     }()
     
     // MARK: - Date label
-    private lazy var dateLabel: UILabel = {
+    private let dateLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: constants.bodyLabelFontSize)
-        label.numberOfLines = 1
+        label.numberOfLines = constants.dateLabelNumberOfLines
         label.textColor = .secondaryLabel
         label.textAlignment = .right
         label.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -124,7 +136,7 @@ final class PostCell: UICollectionViewCell {
     }()
     
     // MARK: - Top info stack view
-    private lazy var topInfoStackView: UIStackView = {
+    private let topInfoStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = constants.stackSpacing
@@ -144,7 +156,7 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Title label
-    private lazy var titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: constants.titleLabelFontSize, weight: .bold)
         label.numberOfLines = constants.titleLabelNumberOfLines
@@ -163,25 +175,51 @@ final class PostCell: UICollectionViewCell {
         return label
     }()
     
-    // MARK: - Post images page view controller
-    var postImagesPageViewController: UIPageViewController?
-    var imageControllers: [PostCellImageViewController] = []
+    // MARK: - Images VC's lifecycle
+    private func setupImagesViewController(viewController: UIViewController?) {
+        viewController?.view.translatesAutoresizingMaskIntoConstraints = false
+        viewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
+        viewController?.view.clipsToBounds = true
+    }
+    
+    private func tearDownImagesViewController(viewController: UIViewController?) {
+        viewController?.willMove(toParent: nil)
+        viewController?.view.removeFromSuperview()
+        viewController?.removeFromParent()
+    }
+    
+    // MARK: - (Single image) Post image view controller
+    private var imageViewController: PostCellImageViewController?
+    
+    private func initializePostImageViewController(image: PostImage) {
+        imageViewController = PostCellImageViewController()
+        let output = PostCellImagePresenter(postImage: image)
+        imageViewController?.output = output
+        output.input = imageViewController
+        self.setupImagesViewController(viewController: imageViewController)
+    }
+    
+    private func deinitializePostImageViewController() {
+        self.tearDownImagesViewController(viewController: imageViewController)
+        imageViewController = nil
+    }
+    
+    // MARK: - (Multiple images) Post images page view controller
+    private var postImagesPageViewController: UIPageViewController?
+    private var imageControllers: [PostCellImageViewController] = []
     
     private func initializePostImagesPageViewController() {
         postImagesPageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
-        postImagesPageViewController?.view.translatesAutoresizingMaskIntoConstraints = false
-        postImagesPageViewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
-        postImagesPageViewController?.view.clipsToBounds = true
+        self.setupImagesViewController(viewController: postImagesPageViewController)
         postImagesPageViewController?.dataSource = self
         postImagesPageViewController?.delegate = self
     }
     
     private func deinitializePostImagesPageViewController() {
-        postImagesPageViewController?.view.removeFromSuperview()
-        postImagesPageViewController?.removeFromParent()
-        postImagesPageViewController = nil
         postImagesPageViewController?.dataSource = nil
         postImagesPageViewController?.delegate = nil
+        self.tearDownImagesViewController(viewController: postImagesPageViewController)
+        postImagesPageViewController = nil
         imageControllers.removeAll()
     }
     
@@ -207,8 +245,13 @@ final class PostCell: UICollectionViewCell {
         ])
     }
     
+    private func deinitializePageControl() {
+        pageControl?.removeFromSuperview()
+        pageControl = nil
+    }
+    
     // MARK: - Post content stack view
-    private lazy var postContentStackView: UIStackView = {
+    private let postContentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = constants.stackSpacing
@@ -238,16 +281,16 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Score label
-    private lazy var scoreLabel: UILabel = {
+    private let scoreLabel: UILabel = {
         let label = UILabel()
-        label.numberOfLines = 1
+        label.numberOfLines = constants.scoreLabelNumberOfLines
         label.textAlignment = .center
         label.font = .systemFont(ofSize: constants.bottomLabelsFontSize, weight: .medium)
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return label
     }()
     
-    private func scoreLabelConfiguration() {
+    private func configureScoreLabel() {
         scoreLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: constants.buttonSize / 2).isActive = true
     }
     
@@ -264,7 +307,7 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Score buttons stack
-    private lazy var scoreButtonsStackView: UIStackView = {
+    private let scoreButtonsStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
@@ -302,14 +345,14 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Spacer view
-    private lazy var spacerView: UIView = {
+    private let spacerView: UIView = {
         let view = UIView()
         view.setContentHuggingPriority(.defaultLow, for: .horizontal)
         return view
     }()
     
     // MARK: - Comment stack
-    private lazy var commentStack: UIStackView = {
+    private let commentStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.setContentHuggingPriority(.defaultHigh, for: .horizontal)
@@ -323,7 +366,7 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Bottom stacks stack
-    private lazy var bottomStacksStack: UIStackView = {
+    private let bottomStacksStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = constants.stackSpacing
@@ -347,7 +390,7 @@ final class PostCell: UICollectionViewCell {
         self.configureContentView()
         self.configureSubredditImageView()
         self.configureTopInfoStackView()
-        self.scoreLabelConfiguration()
+        self.configureScoreLabel()
         self.configureCommentStack()
         self.configurePostContentStackView()
         self.configureScoreButtonsStackView()
@@ -356,6 +399,7 @@ final class PostCell: UICollectionViewCell {
         for view in self.contentView.subviews { view.translatesAutoresizingMaskIntoConstraints = false }
     }
     
+    // MARK: - Cell setup
     private func setupHeaderInfo() {
         guard let post = self.output?.post else { return }
         let dateFormatter = RelativeDateTimeFormatter()
@@ -380,11 +424,28 @@ final class PostCell: UICollectionViewCell {
               images.count > 0
         else { return }
         
-        initializePostImagesPageViewController()
+        if images.count == 1 {
+            guard let image = images.first else { return }
+            self.setupSingleImage(image: image)
+        } else {
+            self.setupMultipleImages(images: images)
+        }
+    }
+    
+    private func setupSingleImage(image: PostImage) {
+        self.initializePostImageViewController(image: image)
+        guard let imageViewController else { return }
         
-        guard let postImagesPageViewController else { return }
-        delegate?.willShowPostCell(pageViewController: postImagesPageViewController)
+        delegate?.willShowPostCell(viewController: imageViewController)
         
+        postContentStackView.addArrangedSubview(imageViewController.view)
+        NSLayoutConstraint.activate([
+            imageViewController.view.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
+            imageViewController.view.heightAnchor.constraint(equalTo: imageViewController.view.widthAnchor)
+        ])
+    }
+    
+    private func setupMultipleImages(images: [PostImage]) {
         imageControllers = images.map({ image in
             let vc = PostCellImageViewController()
             let output = PostCellImagePresenter(postImage: image)
@@ -392,14 +453,17 @@ final class PostCell: UICollectionViewCell {
             output.input = vc
             return vc
         })
+        guard let firstVC = imageControllers.first else { return }
         
-        initializePageControl()
+        self.initializePostImagesPageViewController()
         
-        let firstVC = imageControllers.first ?? UIViewController()
+        guard let postImagesPageViewController else { return }
+        delegate?.willShowPostCell(viewController: postImagesPageViewController)
+        
+        self.initializePageControl()
         postImagesPageViewController.setViewControllers([firstVC], direction: .forward, animated: false)
         
         postContentStackView.addArrangedSubview(postImagesPageViewController.view)
-        
         NSLayoutConstraint.activate([
             postImagesPageViewController.view.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
             postImagesPageViewController.view.heightAnchor.constraint(equalTo: postImagesPageViewController.view.widthAnchor)
@@ -411,6 +475,8 @@ final class PostCell: UICollectionViewCell {
         scoreLabel.text = "\(post.score)"
         commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bottomLabelsFontSize)
     }
+    
+    // MARK: - Lifecycle methods
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -427,15 +493,24 @@ final class PostCell: UICollectionViewCell {
             view.removeFromSuperview()
         }
         
-        deinitializePostImagesPageViewController()
-        pageControl?.removeFromSuperview()
-        pageControl = nil
+        self.delegate = nil
+        
+        if postImagesPageViewController != nil {
+            self.deinitializePostImagesPageViewController()
+            self.deinitializePageControl()
+        }
+        
+        if imageViewController != nil {
+            self.deinitializePostImageViewController()
+        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+// MARK: - Page view controller data source
 
 extension PostCell: UIPageViewControllerDataSource {
     func pageViewController(
@@ -457,6 +532,8 @@ extension PostCell: UIPageViewControllerDataSource {
     }
 }
 
+// MARK: - Page view controller delegate for updating page control
+
 extension PostCell: UIPageViewControllerDelegate {
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -471,6 +548,8 @@ extension PostCell: UIPageViewControllerDelegate {
         pageControl?.currentPage = index
     }
 }
+
+// MARK: - Post cell view protocol implementation
 
 extension PostCell: PostCellProtocol {
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool) {
@@ -519,7 +598,6 @@ extension PostCell: PostCellProtocol {
     }
     
     func configure() {
-        
         self.setupHeaderInfo()
         self.setupBodyTextInfo()
         self.setupPostsImages()

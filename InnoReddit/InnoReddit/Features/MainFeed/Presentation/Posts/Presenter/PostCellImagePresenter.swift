@@ -45,35 +45,3 @@ extension PostCellImagePresenter: PostCellImagePresenterProtocol {
         }
     }
 }
-
-//for image in images {
-//    let imageView = IRPostImageViewBlurredBackground()
-//    imageView.layer.cornerRadius = constants.previewImageCornerRadius
-//    imageView.clipsToBounds = true
-//    NSLayoutConstraint.activate([
-//        imageView.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
-//        imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor),
-//    ])
-//
-//    postImagesStackView.addArrangedSubview(imageView)
-//
-//    Task {
-//        let blurImageProcessor = BlurImageProcessor(blurRadius: 20)
-//        let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
-//            with: URL(string: image.fullUrl ?? "")!,
-//            options: [
-//                .processor(blurImageProcessor)
-//            ]
-//        )
-//        await MainActor.run {
-//            imageView.setBackgorundImage(image: imageBlurredResult.image, animationInterval: constants.fadeInAnimationDuration)
-//        }
-//
-//        let imageResult = try await KingfisherManager.shared.retrieveImage(
-//            with: URL(string: image.fullUrl ?? "")!
-//        )
-//        await MainActor.run {
-//            imageView.setImage(image: imageResult.image, animationInterval: constants.fadeInAnimationDuration)
-//        }
-//    }
-//}

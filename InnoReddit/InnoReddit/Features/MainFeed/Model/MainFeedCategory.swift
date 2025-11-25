@@ -5,7 +5,6 @@
 //  Created by Валерий Новиков on 13.11.25.
 //
 
-
 enum MainFeedCategory: CaseIterable {
     case best
     case hot

@@ -62,7 +62,9 @@ extension PostCellPresenter: PostCellPresenterProtocol {
                 } else {
                     self.shouldSetIcon(subredditIconURL: nil, subreddit: subreddit)
                 }
-            } catch { }
+            } catch {
+                self.shouldSetIcon(subredditIconURL: nil, subreddit: subreddit)
+            }
         }
     }
     

@@ -13,23 +13,21 @@ protocol MainScreenViewProtocol {
     func scrollCurrentViewControllerToTop()
 }
 
-struct MainScreenViewControllerValues {
-    static let segmentedControlSidesPadding: CGFloat = 8
-    static let pageViewControllerTopPadding: CGFloat = 8
-}
-
 final class MainScreenViewController: UIViewController {
-    typealias constants = MainScreenViewControllerValues
+    
     // MARK: UI Elements
+    private struct MainScreenViewControllerValues {
+        static let segmentedControlSidesPadding: CGFloat = 8
+        static let pageViewControllerTopPadding: CGFloat = 8
+    }
+    private typealias constants = MainScreenViewControllerValues
     
     // MARK: - Root view
-    
     private func configureRootView() {
         view.backgroundColor = Asset.Colors.innoBackgroundColor.color
     }
     
     // MARK: - Search bar
-    
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = MainScreenStrings.searchBarPlaceholder
@@ -48,7 +46,6 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - Segmented control
-    
     private lazy var segmentedControl: UISegmentedControl = {
         let segmentedControl = UISegmentedControl(items: [
             MainScreenStrings.bestTab,
@@ -80,7 +77,6 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - PageViewController
-    
     private lazy var pageViewController: UIPageViewController = {
         let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -106,7 +102,6 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - General view UI configuration
-    
     private func configureUI() {
         self.configureRootView()
         self.configureSearchBar()
@@ -115,7 +110,6 @@ final class MainScreenViewController: UIViewController {
     }
     
     // MARK: - Lifecycle methods
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()

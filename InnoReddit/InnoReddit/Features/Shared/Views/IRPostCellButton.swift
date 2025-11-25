@@ -7,7 +7,7 @@
 
 import UIKit
 
-class IRPostCellButton: UIButton {
+final class IRPostCellButton: UIButton {
     private let insetSize: CGFloat
     private let imagePadding: CGFloat
     private let imagePointSize: CGFloat

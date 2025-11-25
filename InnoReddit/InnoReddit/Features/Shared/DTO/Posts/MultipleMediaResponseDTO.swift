@@ -6,7 +6,7 @@
 //
 
 struct MultipleMediaResponseDTO: Decodable {
-    let e: String
+    let e: String?
     
     let m: String?
     let p: [MultipleImageSourceDTO]?
@@ -18,5 +18,5 @@ struct MultipleMediaResponseDTO: Decodable {
     let hlsUrl: String?
     let isGif: Bool?
     
-    let id: String
+    let id: String?
 }
