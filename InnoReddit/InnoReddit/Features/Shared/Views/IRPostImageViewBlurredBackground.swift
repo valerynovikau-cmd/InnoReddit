@@ -9,10 +9,17 @@ import UIKit
 
 final class IRPostImageViewBlurredBackground: UIImageView {
     
-    private let childImageView: UIImageView = {
+    private let shadowOpacity: Float = 0.5
+    private let shadowRadius: CGFloat = 10
+    
+    private lazy var childImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.layer.shadowColor = UIColor.darkGray.cgColor
+        imageView.layer.shadowOpacity = shadowOpacity
+        imageView.layer.shadowOffset = .zero
+        imageView.layer.shadowRadius = shadowRadius
         return imageView
     }()
     
