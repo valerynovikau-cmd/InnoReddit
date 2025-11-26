@@ -384,8 +384,9 @@ final class PostCell: UICollectionViewCell {
         self.configureSubredditImageView()
         self.configureTopInfoStackView()
         self.configureScoreLabel()
-        self.configureCommentStack()
         self.configurePostContentStackView()
+        
+        self.configureCommentStack()
         self.configureScoreButtonsStackView()
         self.configureBottomStacksStack()
         
@@ -432,10 +433,7 @@ final class PostCell: UICollectionViewCell {
         delegate?.willShowPostCell(viewController: imageViewController)
         
         postContentStackView.addArrangedSubview(imageViewController.view)
-        NSLayoutConstraint.activate([
-            imageViewController.view.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
-            imageViewController.view.heightAnchor.constraint(equalTo: imageViewController.view.widthAnchor)
-        ])
+        imageViewController.view.heightAnchor.constraint(equalTo: imageViewController.view.widthAnchor).isActive = true
     }
     
     private func setupMultipleImages(images: [PostImage]) {
@@ -457,10 +455,7 @@ final class PostCell: UICollectionViewCell {
         postImagesPageViewController.setViewControllers([firstVC], direction: .forward, animated: false)
         
         postContentStackView.addArrangedSubview(postImagesPageViewController.view)
-        NSLayoutConstraint.activate([
-            postImagesPageViewController.view.widthAnchor.constraint(equalToConstant: postContentStackView.frame.width),
-            postImagesPageViewController.view.heightAnchor.constraint(equalTo: postImagesPageViewController.view.widthAnchor)
-        ])
+        postImagesPageViewController.view.heightAnchor.constraint(equalTo: postImagesPageViewController.view.widthAnchor).isActive = true
     }
     
     private func setupBottomButtonsInfo() {
