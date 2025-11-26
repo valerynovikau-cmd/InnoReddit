@@ -18,6 +18,8 @@ protocol PostsPresenterProtocol: AnyObject {
     
     func didSelectPost(post: Post)
     
+    func updatePost(post: Post)
+    
     func performPostsRetrieval()
     func performPostsPaginatedRetrieval()
 }
@@ -45,6 +47,14 @@ extension PostsPresenter: PostsPresenterProtocol {
     
     func didSelectPost(post: Post) {
         self.router?.showPostDetails(post: post)
+    }
+    
+    func updatePost(post: Post) {
+        guard let index = self.posts.firstIndex(where: { oldPost in
+            oldPost.id == post.id
+        })
+        else { return }
+        self.posts[index] = post
     }
     
     func performPostsRetrieval() {

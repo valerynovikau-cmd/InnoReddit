@@ -25,7 +25,7 @@ enum APIError: Error {
             messageFirstPart = APIErrorStrings.invalidResponse
         case .networkError(let statusCode):
             messageFirstPart = APIErrorStrings.networkError + " \(statusCode)"
-        case .parsingError(let error):
+        case .parsingError:
             messageFirstPart = APIErrorStrings.parsingError
         case .storedCredentialsError:
             messageFirstPart = APIErrorStrings.storedCredentialsError

@@ -196,6 +196,10 @@ final class PostsViewController: IRBaseViewController {
         super.viewWillAppear(animated)
         if self.output?.posts.isEmpty ?? false {
             self.output?.performPostsRetrieval()
+        } else {
+            for cell in self.collectionView.visibleCells {
+                (cell as? PostCellProtocol)?.onCollectionRefreshed()
+            }
         }
     }
 }
@@ -217,7 +221,12 @@ extension PostsViewController: PostsViewProtocol {
         snapshot.appendSections([.main])
         snapshot.appendItems(postIDs, toSection: .main)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: true) { [weak self] in
+            guard let self else { return }
+            for cell in self.collectionView.visibleCells {
+                (cell as? PostCellProtocol)?.onCollectionRefreshed()
+            }
+        }
     }
     
     func onLoadingStarted() {
@@ -253,5 +262,9 @@ extension PostsViewController: PostCellImageCarouselDelegate {
     func willShowPostCell(viewController: UIViewController) {
         addChild(viewController)
         viewController.didMove(toParent: self)
+    }
+    
+    func updatedScoreAndCommentsCount(post: Post) {
+        self.output?.updatePost(post: post)
     }
 }

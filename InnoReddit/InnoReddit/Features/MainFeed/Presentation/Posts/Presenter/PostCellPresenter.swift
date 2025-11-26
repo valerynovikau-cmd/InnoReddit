@@ -21,6 +21,7 @@ protocol PostCellPresenterProtocol: AnyObject {
     func onSubredditTap()
     
     func retrieveSubredditIconURL()
+    func retrieveScoreAndCommentsCount()
 }
 
 final class PostCellPresenter {
@@ -63,6 +64,18 @@ extension PostCellPresenter: PostCellPresenterProtocol {
                 }
             } catch {
                 self.shouldSetIcon(subredditIconURL: nil, subreddit: subreddit)
+            }
+        }
+    }
+    
+    func retrieveScoreAndCommentsCount() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let (score, commentsCount) = try await self.networkService.getPostScoreAndCommentCount(postName: self.post.id)
+                self.post.commentsCount = commentsCount
+                self.post.score = score
+                self.input?.onScoreAndCommentsCountUpdated()
             }
         }
     }

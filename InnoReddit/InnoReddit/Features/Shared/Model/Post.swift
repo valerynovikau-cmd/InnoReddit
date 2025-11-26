@@ -15,17 +15,19 @@ struct Post: Identifiable {
     let title: String?
     let downs: Int
     let ups: Int
-    let score: Int
+    var score: Int
     let created: Date
     let images: [PostImage]?
     let subredditId: String
     let id: String
     let authorName: String?
-    let commentsCount: Int
+    var commentsCount: Int
 }
 
 extension Post: Hashable {
     static func == (lhs: Post, rhs: Post) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id &&
+        lhs.commentsCount == rhs.commentsCount &&
+        lhs.score == rhs.score
     }
 }

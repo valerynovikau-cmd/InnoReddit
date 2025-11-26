@@ -13,6 +13,9 @@ protocol PostCellProtocol: AnyObject {
     func configure()
     
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
+    func onCollectionRefreshed()
+    func onScoreAndCommentsCountUpdated()
+    
     func onPostTap()
     func onUpvoteTap()
     func onDownvoteTap()
@@ -23,6 +26,7 @@ protocol PostCellProtocol: AnyObject {
 
 protocol PostCellImageCarouselDelegate: AnyObject {
     func willShowPostCell(viewController: UIViewController)
+    func updatedScoreAndCommentsCount(post: Post)
 }
 
 final class PostCell: UICollectionViewCell {
@@ -174,19 +178,6 @@ final class PostCell: UICollectionViewCell {
         label.textAlignment = .natural
         return label
     }()
-    
-    // MARK: - Images VC's lifecycle
-    private func setupImagesViewController(viewController: UIViewController?) {
-        viewController?.view.translatesAutoresizingMaskIntoConstraints = false
-        viewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
-        viewController?.view.clipsToBounds = true
-    }
-    
-    private func tearDownImagesViewController(viewController: UIViewController?) {
-        viewController?.willMove(toParent: nil)
-        viewController?.view.removeFromSuperview()
-        viewController?.removeFromParent()
-    }
     
     // MARK: - (Single image) Post image view controller
     private var imageViewController: PostCellImageViewController?
@@ -485,6 +476,18 @@ final class PostCell: UICollectionViewCell {
         self.configureUI()
     }
     
+    private func setupImagesViewController(viewController: UIViewController?) {
+        viewController?.view.translatesAutoresizingMaskIntoConstraints = false
+        viewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
+        viewController?.view.clipsToBounds = true
+    }
+    
+    private func tearDownImagesViewController(viewController: UIViewController?) {
+        viewController?.willMove(toParent: nil)
+        viewController?.view.removeFromSuperview()
+        viewController?.removeFromParent()
+    }
+    
     private func releaseResources() {
         if postImagesPageViewController != nil {
             self.deinitializePostImagesPageViewController()
@@ -518,7 +521,6 @@ final class PostCell: UICollectionViewCell {
 }
 
 // MARK: - Page view controller data source
-
 extension PostCell: UIPageViewControllerDataSource {
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -540,7 +542,6 @@ extension PostCell: UIPageViewControllerDataSource {
 }
 
 // MARK: - Page view controller delegate for updating page control
-
 extension PostCell: UIPageViewControllerDelegate {
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -557,7 +558,6 @@ extension PostCell: UIPageViewControllerDelegate {
 }
 
 // MARK: - Post cell view protocol implementation
-
 extension PostCell: PostCellProtocol {
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool) {
         if let subredditIconURL, !subredditIconURL.isEmpty {
@@ -578,6 +578,16 @@ extension PostCell: PostCellProtocol {
                 }
             }
         }
+    }
+    
+    func onCollectionRefreshed() {
+        self.output?.retrieveScoreAndCommentsCount()
+    }
+    
+    func onScoreAndCommentsCountUpdated() {
+        self.setupBottomButtonsInfo()
+        guard let post = self.output?.post else { return }
+        self.delegate?.updatedScoreAndCommentsCount(post: post)
     }
     
     func onPostTap() {
@@ -611,5 +621,6 @@ extension PostCell: PostCellProtocol {
         self.setupBottomButtonsInfo()
         
         self.output?.retrieveSubredditIconURL()
+        self.output?.retrieveScoreAndCommentsCount()
     }
 }
