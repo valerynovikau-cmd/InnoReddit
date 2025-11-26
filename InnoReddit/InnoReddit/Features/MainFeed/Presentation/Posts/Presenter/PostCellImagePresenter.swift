@@ -27,9 +27,11 @@ final class PostCellImagePresenter {
 extension PostCellImagePresenter: PostCellImagePresenterProtocol {
     func retrieveImage(blurRadius: CGFloat) {
         guard !didRetrieveImage else { return }
-        Task {
+        Task { [weak self] in
             do {
-                guard let url = postImage.previewUrl ?? postImage.fullUrl else { return }
+                guard let self,
+                      let url = postImage.previewUrl ?? postImage.fullUrl
+                else { return }
                 let blurImageProcessor = BlurImageProcessor(blurRadius: blurRadius)
                 let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
                     with: URL(string: url)!,
