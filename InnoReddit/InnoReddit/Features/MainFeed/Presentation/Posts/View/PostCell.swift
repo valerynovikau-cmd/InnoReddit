@@ -192,6 +192,7 @@ final class PostCell: UICollectionViewCell {
     private var imageViewController: PostCellImageViewController?
     
     private func initializePostImageViewController(image: PostImage) {
+        guard imageViewController == nil else { return }
         imageViewController = PostCellImageViewController()
         let output = PostCellImagePresenter(postImage: image)
         imageViewController?.output = output
@@ -209,6 +210,7 @@ final class PostCell: UICollectionViewCell {
     private var imageControllers: [PostCellImageViewController] = []
     
     private func initializePostImagesPageViewController() {
+        guard postImagesPageViewController == nil else { return }
         postImagesPageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         self.setupImagesViewController(viewController: postImagesPageViewController)
         postImagesPageViewController?.dataSource = self
@@ -219,8 +221,8 @@ final class PostCell: UICollectionViewCell {
         postImagesPageViewController?.dataSource = nil
         postImagesPageViewController?.delegate = nil
         self.tearDownImagesViewController(viewController: postImagesPageViewController)
-        postImagesPageViewController = nil
         imageControllers.removeAll()
+        postImagesPageViewController = nil
     }
     
     // MARK: - Page control
@@ -483,6 +485,17 @@ final class PostCell: UICollectionViewCell {
         self.configureUI()
     }
     
+    private func releaseResources() {
+        if postImagesPageViewController != nil {
+            self.deinitializePostImagesPageViewController()
+            self.deinitializePageControl()
+        }
+        
+        if imageViewController != nil {
+            self.deinitializePostImageViewController()
+        }
+    }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         subredditImageView.image = nil
@@ -492,17 +505,11 @@ final class PostCell: UICollectionViewCell {
             postContentStackView.removeArrangedSubview(view)
             view.removeFromSuperview()
         }
-        
-        self.delegate = nil
-        
-        if postImagesPageViewController != nil {
-            self.deinitializePostImagesPageViewController()
-            self.deinitializePageControl()
-        }
-        
-        if imageViewController != nil {
-            self.deinitializePostImageViewController()
-        }
+        self.releaseResources()
+    }
+    
+    @MainActor deinit {
+        self.releaseResources()
     }
     
     required init?(coder: NSCoder) {
