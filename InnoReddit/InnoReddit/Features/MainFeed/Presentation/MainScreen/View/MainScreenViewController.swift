@@ -174,3 +174,8 @@ extension MainScreenViewController: UIPageViewControllerDataSource, UIPageViewCo
     }
 }
 
+extension MainScreenViewController: PostsSearchBarDelegateProtocol {
+    func willResignSearchBar() {
+        searchBar.resignFirstResponder()
+    }
+}

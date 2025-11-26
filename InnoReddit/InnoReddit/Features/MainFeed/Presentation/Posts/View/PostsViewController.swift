@@ -9,6 +9,7 @@ import UIKit
 
 protocol PostsViewProtocol: AnyObject {
     var output: PostsPresenterProtocol? { get set }
+    
     func onPostsUpdated()
     func onLoadingStarted()
     func onLoadingFinished()
@@ -18,9 +19,14 @@ protocol PostsViewProtocol: AnyObject {
     func showAlert(title: String?, message: String?)
 }
 
+protocol PostsSearchBarDelegateProtocol: AnyObject {
+    func willResignSearchBar()
+}
+
 final class PostsViewController: IRBaseViewController {
     
     var output: PostsPresenterProtocol?
+    weak var delegate: PostsSearchBarDelegateProtocol?
     private var dataSource: UICollectionViewDiffableDataSource<Section, Post.ID>!
     
     // MARK: UI Elemenets
@@ -255,6 +261,10 @@ extension PostsViewController: UICollectionViewDelegate {
         else { return }
         
         self.output?.performPostsPaginatedRetrieval()
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.delegate?.willResignSearchBar()
     }
 }
 

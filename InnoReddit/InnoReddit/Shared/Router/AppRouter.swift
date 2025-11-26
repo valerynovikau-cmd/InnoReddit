@@ -64,9 +64,13 @@ extension AppRouter: AppRouterProtocol {
             let controllersWithCategoriesStrings: [(UIViewController, String)] = MainFeedCategory.allCases.compactMap {
                 let view = Container.shared.postsView.resolve()
                 let presenter = Container.shared.postsPresenter.resolve($0)
+                
                 view.output = presenter
                 presenter.input = view
                 presenter.router = mainScreenRouter
+                
+                (view as? PostsViewController)?.delegate = (mainScreenView as? PostsSearchBarDelegateProtocol)
+                
                 guard let vc = (view as? UIViewController) else {
                     return nil
                 }
