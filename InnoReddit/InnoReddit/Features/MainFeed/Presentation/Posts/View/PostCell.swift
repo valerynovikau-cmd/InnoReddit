@@ -37,7 +37,6 @@ final class PostCell: UICollectionViewCell {
     // MARK: UI elements
     private struct PostCellValues {
         static let outerCornerRadius: CGFloat = 10
-        static let previewImageCornerRadius: CGFloat = 5
 
         static let subredditImageSize: CGFloat = 24
         static let subredditLabelNumberOfLines: Int = 1
@@ -63,8 +62,6 @@ final class PostCell: UICollectionViewCell {
         static let bottomLabelsFontSize: CGFloat = 16
         
         static let fadeInAnimationDuration: TimeInterval = 0.1
-        
-        static let pageControlPadding: CGFloat = 8
     }
     
     private enum PostCellButtonType: String {
@@ -179,69 +176,8 @@ final class PostCell: UICollectionViewCell {
         return label
     }()
     
-    // MARK: - (Single image) Post image view controller
-    private var imageViewController: PostCellImageViewController?
-    
-    private func initializePostImageViewController(image: PostImage) {
-        guard imageViewController == nil else { return }
-        imageViewController = PostCellImageViewController()
-        let output = PostCellImagePresenter(postImage: image)
-        imageViewController?.output = output
-        output.input = imageViewController
-        self.setupImagesViewController(viewController: imageViewController)
-    }
-    
-    private func deinitializePostImageViewController() {
-        self.tearDownImagesViewController(viewController: imageViewController)
-        imageViewController = nil
-    }
-    
-    // MARK: - (Multiple images) Post images page view controller
-    private var postImagesPageViewController: UIPageViewController?
-    private var imageControllers: [PostCellImageViewController] = []
-    
-    private func initializePostImagesPageViewController() {
-        guard postImagesPageViewController == nil else { return }
-        postImagesPageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
-        self.setupImagesViewController(viewController: postImagesPageViewController)
-        postImagesPageViewController?.dataSource = self
-        postImagesPageViewController?.delegate = self
-    }
-    
-    private func deinitializePostImagesPageViewController() {
-        postImagesPageViewController?.dataSource = nil
-        postImagesPageViewController?.delegate = nil
-        self.tearDownImagesViewController(viewController: postImagesPageViewController)
-        imageControllers.removeAll()
-        postImagesPageViewController = nil
-    }
-    
-    // MARK: - Page control
-    private var pageControl: UIPageControl?
-    
-    private func initializePageControl() {
-        pageControl = UIPageControl()
-        guard let pageControl,
-              imageControllers.count > 0
-        else { return }
-        
-        pageControl.currentPage = 0
-        pageControl.hidesForSinglePage = true
-        pageControl.isUserInteractionEnabled = false
-        pageControl.translatesAutoresizingMaskIntoConstraints = false
-        pageControl.numberOfPages = imageControllers.count
-        
-        contentView.addSubview(pageControl)
-        NSLayoutConstraint.activate([
-            pageControl.centerXAnchor.constraint(equalTo: postContentStackView.centerXAnchor),
-            pageControl.bottomAnchor.constraint(equalTo: postContentStackView.bottomAnchor, constant: -constants.pageControlPadding)
-        ])
-    }
-    
-    private func deinitializePageControl() {
-        pageControl?.removeFromSuperview()
-        pageControl = nil
-    }
+    // MARK: - Post image view
+    private var postImageView: PostCellImageView?
     
     // MARK: - Post content stack view
     private let postContentStackView: UIStackView = {
@@ -418,44 +354,15 @@ final class PostCell: UICollectionViewCell {
               images.count > 0
         else { return }
         
-        if images.count == 1 {
-            guard let image = images.first else { return }
-            self.setupSingleImage(image: image)
-        } else {
-            self.setupMultipleImages(images: images)
-        }
-    }
-    
-    private func setupSingleImage(image: PostImage) {
-        self.initializePostImageViewController(image: image)
-        guard let imageViewController else { return }
+        postImageView = PostCellImageView()
+        guard let postImageView else { return }
         
-        delegate?.willShowPostCell(viewController: imageViewController)
+        postImageView.delegate = self.delegate
+        postImageView.setup(images: images)
         
-        postContentStackView.addArrangedSubview(imageViewController.view)
-        imageViewController.view.heightAnchor.constraint(equalTo: imageViewController.view.widthAnchor).isActive = true
-    }
-    
-    private func setupMultipleImages(images: [PostImage]) {
-        imageControllers = images.map({ image in
-            let vc = PostCellImageViewController()
-            let output = PostCellImagePresenter(postImage: image)
-            vc.output = output
-            output.input = vc
-            return vc
-        })
-        guard let firstVC = imageControllers.first else { return }
+        postImageView.heightAnchor.constraint(equalTo: postImageView.widthAnchor).isActive = true
         
-        self.initializePostImagesPageViewController()
-        
-        guard let postImagesPageViewController else { return }
-        delegate?.willShowPostCell(viewController: postImagesPageViewController)
-        
-        self.initializePageControl()
-        postImagesPageViewController.setViewControllers([firstVC], direction: .forward, animated: false)
-        
-        postContentStackView.addArrangedSubview(postImagesPageViewController.view)
-        postImagesPageViewController.view.heightAnchor.constraint(equalTo: postImagesPageViewController.view.widthAnchor).isActive = true
+        postContentStackView.addArrangedSubview(postImageView)
     }
     
     private func setupBottomButtonsInfo() {
@@ -471,29 +378,6 @@ final class PostCell: UICollectionViewCell {
         self.configureUI()
     }
     
-    private func setupImagesViewController(viewController: UIViewController?) {
-        viewController?.view.translatesAutoresizingMaskIntoConstraints = false
-        viewController?.view.layer.cornerRadius = constants.previewImageCornerRadius
-        viewController?.view.clipsToBounds = true
-    }
-    
-    private func tearDownImagesViewController(viewController: UIViewController?) {
-        viewController?.willMove(toParent: nil)
-        viewController?.view.removeFromSuperview()
-        viewController?.removeFromParent()
-    }
-    
-    private func releaseResources() {
-        if postImagesPageViewController != nil {
-            self.deinitializePostImagesPageViewController()
-            self.deinitializePageControl()
-        }
-        
-        if imageViewController != nil {
-            self.deinitializePostImageViewController()
-        }
-    }
-    
     override func prepareForReuse() {
         super.prepareForReuse()
         subredditImageView.image = nil
@@ -503,52 +387,15 @@ final class PostCell: UICollectionViewCell {
             postContentStackView.removeArrangedSubview(view)
             view.removeFromSuperview()
         }
-        self.releaseResources()
+        postImageView = nil
     }
     
     @MainActor deinit {
-        self.releaseResources()
+        postImageView = nil
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-// MARK: - Page view controller data source
-extension PostCell: UIPageViewControllerDataSource {
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerBefore viewController: UIViewController
-    ) -> UIViewController? {
-        guard let vc = viewController as? PostCellImageViewController else { return nil }
-        guard let index = imageControllers.firstIndex(of: vc), index > 0 else { return nil }
-        return imageControllers[index - 1]
-    }
-    
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerAfter viewController: UIViewController
-    ) -> UIViewController? {
-        guard let vc = viewController as? PostCellImageViewController else { return nil }
-        guard let index = imageControllers.firstIndex(of: vc), index < imageControllers.count - 1 else { return nil }
-        return imageControllers[index + 1]
-    }
-}
-
-// MARK: - Page view controller delegate for updating page control
-extension PostCell: UIPageViewControllerDelegate {
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        didFinishAnimating finished: Bool,
-        previousViewControllers: [UIViewController],
-        transitionCompleted completed: Bool
-    ) {
-        guard completed,
-              let visibleVC = pageViewController.viewControllers?.first as? PostCellImageViewController,
-              let index = imageControllers.firstIndex(of: visibleVC) else { return }
-        
-        pageControl?.currentPage = index
     }
 }
 
