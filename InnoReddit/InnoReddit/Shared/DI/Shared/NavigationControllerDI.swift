@@ -15,9 +15,9 @@ extension Container {
         }.singleton
     }
     
-    var mainFeedNavigationController: ParameterFactory<UIViewController, UINavigationController> {
-        self { @MainActor vc in
-            IRNavigationController(rootViewController: vc)
+    var mainFeedNavigationController: Factory<UINavigationController> {
+        self { @MainActor in
+            IRNavigationController()
         }.singleton
     }
 }

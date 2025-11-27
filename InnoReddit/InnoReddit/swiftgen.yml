@@ -6,6 +6,27 @@ strings:
       output: Features/Authentication/Presentation/Resources/LocalizableStrings/AuthenticationLocalizableStrings+Generated.swift
       params:
         enumName: AuthenticationLocalizableStrings
+  - inputs:
+      - Features/TabBar/Resources/LocalizableStrings/en.lproj/TabBarLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/TabBar/Resources/LocalizableStrings/TabBarLocalizableStrings+Generated.swift
+      params:
+        enumName: TabBarLocalizableStrings
+  - inputs:
+      - Features/MainFeed/Presentation/Resources/LozalizableStrings/en.lproj/MainScreenLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/MainFeed/Presentation/Resources/LozalizableStrings/MainScreenLocalizableStrings+Generated.swift
+      params:
+        enumName: MainScreenStrings
+  - inputs:
+      - Shared/APIClient/LocalizableStrings/en.lproj/APIErrorLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Shared/APIClient/LocalizableStrings/APIErrorLocalizableStrings+Generated.swift
+      params:
+        enumName: APIErrorStrings
 
 xcassets:
   inputs:

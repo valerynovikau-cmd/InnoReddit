@@ -1,0 +1,20 @@
+/* 
+  TabBarLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 11.11.25.
+  
+*/
+
+"mainFeedTabBarTitle" = "Main";
+"createPostTabBarTitle" = "Create";
+"settingsTabBarTitle" = "Settings";
+
+"mainFeedSFSymbolName" = "house";
+"mainFeedSFSymbolNameSelected" = "house.fill";
+
+"createPostSFSymbolName" = "plus.circle";
+"createPostSFSymbolNameSelected" = "plus.circle.fill";
+
+"settingsSFSymbolName" = "gear";
+"settingsSFSymbolNameSelected" = "gear";

@@ -1,0 +1,19 @@
+/* 
+  APIErrorLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 25.11.25.
+  
+*/
+
+"errorTitle" = "Ошибка";
+
+"networkError" = "Ошибка сети. Код ошибки:";
+"APIErrorMessage" = "Ошибка сервера:";
+"invalidResponse" = "Некорректный ответ сервера.";
+"invalidRequest" = "Некорректный запрос.";
+"storedCredentialsError" = "Ошибка сохраненных реквизитов.";
+"parsingError" = "Ошибка конвертации данных сервера.";
+"unknown" = "Неизвестная ошибка.";
+
+"tryAgainText" = "Пожалуйста, попробуйте снова";

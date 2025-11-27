@@ -8,6 +8,12 @@
 import Foundation
 import Factory
 
+protocol AuthenticationViewPresenterProtocol: AnyObject {
+    var input: AuthenticationViewProtocol? { get set }
+    func didTapAuthenticateWithReddit()
+    func goToMainFlowIfAuthenticated()
+}
+
 final class AuthenticationPresenter {
     weak var input: AuthenticationViewProtocol?
     private var router: AppRouterProtocol {
