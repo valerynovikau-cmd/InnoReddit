@@ -268,7 +268,7 @@ extension PostsViewController: UICollectionViewDelegate {
     }
 }
 
-extension PostsViewController: PostCellImageCarouselDelegate {
+extension PostsViewController: PostCellDelegate {
     func willShowPostCell(viewController: UIViewController) {
         addChild(viewController)
         viewController.didMove(toParent: self)

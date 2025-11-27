@@ -24,7 +24,7 @@ protocol PostCellProtocol: AnyObject {
     func onSubredditTap()
 }
 
-protocol PostCellImageCarouselDelegate: AnyObject {
+protocol PostCellDelegate: AnyObject {
     func willShowPostCell(viewController: UIViewController)
     func updatedScoreAndCommentsCount(post: Post)
 }
@@ -32,7 +32,7 @@ protocol PostCellImageCarouselDelegate: AnyObject {
 final class PostCell: UICollectionViewCell {
     static let reuseIdentifier = "PostCell"
     var output: PostCellPresenterProtocol?
-    weak var delegate: PostCellImageCarouselDelegate?
+    weak var delegate: PostCellDelegate?
     
     // MARK: UI elements
     private struct PostCellValues {
