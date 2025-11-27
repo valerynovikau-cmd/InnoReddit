@@ -463,6 +463,5 @@ extension PostCell: PostCellProtocol {
         self.setupBottomButtonsInfo()
         
         self.output?.retrieveSubredditIconURL()
-        self.output?.retrieveScoreAndCommentsCount()
     }
 }
