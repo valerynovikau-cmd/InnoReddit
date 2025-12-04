@@ -6,7 +6,13 @@
 //
 
 import UIKit
-import SwiftUI
+
+protocol AuthenticationViewProtocol: AnyObject {
+    var output: AuthenticationViewPresenterProtocol? { get set }
+    func showAlert(title: String, message: String)
+    func disableLoginButton()
+    func enableLoginButton()
+}
 
 class AuthenticationViewController: IRBaseViewController {
     
@@ -264,18 +270,10 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
     }
     
     func showAlert(title: String, message: String) {
-        self.presentAlertController(title: title, message: message, buttonTitle: "OK")
+        self.presentAlertController(title: title, message: message)
     }
 }
 
 extension AuthenticationViewController: NavigationBarDisplayable {
     var prefersNavigationBarHidden: Bool { true }
-}
-
-#Preview {
-    ViewControllerPreview {
-        let view = AuthenticationViewController()
-        return view
-    }
-    .ignoresSafeArea()
 }

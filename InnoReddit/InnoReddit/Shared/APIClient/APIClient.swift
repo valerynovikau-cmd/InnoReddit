@@ -7,25 +7,16 @@
 
 import Foundation
 
-enum APIError: Error {
-    case networkError(statusCode: Int)
-    case APIErrorMessage(message: String)
-    case invalidResponse
-    case invalidRequest
-    case parsingError(Error)
-    case unknown
-}
-
 protocol APIClient: AnyObject {
     var baseURL: URL { get }
     
-    func send(request: URLRequest) async throws -> APIResponse
+    func send(request: URLRequest) async throws(APIError) -> APIResponse
     
-    func onTokenRefreshed(response: TokenRetrievalDTO) throws
+    func onTokenRefreshed(response: TokenRetrievalDTO) throws(APIError)
     
-    func defaultHeaders(additionalHeaders: [String: String]) throws -> [String: String]
+    func defaultHeaders(additionalHeaders: [String: String]) throws(APIError) -> [String: String]
     
-    func getRefreshToken() throws -> String
+    func getRefreshToken() throws(APIError) -> String
 }
 
 extension APIClient {
@@ -33,8 +24,10 @@ extension APIClient {
         path: String,
         httpMethod: HTTPMethod,
         queryParams: [String: String]? = nil,
-        body: Encodable? = nil,
-        additionalHeaders: [String: String] = [:]
+        jsonBody: Encodable? = nil,
+        urlEncodedBody: [String: String]? = nil,
+        additionalHeaders: [String: String] = [:],
+        differentBaseURL: URL? = nil
     ) async throws(APIError) -> T {
         
         var response: APIResponse?
@@ -44,8 +37,10 @@ extension APIClient {
                 path: path,
                 method: httpMethod,
                 queryParams: queryParams,
-                body: body,
-                additionalHeaders: additionalHeaders
+                jsonBody: jsonBody,
+                urlEncodedBody: urlEncodedBody,
+                additionalHeaders: additionalHeaders,
+                differentBaseURL: differentBaseURL
             )
             
             response = try? await self.send(request: request)
@@ -97,14 +92,31 @@ extension APIClient {
     }
     
     private func buildRefreshTokenRequest(refreshToken: String) throws(APIError) -> URLRequest {
+        let baseURL = URL(string: "https://www.reddit.com")!
         let path = "/api/v1/access_token"
-        let body = RefreshTokenDTO(grantType: "refresh_token", refreshToken: refreshToken)
+        
+        let body: [String: String] = [
+            "grant_type": "refresh_token",
+            "refresh_token": refreshToken
+        ]
+        guard let clientId = Bundle.main.infoDictionary?["ClientID"] as? String else {
+            throw APIError.invalidRequest
+        }
+        
+        let credentials = "\(clientId):"
+        let encoded = Data(credentials.utf8).base64EncodedString()
+        
+        let additionalHeaders: [String:String] = [
+            "Authorization": "Basic \(encoded)",
+            "Content-Type": "application/x-www-form-urlencoded"
+        ]
         return try self.buildRequest(
             path: path,
             method: HTTPMethod.POST,
             queryParams: nil,
-            body: body,
-            additionalHeaders: [:]
+            urlEncodedBody: body,
+            additionalHeaders: additionalHeaders,
+            differentBaseURL: baseURL
         )
     }
     
@@ -112,21 +124,39 @@ extension APIClient {
         path: String,
         method: HTTPMethod,
         queryParams: [String: String]? = nil,
-        body: Encodable? = nil,
-        additionalHeaders: [String: String] = [:]
+        jsonBody: Encodable? = nil,
+        urlEncodedBody: [String: String]? = nil,
+        additionalHeaders: [String: String] = [:],
+        differentBaseURL: URL? = nil
     ) throws(APIError) -> URLRequest {
+        guard (urlEncodedBody == nil && jsonBody == nil) ||
+              (urlEncodedBody == nil && jsonBody != nil) ||
+              (urlEncodedBody != nil && jsonBody == nil)
+        else {
+            throw APIError.invalidRequest
+        }
+        
+        var url: URL!
+        if let differentBaseURL {
+            url = differentBaseURL.appendingPathComponent(path)
+        } else {
+            url = self.baseURL.appendingPathComponent(path)
+        }
+        
         guard var urlComponents = URLComponents(
-            url: baseURL.appendingPathComponent(path),
+            url: url,
             resolvingAgainstBaseURL: false
         ) else {
             throw APIError.invalidRequest
         }
+        
         if let queryParams = queryParams {
             urlComponents.queryItems = queryParams.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
         guard let url = urlComponents.url else {
             throw APIError.invalidRequest
         }
+        
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         
@@ -137,16 +167,21 @@ extension APIClient {
             throw APIError.invalidRequest
         }
         request.allHTTPHeaderFields = headers
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let body {
-            let encodedBody: Data
-            do {
-                encodedBody = try JSONEncoder().encode(body)
-            } catch {
-                throw APIError.parsingError(error)
-            }
-            request.httpBody = encodedBody
+        if request.value(forHTTPHeaderField: "Content-Type") == nil {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
+        
+        if let jsonBody {
+            let encoder = JSONEncoder()
+            encoder.keyEncodingStrategy = .convertToSnakeCase
+            request.httpBody = try? encoder.encode(jsonBody)
+        }
+        if let urlEncodedBody {
+            var components = URLComponents()
+            components.queryItems = urlEncodedBody.map { URLQueryItem(name: $0.key, value: $0.value) }
+            request.httpBody = components.query?.data(using: .utf8)
+        }
+        
         return request
     }
     

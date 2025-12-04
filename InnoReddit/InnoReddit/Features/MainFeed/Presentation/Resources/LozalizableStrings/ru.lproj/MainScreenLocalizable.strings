@@ -1,0 +1,17 @@
+/* 
+  MainScreenLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 14.11.25.
+  
+*/
+
+"bestTab" = "Лучшее";
+"hotTab" = "Горячее";
+"newTab" = "Новое";
+"topTab" = "Топ";
+"risingTab" = "В тренде";
+
+"searchBarPlaceholder" = "Поиск";
+
+"deletedSubreddit" = "[deleted]";

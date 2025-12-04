@@ -9,12 +9,6 @@ import Factory
 import UIKit
 
 extension Container {
-    var authenticationRouter: Factory<AuthenticationRouterProtocol> {
-        self { @MainActor in
-            AuthenticationRouter(navigationController: self.rootNavigationController())
-        }
-    }
-    
     var webAuthSessionService: Factory<ASWebAuthSessionServiceProtocol> {
         self { @MainActor in
             ASWebAuthSessionService()

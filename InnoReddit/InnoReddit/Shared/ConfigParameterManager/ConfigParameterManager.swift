@@ -11,6 +11,8 @@ struct ConfigParameterManager {
     
     static let clientID: String? = Bundle.main.infoDictionary?["ClientID"] as? String
     
+    static let userAgent: String? = Bundle.main.infoDictionary?["User-Agent"] as? String
+    
     static var callbackScheme: String? {
         let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]]
         let urlSchemes = urlTypes?.first?["CFBundleURLSchemes"] as? [String]
