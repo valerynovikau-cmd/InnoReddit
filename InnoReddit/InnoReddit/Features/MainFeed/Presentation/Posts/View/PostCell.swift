@@ -433,7 +433,7 @@ extension PostCell: PostCellProtocol {
     }
     
     func onPostTap() {
-        
+        self.output?.onPostTap()
     }
     
     func onUpvoteTap() {

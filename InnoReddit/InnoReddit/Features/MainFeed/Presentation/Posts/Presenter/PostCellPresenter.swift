@@ -86,7 +86,7 @@ extension PostCellPresenter: PostCellPresenterProtocol {
     }
     
     func onPostTap() {
-        
+        self.router?.showPostDetails(post: post)
     }
     
     func onUpvoteTap() {

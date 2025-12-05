@@ -154,6 +154,7 @@ final class PostsViewController: IRBaseViewController {
                let post = output.posts.first(where: { $0.id == postIdentifier })
             {
                 let cellOutput = PostCellPresenter(post: post)
+                cellOutput.router = self.output?.router
                 cell.delegate = self
                 cell.output = cellOutput
                 cellOutput.input = cell

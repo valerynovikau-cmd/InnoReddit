@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Factory
 
 protocol MainScreenRouterProtocol: AnyObject {
@@ -18,6 +19,7 @@ final class MainScreenRouter: RouterProtocol {
 
 extension MainScreenRouter: MainScreenRouterProtocol {
     func showPostDetails(post: Post) {
-        
+        let hostingVC = UIHostingController(rootView: PostDetailsView())
+        navigationController.pushViewController(hostingVC, animated: true)
     }
 }
