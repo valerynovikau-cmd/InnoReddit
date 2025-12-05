@@ -30,18 +30,19 @@ extension PostCellImagePresenter: PostCellImagePresenterProtocol {
         Task { [weak self] in
             do {
                 guard let self,
-                      let url = postImage.previewUrl ?? postImage.fullUrl
+                      let urlString = postImage.previewUrl ?? postImage.fullUrl,
+                      let url = URL(string: urlString)
                 else { return }
                 let blurImageProcessor = BlurImageProcessor(blurRadius: blurRadius)
                 let imageBlurredResult = try await KingfisherManager.shared.retrieveImage(
-                    with: URL(string: url)!,
+                    with: url,
                     options: [
                         .processor(blurImageProcessor)
                     ]
                 )
                 
                 let imageResult = try await KingfisherManager.shared.retrieveImage(
-                    with: URL(string: url)!
+                    with: url
                 )
                 didRetrieveImage = true
                 input?.onImageRetrieved(image: imageResult.image, blurredImage: imageBlurredResult.image)
