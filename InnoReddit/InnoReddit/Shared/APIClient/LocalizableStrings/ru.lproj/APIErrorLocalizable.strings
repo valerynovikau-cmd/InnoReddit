@@ -15,5 +15,6 @@
 "storedCredentialsError" = "Ошибка сохраненных реквизитов.";
 "parsingError" = "Ошибка конвертации данных сервера.";
 "unknown" = "Неизвестная ошибка.";
+"localTokenError" = "Ошибка в обработке refresh_token";
 
 "tryAgainText" = "Пожалуйста, попробуйте снова";
