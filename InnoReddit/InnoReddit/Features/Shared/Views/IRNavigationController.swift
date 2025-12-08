@@ -11,6 +11,7 @@ class IRNavigationController: UINavigationController {
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
+        navigationBar.tintColor = Asset.Colors.innoOrangeColor.color
     }
 }
 
