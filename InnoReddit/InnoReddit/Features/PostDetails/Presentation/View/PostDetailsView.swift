@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct PostDetailsView: View {
     
@@ -38,11 +39,23 @@ struct PostDetailsView: View {
                 
                 // MARK: - Header info(subreddit, author, post date)
                 HStack {
-                    Image(asset: Asset.Assets.Images.defaultSubredditAvatar)
-                        .resizable()
-                        .background(Asset.Assets.Colors.innoSecondaryBackgroundColor.swiftUIColor)
-                        .clipShape(.circle)
-                        .frame(width: imageSize, height: imageSize)
+                    ZStack {
+                        Asset.Assets.Colors.innoSecondaryBackgroundColor.swiftUIColor
+                        
+                        if let icon = self.store.iconToShow {
+                            switch icon {
+                            case .defaultIcon:
+                                Image(asset: Asset.Assets.Images.defaultSubredditAvatar)
+                                    .resizable()
+                                    
+                            case .nonDefaultIcon(let url):
+                                KFImage(URL(string: url))
+                                    .resizable()
+                            }
+                        }
+                    }
+                    .clipShape(.circle)
+                    .frame(width: imageSize, height: imageSize)
                     
                     VStack(alignment: .leading, spacing: headerLabelsVStackSpacing) {
                         Text("r/\(self.store.subredditName ?? PostDetailsStrings.deletedSubreddit)")
@@ -135,5 +148,8 @@ struct PostDetailsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Asset.Assets.Colors.innoBackgroundColor.swiftUIColor)
+        .onAppear {
+            self.output?.retrieveSubbreditImage()
+        }
     }
 }

@@ -26,4 +26,10 @@ extension Container {
             return PostDetailsView(store: store)
         }
     }
+    
+    var postDetailsNetworkService: Factory<PostDetailsNetworkServiceProtocol> {
+        self { @MainActor in
+            return PostDetailsNetworkService()
+        }
+    }
 }

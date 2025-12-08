@@ -7,10 +7,11 @@
 
 import Combine
 import Foundation
+import SwiftUI
 
 protocol PostDetailsStoreProtocol: AnyObject {
     func configure(post: Post)
-    func onSubredditIconUpdated()
+    func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool)
     func onBookmarkTap()
     func onUpvoteTap()
     func onDownvoteTap()
@@ -30,6 +31,12 @@ final class PostDetailsStore: ObservableObject {
     @Published var subredditName: String?
     @Published var authorName: String?
     @Published var score: String = ""
+
+    enum SubredditIconToShow {
+        case defaultIcon
+        case nonDefaultIcon(String)
+    }
+    @Published var iconToShow: SubredditIconToShow?
 }
 
 extension PostDetailsStore: PostDetailsStoreProtocol {
@@ -42,8 +49,21 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         self.authorName = post.authorName
     }
     
-    func onSubredditIconUpdated() {
+    func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool) {
+        var iconToShow: SubredditIconToShow
+        if let iconURL, !iconURL.isEmpty {
+            iconToShow = .nonDefaultIcon(iconURL)
+        } else {
+            iconToShow = .defaultIcon
+        }
         
+        if shouldAnimate {
+            withAnimation {
+                self.iconToShow = iconToShow
+            }
+        } else {
+            self.iconToShow = iconToShow
+        }
     }
     
     func onBookmarkTap() {
