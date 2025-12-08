@@ -48,8 +48,8 @@ class AuthenticationViewController: IRBaseViewController {
     private lazy var gradient: CAGradientLayer = {
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
-        let startColor = Asset.Colors.innoOrangeColor.color.cgColor
-        let endColor = Asset.Colors.innoRedColor.color.cgColor
+        let startColor = Asset.Assets.Colors.innoOrangeColor.color.cgColor
+        let endColor = Asset.Assets.Colors.innoRedColor.color.cgColor
         gradient.colors = [startColor, endColor]
         gradient.startPoint = CGPoint(x: 0.5, y: 0)
         gradient.endPoint = CGPoint(x: 1.5, y: 1)
@@ -66,9 +66,9 @@ class AuthenticationViewController: IRBaseViewController {
     
     private lazy var containerView: UIView = {
         let view = IRDynamicBorderedView()
-        view.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        view.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
         view.layer.cornerRadius = constants.containerViewCornerRadius
-        view.dynamicBorderColor = Asset.Colors.innoSecondaryBackgroundColor.color
+        view.dynamicBorderColor = Asset.Assets.Colors.innoSecondaryBackgroundColor.color
         view.layer.borderWidth = constants.containerViewBorderWidth
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -88,10 +88,10 @@ class AuthenticationViewController: IRBaseViewController {
     
     private lazy var redditImageContainerView: UIView = {
         let view = IRDynamicBorderedView()
-        view.backgroundColor = Asset.Colors.innoOrangeColor.color
+        view.backgroundColor = Asset.Assets.Colors.innoOrangeColor.color
         view.layer.cornerRadius = constants.redditImageContainerCornerRadius
         view.clipsToBounds = true
-        view.dynamicBorderColor = Asset.Colors.innoSecondaryBackgroundColor.color
+        view.dynamicBorderColor = Asset.Assets.Colors.innoSecondaryBackgroundColor.color
         view.layer.borderWidth = constants.redditImageContainerBorderWidth
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -111,7 +111,7 @@ class AuthenticationViewController: IRBaseViewController {
     
     private lazy var redditImageView: UIImageView = {
         let view = UIImageView()
-        view.image = Asset.Images.redditIcon.image
+        view.image = Asset.Assets.Images.redditIcon.image
         view.layer.cornerRadius = constants.redditImageContainerCornerRadius
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -180,7 +180,7 @@ class AuthenticationViewController: IRBaseViewController {
         let title = AuthenticationLocalizableStrings.logInWithRedditButtonText
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: constants.loginButtonLabelFontSize, weight: .bold)
-        button.backgroundColor = Asset.Colors.innoOrangeColor.color
+        button.backgroundColor = Asset.Assets.Colors.innoOrangeColor.color
         button.tintColor = .white
         button.layer.cornerRadius = constants.loginButtonCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false

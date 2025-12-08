@@ -38,9 +38,9 @@ struct PostDetailsView: View {
                 
                 // MARK: - Header info(subreddit, author, post date)
                 HStack {
-                    Image(asset: Asset.Images.defaultSubredditAvatar)
+                    Image(asset: Asset.Assets.Images.defaultSubredditAvatar)
                         .resizable()
-                        .background(Asset.Colors.innoSecondaryBackgroundColor.swiftUIColor)
+                        .background(Asset.Assets.Colors.innoSecondaryBackgroundColor.swiftUIColor)
                         .clipShape(.circle)
                         .frame(width: imageSize, height: imageSize)
                     
@@ -90,10 +90,10 @@ struct PostDetailsView: View {
                 }
                 
                 TabView {
-                    PostImageView(asset: Asset.Images.test1)
-                    PostImageView(asset: Asset.Images.test2)
-                    PostImageView(asset: Asset.Images.test3)
-                    PostImageView(asset: Asset.Images.test4)
+                    PostImageView(asset: Asset.TestAssets.Images.test1)
+                    PostImageView(asset: Asset.TestAssets.Images.test2)
+                    PostImageView(asset: Asset.TestAssets.Images.test3)
+                    PostImageView(asset: Asset.TestAssets.Images.test4)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
                 .frame(maxWidth: .infinity)
@@ -134,6 +134,6 @@ struct PostDetailsView: View {
             .padding(.horizontal)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Asset.Colors.innoBackgroundColor.swiftUIColor)
+        .background(Asset.Assets.Colors.innoBackgroundColor.swiftUIColor)
     }
 }

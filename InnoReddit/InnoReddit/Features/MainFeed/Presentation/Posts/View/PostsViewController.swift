@@ -53,7 +53,7 @@ final class PostsViewController: IRBaseViewController {
     
     // MARK: - Root view
     private func configureRootView() {
-        view.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        view.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
     }
     
     // MARK: - Collection view

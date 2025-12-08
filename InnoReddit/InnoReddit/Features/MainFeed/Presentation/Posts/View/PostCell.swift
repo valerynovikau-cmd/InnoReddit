@@ -75,7 +75,7 @@ final class PostCell: UICollectionViewCell {
     
     // MARK: - Content view
     private func configureContentView() {
-        contentView.backgroundColor = Asset.Colors.innoSecondaryBackgroundColor.color
+        contentView.backgroundColor = Asset.Assets.Colors.innoSecondaryBackgroundColor.color
         contentView.layer.cornerRadius = constants.outerCornerRadius
         contentView.layer.masksToBounds = true
         
@@ -95,7 +95,7 @@ final class PostCell: UICollectionViewCell {
         imageView.isUserInteractionEnabled = true
         imageView.contentMode = .scaleAspectFit
         imageView.addGestureRecognizer(tapGestureRecognizer)
-        imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        imageView.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
         imageView.layer.cornerRadius = constants.subredditCornerRadius
         imageView.clipsToBounds = true
         return imageView
@@ -413,7 +413,7 @@ extension PostCell: PostCellProtocol {
                 options: options
             )
         } else {
-            self.subredditImageView.image = Asset.Images.defaultSubredditAvatar.image
+            self.subredditImageView.image = Asset.Assets.Images.defaultSubredditAvatar.image
             if shouldAnimate {
                 subredditImageView.alpha = 0
                 UIView.animate(withDuration: constants.fadeInAnimationDuration) { [weak self] in
