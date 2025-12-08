@@ -15,5 +15,6 @@
 "storedCredentialsError" = "Stored credentials error.";
 "parsingError" = "Data parsing error.";
 "unknown" = "Unknown error.";
+"localTokenError" = "Failed to handle refresh_token";
 
 "tryAgainText" = "Please try again";
