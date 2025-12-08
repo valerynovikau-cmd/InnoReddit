@@ -330,9 +330,10 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Cell setup
+    private lazy var dateFormatter = RelativeDateTimeFormatter()
+    
     private func setupHeaderInfo() {
         guard let post = self.output?.post else { return }
-        let dateFormatter = RelativeDateTimeFormatter()
         dateFormatter.dateTimeStyle = .numeric
         let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
         dateLabel.text = relativeDate
