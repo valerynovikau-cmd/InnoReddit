@@ -48,8 +48,8 @@ struct PostDetailsView: View {
                                 Image(asset: Asset.Assets.Images.defaultSubredditAvatar)
                                     .resizable()
                                     
-                            case .nonDefaultIcon(let url):
-                                KFImage(URL(string: url))
+                            case .iconFromURL(let url):
+                                KFImage(url)
                                     .resizable()
                             }
                         }

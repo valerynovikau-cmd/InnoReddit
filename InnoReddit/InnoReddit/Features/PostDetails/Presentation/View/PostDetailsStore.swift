@@ -34,7 +34,7 @@ final class PostDetailsStore: ObservableObject {
 
     enum SubredditIconToShow {
         case defaultIcon
-        case nonDefaultIcon(String)
+        case iconFromURL(URL)
     }
     @Published var iconToShow: SubredditIconToShow?
 }
@@ -51,8 +51,11 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
     
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool) {
         var iconToShow: SubredditIconToShow
-        if let iconURL, !iconURL.isEmpty {
-            iconToShow = .nonDefaultIcon(iconURL)
+        if let iconURL,
+           !iconURL.isEmpty,
+           let url = URL(string: iconURL)
+        {
+            iconToShow = .iconFromURL(url)
         } else {
             iconToShow = .defaultIcon
         }
