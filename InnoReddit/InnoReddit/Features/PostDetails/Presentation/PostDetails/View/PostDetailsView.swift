@@ -97,22 +97,23 @@ struct PostDetailsView: View {
                         .fontWeight(.bold)
                 }
                 
-                if let text = self.store.text {
+                if let text = self.store.text, !text.isEmpty {
                     Text(text)
                         .font(.body)
                 }
-                
-                TabView {
-                    PostImageView(asset: Asset.TestAssets.Images.test1)
-                    PostImageView(asset: Asset.TestAssets.Images.test2)
-                    PostImageView(asset: Asset.TestAssets.Images.test3)
-                    PostImageView(asset: Asset.TestAssets.Images.test4)
+                if let images = self.store.images {
+                    TabView {
+                        ForEach(images) { image in
+                            let url = URL(string: image.fullUrl ?? image.previewUrl ?? "")
+                            PostDetailsImageView(imageURL: url)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(imageTabViewAspectRatio, contentMode: .fit)
+                    .tabViewStyle(.page)
+                    .indexViewStyle(.page(backgroundDisplayMode: .always))
                 }
-                .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
-                .frame(maxWidth: .infinity)
-                .aspectRatio(imageTabViewAspectRatio, contentMode: .fit)
-                .tabViewStyle(.page)
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
                 
                 Divider()
                 

@@ -37,6 +37,8 @@ final class PostDetailsStore: ObservableObject {
         case iconFromURL(URL)
     }
     @Published var iconToShow: SubredditIconToShow?
+    
+    @Published var images: [PostImage]? = nil
 }
 
 extension PostDetailsStore: PostDetailsStoreProtocol {
@@ -47,6 +49,7 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         self.score = "\(post.score)"
         self.subredditName = post.subreddit
         self.authorName = post.authorName
+        self.images = post.images
     }
     
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool) {
