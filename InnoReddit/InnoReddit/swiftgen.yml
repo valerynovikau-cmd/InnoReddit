@@ -40,10 +40,10 @@ strings:
         enumName: PostDetailsStrings
 
 xcassets:
-  inputs:
-    Resources/Assets/Assets.xcassets
-  outputs:
-    templateName: swift5
-    params:
-        forceProvidesNamespaces: true
-    output: Resources/Assets/XCAssets+Generated.swift
+  - inputs:
+      Resources/Assets/Assets.xcassets
+    outputs:
+      templateName: swift5
+      params:
+          forceProvidesNamespaces: true
+      output: Resources/Assets/XCAssets+Generated.swift
