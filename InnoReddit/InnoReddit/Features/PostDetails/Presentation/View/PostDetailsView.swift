@@ -12,32 +12,36 @@ struct PostDetailsView: View {
     @ScaledMetric private var buttonSize: CGFloat = 35
     @ScaledMetric private var circleSize: CGFloat = 4
     
-    private var sampleText: String = """
-Sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text sample text 
-"""
+    var output: PostDetailsPresenterProtocol?
+    @ObservedObject private(set) var store: PostDetailsStore
+    
+    init(store: PostDetailsStore) {
+        self.store = store
+    }
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(asset: Asset.Images.defaultSubredditAvatar)
                         .resizable()
+                        .background(Asset.Colors.innoSecondaryBackgroundColor.swiftUIColor)
                         .clipShape(.circle)
                         .frame(width: imageSize, height: imageSize)
                     
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("r/test")
+                        Text("r/\(self.store.subredditName ?? "[deleted]")")
                             .lineLimit(1)
                         
                         HStack {
-                            Text("u/user12498302985")
+                            Text("u/\(self.store.authorName ?? "[deleted]")")
                                 .lineLimit(1)
                             
                             Circle()
                                 .frame(width: circleSize, height: circleSize)
                                 .foregroundStyle(Color.primary)
                             
-                            Text("4 days ago")
+                            Text(self.store.date)
                                 .lineLimit(1)
                         }
                     }
@@ -46,7 +50,7 @@ Sample text sample text sample text sample text sample text sample text sample t
                     Spacer()
                     
                     Button {
-                        
+                        self.output?.onMoreTap()
                     } label: {
                         Image(systemName: "ellipsis")
                     }
@@ -55,7 +59,18 @@ Sample text sample text sample text sample text sample text sample text sample t
                 }
                 .frame(maxWidth: .infinity)
                 
-                Text(sampleText)
+                Divider()
+                
+                if let title = self.store.title {
+                    Text(title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                }
+                
+                if let text = self.store.text {
+                    Text(text)
+                        .font(.body)
+                }
                 
                 TabView {
                     PostImageView(asset: Asset.Images.test1, color: .green)
@@ -69,17 +84,19 @@ Sample text sample text sample text sample text sample text sample text sample t
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 
+                Divider()
+                
                 HStack {
                     Button {
-                        
+                        self.output?.onUpvoteTap()
                     } label: {
                         Image(systemName: "arrow.up")
                     }
                     
-                    Text("120")
+                    Text(store.score)
                     
                     Button {
-                        
+                        self.output?.onDownvoteTap()
                     } label: {
                         Image(systemName: "arrow.down")
                     }
@@ -87,15 +104,13 @@ Sample text sample text sample text sample text sample text sample text sample t
                     Spacer()
                     
                     Button {
-                        
+                        self.output?.onBookmarkTap()
                     } label: {
                         Image(systemName: "bookmark")
                     }
                 }
                 .font(.title)
                 .tint(Color.primary)
-                
-                Spacer()
             }
             .padding(.horizontal)
         }
@@ -129,5 +144,27 @@ struct PostImageView: View {
 }
 
 #Preview {
-    PostDetailsView()
+    let post = Post(
+        subreddit: "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest",
+        text: "Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text Sample text ",
+        authorId: "skebob",
+        saved: false,
+        title: "Sample title",
+        downs: 0,
+        ups: 0,
+        score: 120000,
+        created: Date().addingTimeInterval(-3600),
+        images: [PostImage(id: "a", fullUrl: "", fullWidth: 1, fullHeight: 1, previewUrl: "", previewWidth: 1, previewHeight: 1)],
+        subredditId: "skebob",
+        id: "skebob",
+        authorName: "authorName",
+        commentsCount: 11241
+    )
+    let store = PostDetailsStore()
+    let output = PostDetailsPresenter(post: post)
+    output.input = store
+    var view = PostDetailsView(store: store)
+    view.output = output
+    
+    return view
 }
