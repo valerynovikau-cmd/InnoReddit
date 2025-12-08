@@ -30,6 +30,8 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                     previewWidth = previewImage.width
                 }
                 
+                guard image.source?.url != nil || previewUrl != nil else { return nil }
+                
                 return PostImage(
                     id: image.id,
                     fullUrl: image.source?.url,
@@ -69,7 +71,7 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                 )
             } ?? []
             
-            let images: [PostImage]? = singleImages + multipleImages
+            let images: [PostImage] = singleImages + multipleImages
             
             return Post(
                 subreddit: data.subreddit,
@@ -81,7 +83,7 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                 ups: data.ups,
                 score: data.score,
                 created: date,
-                images: images,
+                images: images.isEmpty ? nil : images,
                 subredditId: data.subredditId,
                 id: data.name,
                 authorName: data.author,
