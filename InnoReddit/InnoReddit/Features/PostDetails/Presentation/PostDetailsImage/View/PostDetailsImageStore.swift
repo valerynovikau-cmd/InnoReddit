@@ -9,14 +9,27 @@ import Combine
 import Foundation
 import SwiftUI
 
-protocol PostImageDetailsStoreProtocol: AnyObject {
-    
+enum PostImageState {
+    case startedLoading
+    case loaded(URL?)
+    case loadFailed
+    case none
 }
 
-final class PostImageDetailsStore: ObservableObject {
-    
+protocol PostDetailsImageStoreProtocol: AnyObject {
+    func animatedStateChange(state: PostImageState)
 }
 
-extension PostImageDetailsStore: PostImageDetailsStoreProtocol {
+final class PostDetailsImageStore: ObservableObject {
+    @Published var viewState: PostImageState = .none
     
+    let fadeDuration: TimeInterval = 0.1
+}
+
+extension PostDetailsImageStore: PostDetailsImageStoreProtocol {
+    func animatedStateChange(state: PostImageState) {
+        withAnimation(.easeIn(duration: fadeDuration)) {
+            self.viewState = state
+        }
+    }
 }

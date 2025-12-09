@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Kingfisher
+import Factory
 
 struct PostDetailsView: View {
     
@@ -105,7 +106,11 @@ struct PostDetailsView: View {
                     TabView {
                         ForEach(images) { image in
                             let url = URL(string: image.fullUrl ?? image.previewUrl ?? "")
-                            PostDetailsImageView(imageURL: url)
+                            var view = Container.shared.postDetailsImageView.resolve()
+                            let output = Container.shared.postDetailsImagePresenter.resolve(url)
+                            output.input = view.store
+                            view.output = output
+                            return view
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
