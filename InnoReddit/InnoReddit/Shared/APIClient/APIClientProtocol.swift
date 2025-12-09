@@ -1,5 +1,5 @@
 //
-//  APIClient.swift
+//  APIClientProtocol.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 10.11.25.
@@ -7,8 +7,9 @@
 
 import Foundation
 
-protocol APIClient: AnyObject {
+protocol APIClientProtocol: AnyObject {
     var baseURL: URL { get }
+    var tokensBaseURL: URL { get }
     
     func send(request: URLRequest) async throws(APIError) -> APIResponse
     
@@ -19,15 +20,14 @@ protocol APIClient: AnyObject {
     func getRefreshToken() throws(APIError) -> String
 }
 
-extension APIClient {
+extension APIClientProtocol {
     func sendRequest<T: Decodable>(
         path: String,
         httpMethod: HTTPMethod,
         queryParams: [String: String]? = nil,
-        jsonBody: Encodable? = nil,
-        urlEncodedBody: [String: String]? = nil,
+        body: RequestBody? = nil,
         additionalHeaders: [String: String] = [:],
-        differentBaseURL: URL? = nil
+        urlToUse: APIBaseURL = APIBaseURL.base
     ) async throws(APIError) -> T {
         
         var response: APIResponse?
@@ -37,10 +37,9 @@ extension APIClient {
                 path: path,
                 method: httpMethod,
                 queryParams: queryParams,
-                jsonBody: jsonBody,
-                urlEncodedBody: urlEncodedBody,
+                body: body,
                 additionalHeaders: additionalHeaders,
-                differentBaseURL: differentBaseURL
+                urlToUse: .base
             )
             
             response = try? await self.send(request: request)
@@ -51,11 +50,11 @@ extension APIClient {
                 }
                 
                 let refreshResponse = try? await self.send(request: refreshRequest)
-                guard
-                    let refreshResponse,
-                    (200...299).contains(refreshResponse.statusCode)
-                else {
-                    throw APIError.networkError(statusCode: refreshResponse?.statusCode ?? 400)
+                guard let refreshResponse else {
+                    throw APIError.invalidResponse
+                }
+                guard (200...299).contains(refreshResponse.statusCode) else {
+                    throw APIError.networkError(statusCode: refreshResponse.statusCode)
                 }
                 
                 let decodedRefreshResponse: TokenRetrievalDTO
@@ -68,7 +67,7 @@ extension APIClient {
                 do {
                     try self.onTokenRefreshed(response: decodedRefreshResponse)
                 } catch {
-                    throw APIError.APIErrorMessage(message: "Failed to handle refresh_token")
+                    throw APIError.localTokenHandlingError
                 }
                 continue
             }
@@ -92,14 +91,13 @@ extension APIClient {
     }
     
     private func buildRefreshTokenRequest(refreshToken: String) throws(APIError) -> URLRequest {
-        let baseURL = URL(string: "https://www.reddit.com")!
         let path = "/api/v1/access_token"
         
         let body: [String: String] = [
             "grant_type": "refresh_token",
             "refresh_token": refreshToken
         ]
-        guard let clientId = Bundle.main.infoDictionary?["ClientID"] as? String else {
+        guard let clientId = ConfigParameterManager.clientID else {
             throw APIError.invalidRequest
         }
         
@@ -107,16 +105,15 @@ extension APIClient {
         let encoded = Data(credentials.utf8).base64EncodedString()
         
         let additionalHeaders: [String:String] = [
-            "Authorization": "Basic \(encoded)",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Authorization": "Basic \(encoded)"
         ]
         return try self.buildRequest(
             path: path,
             method: HTTPMethod.POST,
             queryParams: nil,
-            urlEncodedBody: body,
+            body: RequestBody.urlEncodedBody(body),
             additionalHeaders: additionalHeaders,
-            differentBaseURL: baseURL
+            urlToUse: .tokens
         )
     }
     
@@ -124,23 +121,16 @@ extension APIClient {
         path: String,
         method: HTTPMethod,
         queryParams: [String: String]? = nil,
-        jsonBody: Encodable? = nil,
-        urlEncodedBody: [String: String]? = nil,
+        body: RequestBody? = nil,
         additionalHeaders: [String: String] = [:],
-        differentBaseURL: URL? = nil
+        urlToUse: APIBaseURL
     ) throws(APIError) -> URLRequest {
-        guard (urlEncodedBody == nil && jsonBody == nil) ||
-              (urlEncodedBody == nil && jsonBody != nil) ||
-              (urlEncodedBody != nil && jsonBody == nil)
-        else {
-            throw APIError.invalidRequest
-        }
-        
         var url: URL!
-        if let differentBaseURL {
-            url = differentBaseURL.appendingPathComponent(path)
-        } else {
+        switch urlToUse {
+        case .base:
             url = self.baseURL.appendingPathComponent(path)
+        case .tokens:
+            url = self.tokensBaseURL.appendingPathComponent(path)
         }
         
         guard var urlComponents = URLComponents(
@@ -167,19 +157,25 @@ extension APIClient {
             throw APIError.invalidRequest
         }
         request.allHTTPHeaderFields = headers
-        if request.value(forHTTPHeaderField: "Content-Type") == nil {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        }
         
-        if let jsonBody {
+        var contentType: String?
+        switch body {
+        case .jsonBody(let body):
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
-            request.httpBody = try? encoder.encode(jsonBody)
-        }
-        if let urlEncodedBody {
+            request.httpBody = try? encoder.encode(body)
+            contentType = "application/json"
+        case .urlEncodedBody(let body):
             var components = URLComponents()
-            components.queryItems = urlEncodedBody.map { URLQueryItem(name: $0.key, value: $0.value) }
+            components.queryItems = body.map { URLQueryItem(name: $0.key, value: $0.value) }
             request.httpBody = components.query?.data(using: .utf8)
+            contentType = "application/x-www-form-urlencoded"
+        case .none:
+            break
+        }
+        
+        if let contentType {
+            request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         }
         
         return request

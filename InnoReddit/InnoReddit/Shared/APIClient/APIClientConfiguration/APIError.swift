@@ -12,6 +12,7 @@ enum APIError: Error {
     case invalidRequest
     case storedCredentialsError
     case parsingError(Error)
+    case localTokenHandlingError
     case unknown
     
     @MainActor var errorMessage: String {
@@ -29,6 +30,8 @@ enum APIError: Error {
             messageFirstPart = APIErrorStrings.parsingError
         case .storedCredentialsError:
             messageFirstPart = APIErrorStrings.storedCredentialsError
+        case .localTokenHandlingError:
+            messageFirstPart = APIErrorStrings.localTokenError
         case .unknown:
             messageFirstPart = APIErrorStrings.unknown
         default:
