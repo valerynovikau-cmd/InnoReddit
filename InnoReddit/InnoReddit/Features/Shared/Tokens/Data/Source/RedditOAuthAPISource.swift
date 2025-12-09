@@ -34,7 +34,7 @@ final class RedditOAuthAPISource {
     
     private var clientID: String {
         get throws(RedditOAuthFlowError) {
-            guard let id = Bundle.main.infoDictionary?["ClientID"] as? String else {
+            guard let id = ConfigParameterManager.clientID else {
                 throw .invalidClientData
             }
             return id
@@ -43,13 +43,10 @@ final class RedditOAuthAPISource {
     
     private var redirectURLScheme: String {
         get throws(RedditOAuthFlowError) {
-            guard let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]],
-                  let urlSchemes = urlTypes.first?["CFBundleURLSchemes"] as? [String],
-                  let callbackScheme = urlSchemes.first
-            else {
+            guard let scheme = ConfigParameterManager.callbackScheme else {
                 throw .invalidClientData
             }
-            return callbackScheme
+            return scheme
         }
     }
     
