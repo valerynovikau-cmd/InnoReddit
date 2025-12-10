@@ -6,7 +6,7 @@
 //
 
 struct SingleImageSourceDTO: Decodable {
-    let url: String
-    let width: Int
-    let height: Int
+    let url: String?
+    let width: Int?
+    let height: Int?
 }

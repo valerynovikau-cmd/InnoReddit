@@ -7,14 +7,14 @@
 
 struct PostImage: Identifiable {
     let id: String
-    let fullUrl: String?
-    let fullWidth: Int?
-    let fullHeight: Int?
-    let previewUrl: String?
-    let previewWidth: Int?
-    let previewHeight: Int?
+    let fullSource: PostImageSource?
+    let previewSource: PostImageSource?
+//    let fullUrl: String?
+//    let fullWidth: Int?
+//    let fullHeight: Int?
+//    let previewUrl: String?
+//    let previewWidth: Int?
+//    let previewHeight: Int?
 }
 
-extension PostImage: Hashable {
-    
-}
+extension PostImage: Hashable { }

@@ -6,7 +6,7 @@
 //
 
 struct MultipleImageSourceDTO: Decodable {
-    let y: Int
-    let x: Int
-    let u: String
+    let y: Int?
+    let x: Int?
+    let u: String?
 }

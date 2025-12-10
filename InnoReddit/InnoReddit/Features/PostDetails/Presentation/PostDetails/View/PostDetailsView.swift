@@ -105,7 +105,7 @@ struct PostDetailsView: View {
                 if let images = self.store.images {
                     TabView {
                         ForEach(images) { image in
-                            let url = URL(string: image.fullUrl ?? image.previewUrl ?? "")
+                            let url = URL(string: image.fullSource?.url ?? image.previewSource?.url ?? "")
                             var view = Container.shared.postDetailsImageView.resolve()
                             let output = Container.shared.postDetailsImagePresenter.resolve(url)
                             output.input = view.store

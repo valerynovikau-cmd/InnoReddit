@@ -17,29 +17,44 @@ final class PostsModelMapper: PostsModelMapperProtocol {
             let data = child.data
             let date = Date(timeIntervalSince1970: TimeInterval(floatLiteral: data.created))
             let singleImages: [PostImage] = data.preview?.images?.compactMap({ image in
-                var previewUrl: String?
-                var previewHeight: Int?
-                var previewWidth: Int?
+                var previewSource: PostImageSource?
+                var fullSource: PostImageSource?
                 
-                if let previewsCount = image.resolutions?.sorted(by: { $0.height < $1.height }).count,
+                if let previewsCount = image.resolutions?.sorted(by: {
+                    $0.height ?? 0 < $1.height ?? 1
+                }).count,
                    previewsCount > 0
                 {
                     let previewImage = image.resolutions![previewsCount / 2]
-                    previewUrl = previewImage.url
-                    previewHeight = previewImage.height
-                    previewWidth = previewImage.width
+                    if let previewUrl = previewImage.url,
+                       let previewWidth = previewImage.width,
+                       let previewHeight = previewImage.height
+                    {
+                        previewSource = PostImageSource(
+                            url: previewUrl,
+                            width: previewWidth,
+                            height: previewHeight
+                        )
+                    }
                 }
                 
-                guard image.source?.url != nil || previewUrl != nil else { return nil }
+                if let fullUrl = image.source?.url,
+                   let fullWidth = image.source?.width,
+                   let fullHeight = image.source?.height
+                {
+                    fullSource = PostImageSource(
+                        url: fullUrl,
+                        width: fullWidth,
+                        height: fullHeight
+                    )
+                }
+                
+                guard fullSource != nil || previewSource != nil else { return nil }
                 
                 return PostImage(
                     id: image.id,
-                    fullUrl: image.source?.url,
-                    fullWidth: image.source?.width,
-                    fullHeight: image.source?.height,
-                    previewUrl: previewUrl,
-                    previewWidth: previewWidth,
-                    previewHeight: previewHeight
+                    fullSource: fullSource,
+                    previewSource: previewSource
                 )
             }) ?? []
             
@@ -49,25 +64,39 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                       multipleMediaResponseDTO.e == "Image"
                 else { return nil }
                 
-                var previewUrl: String?
-                var previewHeight: Int?
-                var previewWidth: Int?
+                var previewSource: PostImageSource?
+                var fullSource: PostImageSource?
                 
-                if previews.count > 0 {
-                    let previewImage = previews.last
-                    previewUrl = previewImage?.u
-                    previewHeight = previewImage?.y
-                    previewWidth = previewImage?.x
+                if previews.count > 0,
+                   let previewImage = previews.last,
+                   let previewUrl = previewImage.u,
+                   let previewHeight = previewImage.y,
+                   let previewWidth = previewImage.x
+                {
+                    previewSource = PostImageSource(
+                        url: previewUrl,
+                        width: previewWidth,
+                        height: previewHeight
+                    )
                 }
+                
+                if let fullImage = multipleMediaResponseDTO.s,
+                   let fullUrl = fullImage.u,
+                   let fullWidth = fullImage.x,
+                   let fullHeight = fullImage.y {
+                    fullSource = PostImageSource(
+                        url: fullUrl,
+                        width: fullWidth,
+                        height: fullHeight
+                    )
+                }
+                
+                guard fullSource != nil || previewSource != nil else { return nil }
                 
                 return PostImage(
                     id: id,
-                    fullUrl: multipleMediaResponseDTO.s?.u,
-                    fullWidth: multipleMediaResponseDTO.s?.x,
-                    fullHeight: multipleMediaResponseDTO.s?.y,
-                    previewUrl: previewUrl,
-                    previewWidth: previewWidth,
-                    previewHeight: previewHeight
+                    fullSource: fullSource,
+                    previewSource: previewSource
                 )
             } ?? []
             

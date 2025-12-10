@@ -30,7 +30,7 @@ extension PostCellImagePresenter: PostCellImagePresenterProtocol {
         Task { [weak self] in
             do {
                 guard let self,
-                      let urlString = postImage.previewUrl ?? postImage.fullUrl,
+                      let urlString = postImage.previewSource?.url ?? postImage.fullSource?.url,
                       let url = URL(string: urlString)
                 else { return }
                 let blurImageProcessor = BlurImageProcessor(blurRadius: blurRadius)
