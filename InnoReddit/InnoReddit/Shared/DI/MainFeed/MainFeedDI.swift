@@ -35,7 +35,8 @@ extension Container {
     
     var postsNetworkService: Factory<PostsNetworkServiceProtocol> {
         self { @MainActor in
-            PostsNetworkService()
+//            PostsNetworkService()
+            MockPostsNetworkService()
         }
     }
     
