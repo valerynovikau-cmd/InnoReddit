@@ -98,26 +98,43 @@ struct PostDetailsView: View {
                         .fontWeight(.bold)
                 }
                 
-                if let text = self.store.text, !text.isEmpty {
-                    Text(text)
-                        .font(.body)
-                }
-                if let images = self.store.images {
-                    TabView {
-                        ForEach(images) { image in
-                            let url = URL(string: image.fullSource?.url ?? image.previewSource?.url ?? "")
-                            var view = Container.shared.postDetailsImageView.resolve()
-                            let output = Container.shared.postDetailsImagePresenter.resolve(url)
-                            output.input = view.store
-                            view.output = output
-                            return view
-                        }
+                if self.store.content.count == 1,
+                   let content = self.store.content.first,
+                   case .text(let text) = content
+                { // Post text doesn't contain images inside of it
+                    if !text.isEmpty {
+                        Text(text)
+                            .font(.body)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(imageTabViewAspectRatio, contentMode: .fit)
-                    .tabViewStyle(.page)
-                    .indexViewStyle(.page(backgroundDisplayMode: .always))
+                    
+                    if let images = self.store.images {
+                        TabView {
+                            ForEach(images) { image in
+                                let _ = print("Entered ForEach for \(image.id)")
+                                let url = URL(string: image.fullSource?.url ?? image.previewSource?.url ?? "")
+                                var view = Container.shared.postDetailsImageView.resolve()
+                                let output = Container.shared.postDetailsImagePresenter.resolve(url)
+                                output.input = view.store
+                                view.output = output
+                                return view
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
+                        .frame(maxWidth: .infinity)
+                        .aspectRatio(imageTabViewAspectRatio, contentMode: .fit)
+                        .tabViewStyle(.page)
+                        .indexViewStyle(.page(backgroundDisplayMode: .always))
+                    }
+                } else if self.store.content.count > 0 { // Post text contains images inside of it
+                    ForEach(self.store.content, id: \.self) { item in
+                        switch item {
+                        case .image(let image):
+                            let _ = print("Entered ForEach for image \(image.id)")
+                        case .text(let text):
+                            let _ = print("Entered ForEach for text \(text.prefix(10))...")
+                        }
+                        view(for: item)
+                    }
                 }
                 
                 Divider()
@@ -157,5 +174,29 @@ struct PostDetailsView: View {
         .onAppear {
             self.output?.retrieveSubbreditImage()
         }
+    }
+    
+    @ViewBuilder
+    private func view(for item: PostTextContentType) -> some View {
+        switch item {
+        case .text(let text):
+            Text(text)
+                .font(.body)
+        case .image(let image):
+            imageView(for: image)
+        }
+    }
+    
+    private func imageView(for image: PostImage) -> some View {
+        let url = URL(string: image.fullSource?.url ?? image.previewSource?.url ?? "")
+        var view = Container.shared.postDetailsImageView.resolve()
+        let output = Container.shared.postDetailsImagePresenter.resolve(url)
+        output.input = view.store
+        view.output = output
+
+        return view
+            .clipShape(RoundedRectangle(cornerRadius: imageTabViewCornerRadius))
+            .frame(maxWidth: .infinity)
+            .aspectRatio(imageTabViewAspectRatio, contentMode: .fit)
     }
 }

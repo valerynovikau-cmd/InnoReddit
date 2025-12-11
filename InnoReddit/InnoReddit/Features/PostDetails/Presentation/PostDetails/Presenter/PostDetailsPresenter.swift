@@ -26,7 +26,8 @@ final class PostDetailsPresenter {
     
     weak var input: PostDetailsStoreProtocol? {
         didSet {
-            input?.configure(post: self.post)
+            let postContent = PostTextDataSeparator.separatePostContents(post: self.post)
+            input?.configure(post: self.post, postContent: postContent)
         }
     }
     

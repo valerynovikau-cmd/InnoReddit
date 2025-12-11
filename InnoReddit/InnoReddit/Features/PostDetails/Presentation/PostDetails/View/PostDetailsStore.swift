@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 protocol PostDetailsStoreProtocol: AnyObject {
-    func configure(post: Post)
+    func configure(post: Post, postContent: [PostTextContentType])
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool)
     func onBookmarkTap()
     func onUpvoteTap()
@@ -26,7 +26,8 @@ final class PostDetailsStore: ObservableObject {
     }()
     
     @Published var title: String?
-    @Published var text: String?
+//    @Published var text: String?
+    @Published var content: [PostTextContentType] = []
     @Published var date: String = ""
     @Published var subredditName: String?
     @Published var authorName: String?
@@ -42,14 +43,15 @@ final class PostDetailsStore: ObservableObject {
 }
 
 extension PostDetailsStore: PostDetailsStoreProtocol {
-    func configure(post: Post) {
+    func configure(post: Post, postContent: [PostTextContentType]) {
         self.title = post.title
-        self.text = post.text
         self.date = dateFormatter.localizedString(for: post.created, relativeTo: Date())
         self.score = "\(post.score)"
         self.subredditName = post.subreddit
         self.authorName = post.authorName
         self.images = post.images
+        
+        self.content = postContent
     }
     
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool) {
