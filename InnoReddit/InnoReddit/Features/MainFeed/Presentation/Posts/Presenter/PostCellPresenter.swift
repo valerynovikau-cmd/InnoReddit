@@ -12,6 +12,7 @@ protocol PostCellPresenterProtocol: AnyObject {
     var router: MainScreenRouterProtocol? { get set }
     
     var post: Post { get }
+    var postSeparatedText: String? { get }
     
     func onPostTap()
     func onUpvoteTap()
@@ -32,9 +33,23 @@ final class PostCellPresenter {
     @Injected(\.subredditIconsMemoryCache) private var cache: SubredditIconsMemoryCache
     
     private(set) var post: Post
+    private(set) var postSeparatedText: String?
     
     init(post: Post) {
         self.post = post
+        if self.post.images != nil, !self.post.images!.isEmpty {
+            let separatedContent = PostTextDataSeparator.separatePostContents(post: post)
+            self.postSeparatedText = separatedContent.compactMap({ content in
+                switch content {
+                case .text(let text):
+                    return text
+                default:
+                    return nil
+                }
+            }).joined(separator: " ")
+        } else {
+            self.postSeparatedText = self.post.text
+        }
     }
 }
 

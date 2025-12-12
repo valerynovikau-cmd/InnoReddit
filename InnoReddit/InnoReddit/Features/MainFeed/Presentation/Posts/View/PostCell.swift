@@ -342,12 +342,12 @@ final class PostCell: UICollectionViewCell {
     }
     
     private func setupBodyTextInfo() {
-        guard let post = self.output?.post else { return }
-        if let text = post.text, !text.isEmpty {
+        guard let text = self.output?.postSeparatedText else { return }
+        if !text.isEmpty {
             postContentStackView.addArrangedSubview(bodyLabel)
             bodyLabel.text = text
         }
-        titleLabel.text = post.title ?? ""
+        titleLabel.text = self.output?.post.title ?? ""
     }
     
     private func setupPostsImages() {
