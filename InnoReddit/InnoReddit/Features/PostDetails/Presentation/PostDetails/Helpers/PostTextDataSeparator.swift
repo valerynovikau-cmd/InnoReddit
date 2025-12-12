@@ -49,16 +49,22 @@ struct PostTextDataSeparator {
         
         if let range = text.range(of: imageUrl) {
             var result: [PostTextContentType] = []
-            let before = String(text[..<range.lowerBound])
-            let after = String(text[range.upperBound...])
+            var before = String(text[..<range.lowerBound])
+            var after = String(text[range.upperBound...])
             
             if !before.isEmpty {
+                if before.hasSuffix("\n\n") {
+                    before.removeSubrange(before.index(before.endIndex, offsetBy: -2)..<before.endIndex)
+                }
                 result.append(.text(before))
             }
             
             result.append(.image(imageToFind))
             
             if !after.isEmpty {
+                if after.hasPrefix("\n\n") {
+                    after.removeSubrange(after.startIndex..<after.index(after.startIndex, offsetBy: 2))
+                }
                 result.append(.text(after))
             }
             

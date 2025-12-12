@@ -9,22 +9,15 @@ import SwiftUI
 import Kingfisher
 
 struct PostDetailsImageView: View {
-    var id = UUID()
-    var output: PostDetailsImagePresenterProtocol?
-//    @ObservedObject private(set) var store: PostDetailsImageStore
-//    var output: PostDetailsImagePresenterProtocol? = PostDeta
-    @StateObject var store: PostDetailsImageStore = PostDetailsImageStore()
+    private var id = UUID()
+    var imageURL: URL?
+    @StateObject var store: PostDetailsImageStore
     
-//    init(store: PostDetailsImageStore) {
-//        self.store = store
-//        withUnsafeMutablePointer(to: &self) { address in
-//            print("\(Self.self) \(address) inited")
-//        }
-//    }
-    init(store: PostDetailsImageStore) {
-//        withUnsafeMutablePointer(to: &self) { address in
-//            print("\(Self.self) \(address) inited")
-//        }
+    init(imageURL: URL?) {
+        let store = PostDetailsImageStore()
+        let output = PostDetailsImagePresenter(imageURL: imageURL)
+        store.output = output
+        output.input = store
         self._store = StateObject(wrappedValue: store)
     }
     
@@ -64,7 +57,7 @@ struct PostDetailsImageView: View {
             }
             .frame(width: geometryProxy.size.width, height: geometryProxy.size.height)
             .onAppear {
-                self.output?.startLoading()
+                self.store.output?.startLoading()
             }
         }
     }

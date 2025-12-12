@@ -48,10 +48,10 @@ extension Container {
         }
     }
     
-    var postDetailsImageView: Factory<PostDetailsImageView> {
-        self { @MainActor in
-            let store = self.postDetailsImageStore()
-            return PostDetailsImageView(store: store)
-        }
-    }
+//    var postDetailsImageView: Factory<PostDetailsImageView> {
+//        self { @MainActor in
+//            let store = self.postDetailsImageStore()
+//            return PostDetailsImageView(store: store)
+//        }
+//    }
 }

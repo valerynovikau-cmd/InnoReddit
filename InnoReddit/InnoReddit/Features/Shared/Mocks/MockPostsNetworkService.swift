@@ -17,7 +17,7 @@ extension MockPostsNetworkService: PostsNetworkServiceProtocol {
         if let after = after {
             queryParams["after"] = after
         }
-        let path = "/by_id/t3_1pic6xp,t3_1i6tu6v,t3_1ovr9k6,t3_1pj006r"
+        let path = "/by_id/t3_1pic6xp,t3_1i6tu6v,t3_1ovr9k6,t3_1pj006r,t3_1pk09oi,t3_1pk0mt9"
         let response: ListingResponseDTO = try await self.sendRequest(path: path, httpMethod: .GET, queryParams: queryParams)
         return response
     }

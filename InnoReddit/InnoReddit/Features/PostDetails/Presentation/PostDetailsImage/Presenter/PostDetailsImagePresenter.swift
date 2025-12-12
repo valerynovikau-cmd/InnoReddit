@@ -15,7 +15,7 @@ protocol PostDetailsImagePresenterProtocol: AnyObject {
 }
 
 final class PostDetailsImagePresenter {
-    var input: PostDetailsImageStoreProtocol?
+    weak var input: PostDetailsImageStoreProtocol?
     private(set) var imageURL: URL?
     
     init(imageURL: URL?) {
