@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 
 protocol PostDetailsStoreProtocol: AnyObject {
+    var output: PostDetailsPresenterProtocol? { get set }
     func configure(post: Post, postContent: [PostTextContentType])
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool)
     func onBookmarkTap()
@@ -25,8 +26,9 @@ final class PostDetailsStore: ObservableObject {
         return formatter
     }()
     
+    var output: PostDetailsPresenterProtocol?
+    
     @Published var title: String?
-//    @Published var text: String?
     @Published var content: [PostTextContentType] = []
     @Published var date: String = ""
     @Published var subredditName: String?

@@ -8,3 +8,4 @@
 
 "deletedSubreddit" = "[deleted]";
 "deletedAuthor" = "[deleted]";
+"imageLoadFailed" = "Ошибка загрузки";

@@ -20,7 +20,6 @@ final class PostDetailsImagePresenter {
     
     init(imageURL: URL?) {
         self.imageURL = imageURL
-        print("\(Self.self) \(Unmanaged.passUnretained(self).toOpaque()) inited")
     }
 }
 

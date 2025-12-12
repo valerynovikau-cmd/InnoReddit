@@ -19,12 +19,7 @@ final class MainScreenRouter: RouterProtocol {
 
 extension MainScreenRouter: MainScreenRouterProtocol {
     func showPostDetails(post: Post) {
-        let output = Container.shared.postDetailsPresenter.resolve(post)
-        var view = Container.shared.postDetailsView.resolve()
-        
-        output.input = view.store
-        view.output = output
-        
+        let view = Container.shared.postDetailsView.resolve(post)
         let hostingVC = UIHostingController(rootView: view)
         navigationController.pushViewController(hostingVC, animated: true)
     }

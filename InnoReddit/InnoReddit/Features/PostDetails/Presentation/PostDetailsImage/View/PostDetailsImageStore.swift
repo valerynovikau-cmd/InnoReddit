@@ -18,6 +18,7 @@ enum PostImageState {
 
 protocol PostDetailsImageStoreProtocol: AnyObject {
     func animatedStateChange(state: PostImageState)
+    var output: PostDetailsImagePresenterProtocol? { get set }
 }
 
 final class PostDetailsImageStore: ObservableObject {
@@ -25,15 +26,10 @@ final class PostDetailsImageStore: ObservableObject {
     var output: PostDetailsImagePresenterProtocol?
     
     let fadeDuration: TimeInterval = 0.1
-    
-    init() {
-        print("\(Self.self) \(Unmanaged.passUnretained(self).toOpaque()) inited")
-    }
 }
 
 extension PostDetailsImageStore: PostDetailsImageStoreProtocol {
     func animatedStateChange(state: PostImageState) {
-        print("\(Self.self) \(Unmanaged.passUnretained(self).toOpaque()): changing view state from \(viewState) to \(state)")
         withAnimation(.easeIn(duration: fadeDuration)) {
             self.viewState = state
         }

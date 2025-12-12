@@ -30,7 +30,7 @@ struct PostTextDataSeparator {
                 } else {
                     return [item]
                 }
-            case .image(let postImage):
+            case .image:
                 return [item]
             }
         }

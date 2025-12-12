@@ -10,21 +10,25 @@ import Foundation
 
 extension Container {
     // MARK: - Post details view dependencies
-    var postDetailsPresenter: ParameterFactory<Post, PostDetailsPresenterProtocol> {
+    private var postDetailsPresenter: ParameterFactory<Post, PostDetailsPresenterProtocol> {
         self { @MainActor post in
             return PostDetailsPresenter(post: post)
         }
     }
     
-    private var postDetailsStore: Factory<PostDetailsStore> {
-        self { @MainActor in
-            return PostDetailsStore()
+    private var postDetailsStore: ParameterFactory<Post, PostDetailsStore> {
+        self { @MainActor post in
+            let store = PostDetailsStore()
+            let output = self.postDetailsPresenter.resolve(post)
+            store.output = output
+            output.input = store
+            return store
         }
     }
     
-    var postDetailsView: Factory<PostDetailsView> {
-        self { @MainActor in
-            let store = self.postDetailsStore()
+    var postDetailsView: ParameterFactory<Post, PostDetailsView> {
+        self { @MainActor post in
+            let store = self.postDetailsStore.resolve(post)
             return PostDetailsView(store: store)
         }
     }
@@ -36,22 +40,19 @@ extension Container {
     }
     
     // MARK: - Post details image view dependencies
-    var postDetailsImagePresenter: ParameterFactory<URL?, PostDetailsImagePresenterProtocol> {
+    private var postDetailsImagePresenter: ParameterFactory<URL?, PostDetailsImagePresenterProtocol> {
         self { @MainActor url in
             return PostDetailsImagePresenter(imageURL: url)
         }
     }
     
-    private var postDetailsImageStore: Factory<PostDetailsImageStore> {
-        self { @MainActor in
-            return PostDetailsImageStore()
+    var postDetailsImageStore: ParameterFactory<URL?, PostDetailsImageStore> {
+        self { @MainActor url in
+            let store = PostDetailsImageStore()
+            let output =  self.postDetailsImagePresenter.resolve(url)
+            store.output = output
+            output.input = store
+            return store
         }
     }
-    
-//    var postDetailsImageView: Factory<PostDetailsImageView> {
-//        self { @MainActor in
-//            let store = self.postDetailsImageStore()
-//            return PostDetailsImageView(store: store)
-//        }
-//    }
 }

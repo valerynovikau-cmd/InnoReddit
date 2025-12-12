@@ -8,37 +8,35 @@
 import SwiftUI
 import Kingfisher
 
+fileprivate struct PostDetailsImageViewValues {
+    static let blurRadius: CGFloat = 20
+    static let shadowRadius: CGFloat = 5
+    static let shadowAlpha: CGFloat = 0.2
+    static let loadFailedVStackSpacing: CGFloat = 6
+    static let loadFailedImageSystemName = "xmark.circle.fill"
+}
+
+private typealias constants = PostDetailsImageViewValues
+
 struct PostDetailsImageView: View {
-    private var id = UUID()
-    var imageURL: URL?
     @StateObject var store: PostDetailsImageStore
     
-    init(imageURL: URL?) {
-        let store = PostDetailsImageStore()
-        let output = PostDetailsImagePresenter(imageURL: imageURL)
-        store.output = output
-        output.input = store
+    init(store: PostDetailsImageStore) {
         self._store = StateObject(wrappedValue: store)
     }
-    
-    private let blurRadius: CGFloat = 20
-    private let shadowRadius: CGFloat = 5
-    private let shadowAlpha: CGFloat = 0.2
     
     var body: some View {
         GeometryReader { geometryProxy in
             ZStack(alignment: .center) {
                 switch self.store.viewState {
                 case .startedLoading:
-                    let _ = print("=============================== SHOWING PROGRESS VIEW \(id) ===============================")
                     ProgressView()
                 case .loaded(let url):
-                    let _ = print("=============================== SHOWING IMAGES \(id) ===============================")
                     KFImage(url)
                         .fade(duration: self.store.fadeDuration)
                         .resizable()
                         .scaledToFill()
-                        .blur(radius: blurRadius)
+                        .blur(radius: constants.blurRadius)
                         .frame(width: geometryProxy.size.height, height: geometryProxy.size.width)
                         .clipped()
                     
@@ -46,12 +44,18 @@ struct PostDetailsImageView: View {
                         .fade(duration: self.store.fadeDuration)
                         .resizable()
                         .scaledToFit()
-                        .shadow(color: Color(uiColor: .black.withAlphaComponent(shadowAlpha)), radius: shadowRadius)
+                        .shadow(color: Color(uiColor: .black.withAlphaComponent(constants.shadowAlpha)), radius: constants.shadowRadius)
                 case .loadFailed:
-                    let _ = print("=============================== SHOWING LOAD FAILED \(id) ===============================")
-                    Text(":(")
+                    VStack(spacing: constants.loadFailedVStackSpacing) {
+                        Image(systemName: constants.loadFailedImageSystemName)
+                            .font(.largeTitle)
+                            .foregroundStyle(Color.red)
+                        Text(PostDetailsStrings.imageLoadFailed)
+                            .fontWeight(.medium)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Asset.Assets.Colors.innoSecondaryBackgroundColor.swiftUIColor)
                 case .none:
-                    let _ = print("=============================== SHOWING NOTHING \(id) ===============================")
                     EmptyView()
                 }
             }
