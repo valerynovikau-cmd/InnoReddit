@@ -1,16 +1,16 @@
 //
-//  MultipleMediaResponseDTO.swift
+//  MediaMetadataDTO.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 19.11.25.
 //
 
-struct MultipleMediaResponseDTO: Decodable {
+struct MediaMetadataDTO: Decodable {
     let e: String?
     
     let m: String?
-    let p: [MultipleImageSourceDTO]?
-    let s: MultipleImageSourceDTO?
+    let p: [MediaMetadataImageSourceDTO]?
+    let s: MediaMetadataImageSourceDTO?
     
     let dashUrl: String?
     let x: Int?

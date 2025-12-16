@@ -6,14 +6,14 @@
 //
 
 protocol PostDetailsNetworkServiceProtocol: AnyObject {
-    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO
 }
 
 final class PostDetailsNetworkService: BaseAPIClient { }
 
 extension PostDetailsNetworkService: PostDetailsNetworkServiceProtocol {
-    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO {
-        let response: SubredditResponseDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO {
+        let response: SubredditDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
         return response
     }
 }

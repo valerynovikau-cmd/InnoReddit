@@ -18,6 +18,7 @@ struct Post: Identifiable {
     var score: Int
     let created: Date
     let images: [PostImage]?
+    let videos: [PostVideo]?
     let subredditId: String
     let id: String
     let authorName: String?

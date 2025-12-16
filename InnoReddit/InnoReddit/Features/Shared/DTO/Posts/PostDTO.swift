@@ -1,11 +1,11 @@
 //
-//  PostResponseDTO.swift
+//  PostDTO.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 12.11.25.
 //
 
-struct PostResponseDTO: Decodable {
+struct PostDTO: Decodable {
     let subreddit: String
     let selftext: String?
     let authorFullname: String?
@@ -16,10 +16,12 @@ struct PostResponseDTO: Decodable {
     let ups: Int
     let score: Int
     let created: Double
-    let preview: SingleMediaResponseDTO?
-    let mediaMetadata: [String: MultipleMediaResponseDTO]?
+    let preview: PreviewDTO?
+    let mediaMetadata: [String: MediaMetadataDTO]?
     let subredditId: String
     let id: String
     let author: String?
     let numComments: Int
+    let media: MediaDTO?
+    let isVideo: Bool
 }

@@ -1,11 +1,11 @@
 //
-//  ListingResponseDTO.swift
+//  ListingDTO.swift
 //  InnoReddit
 //
 //  Created by Валерий Новиков on 12.11.25.
 //
 
-struct ListingResponseDTO: Decodable {
+struct ListingDTO: Decodable {
     let kind: String
-    let data: ListingDataResponseDTO
+    let data: ListingDataDTO
 }

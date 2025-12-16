@@ -9,32 +9,32 @@ import Foundation
 import Factory
 
 protocol PostsNetworkServiceProtocol {
-    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingResponseDTO
-    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO
+    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingDTO
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO
     func getPostScoreAndCommentCount(postName: String) async throws(APIError) -> (score: Int, commentCount: Int)
 }
 
 final class PostsNetworkService: BaseAPIClient { }
 
 extension PostsNetworkService: PostsNetworkServiceProtocol {
-    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingResponseDTO {
+    func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingDTO {
         var queryParams: [String: String] = [
             "raw_json" : "1"
         ]
         if let after = after {
             queryParams["after"] = after
         }
-        let response: ListingResponseDTO = try await self.sendRequest(path: category.urlPath, httpMethod: .GET, queryParams: queryParams)
+        let response: ListingDTO = try await self.sendRequest(path: category.urlPath, httpMethod: .GET, queryParams: queryParams)
         return response
     }
     
-    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditResponseDTO {
-        let response: SubredditResponseDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO {
+        let response: SubredditDTO = try await self.sendRequest(path: "/r/\(subredditName)/about", httpMethod: .GET)
         return response
     }
     
     func getPostScoreAndCommentCount(postName: String) async throws(APIError) -> (score: Int, commentCount: Int) {
-        let response: ListingResponseDTO = try await self.sendRequest(path: "/by_id/\(postName)", httpMethod: .GET)
+        let response: ListingDTO = try await self.sendRequest(path: "/by_id/\(postName)", httpMethod: .GET)
         guard let post = response.data.children.first?.data else {
             throw .invalidResponse
         }
