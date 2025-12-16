@@ -8,6 +8,8 @@
 import SwiftUI
 import Kingfisher
 import Factory
+import AVFoundation
+import AVKit
 
 fileprivate struct PostDetailsValues {
     static let moreSymbolName = "ellipsis"
@@ -120,6 +122,7 @@ struct PostDetailsHeaderView: View {
 // MARK: - Post content view
 struct PostDetailsContentView: View {
     @ObservedObject private(set) var store: PostDetailsStore
+    private let player = AVPlayer(url: URL(string: "https://v.redd.it/qqb2a5hr9c7g1/CMAF_1080.mp4?source=fallback")!)
     
     var body: some View {
         if let title = self.store.title {
@@ -149,6 +152,12 @@ struct PostDetailsContentView: View {
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
             }
+            
+            if let videos = self.store.videos {
+                ForEach(videos) { video in
+                    videoView(for: video)
+                }
+            }
         } else if self.store.content.count > 0 {
             ForEach(self.store.content, id: \.self) { item in
                 view(for: item)
@@ -174,6 +183,13 @@ struct PostDetailsContentView: View {
         return PostDetailsImageView(store: store)
             .frame(maxWidth: .infinity)
             .aspectRatio(constants.imageTabViewAspectRatio, contentMode: .fit)
+    }
+    
+    private func videoView(for video: PostVideo) -> some View {
+        let url = URL(string: video.hlsUrl)
+        return PostDetailsVideoView(url: url)
+            .aspectRatio(CGFloat(video.width) / CGFloat(video.height), contentMode: .fit)
+            .frame(maxWidth: .infinity)
     }
 }
 

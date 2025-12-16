@@ -42,6 +42,7 @@ final class PostDetailsStore: ObservableObject {
     @Published var iconToShow: SubredditIconToShow?
     
     @Published var images: [PostImage]? = nil
+    @Published var videos: [PostVideo]? = nil
 }
 
 extension PostDetailsStore: PostDetailsStoreProtocol {
@@ -52,6 +53,7 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         self.subredditName = post.subreddit
         self.authorName = post.authorName
         self.images = post.images
+        self.videos = post.videos
         
         self.content = postContent
     }

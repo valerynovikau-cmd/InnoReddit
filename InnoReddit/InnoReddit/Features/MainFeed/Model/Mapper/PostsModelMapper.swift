@@ -114,11 +114,17 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                     )
                 )
             case "RedditVideo":
-                guard let id = value.id, let hlsUrl = value.hlsUrl else { break }
+                guard let id = value.id,
+                      let hlsUrl = value.hlsUrl,
+                      let height = value.y,
+                      let width = value.x
+                else { break }
                 media.videos.append(
                     PostVideo(
                         id: id,
-                        hlsUrl: hlsUrl
+                        hlsUrl: hlsUrl,
+                        height: height,
+                        width: width
                     )
                 )
             default:
@@ -129,7 +135,9 @@ final class PostsModelMapper: PostsModelMapperProtocol {
     }
     
     private func singleVideo(data: PostDTO) -> PostVideo? {
-        guard let video = data.media?.redditVideo else { return nil }
+        guard let video = data.media?.redditVideo
+        else { return nil }
+        
         var id: String?
         if let videoId = video.id {
             id = videoId
@@ -142,7 +150,9 @@ final class PostsModelMapper: PostsModelMapperProtocol {
         }
         return PostVideo(
             id: video.id ?? id ?? UUID().uuidString,
-            hlsUrl: video.hlsUrl
+            hlsUrl: video.hlsUrl,
+            height: video.height,
+            width: video.width
         )
     }
     

@@ -9,4 +9,6 @@ struct RedditVideoDTO: Decodable {
     let id: String?
     let hlsUrl: String
     let isGif: Bool
+    let height: Int
+    let width: Int
 }

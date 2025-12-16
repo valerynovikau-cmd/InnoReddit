@@ -19,7 +19,7 @@ fileprivate struct PostDetailsImageViewValues {
 private typealias constants = PostDetailsImageViewValues
 
 struct PostDetailsImageView: View {
-    @StateObject var store: PostDetailsImageStore
+    @StateObject private var store: PostDetailsImageStore
     
     init(store: PostDetailsImageStore) {
         self._store = StateObject(wrappedValue: store)
