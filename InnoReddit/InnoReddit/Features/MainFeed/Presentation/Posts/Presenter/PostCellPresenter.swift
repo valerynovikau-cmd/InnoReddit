@@ -37,7 +37,9 @@ final class PostCellPresenter {
     
     init(post: Post) {
         self.post = post
-        if self.post.images != nil, !self.post.images!.isEmpty {
+        if self.post.images != nil && !self.post.images!.isEmpty ||
+            self.post.videos != nil && !self.post.videos!.isEmpty
+        {
             let separatedContent = PostTextDataSeparator.separatePostContents(post: post)
             self.postSeparatedText = separatedContent.compactMap({ content in
                 switch content {

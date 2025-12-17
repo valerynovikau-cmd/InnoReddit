@@ -8,70 +8,88 @@
 import Foundation
 
 struct PostTextDataSeparator {
+    private struct PostContents {
+        var images: [PostImage]
+        var videos: [PostVideo]
+        
+        init(images: [PostImage], videos: [PostVideo]) {
+            self.images = images
+            self.videos = videos
+        }
+    }
+    
     static func separatePostContents(post: Post) -> [PostTextContentType] {
         guard let postText = post.text else {
             return []
         }
-        var postImages = post.images ?? []
-        
-        return self.recursiveContentSeparator(content: [.text(postText)], postImages: &postImages)
-    }
-    
-    private static func recursiveContentSeparator(content: [PostTextContentType], postImages: inout [PostImage]) -> [PostTextContentType] {
-        var result: [PostTextContentType] = []
-        guard !postImages.isEmpty else {
-            return content
-        }
-        result = content.flatMap { item -> [PostTextContentType] in
-            switch item {
-            case .text(let text):
-                if let splittedText = self.separateText(text: text, postImages: &postImages) {
-                    return self.recursiveContentSeparator(content: splittedText, postImages: &postImages)
-                } else {
-                    return [item]
-                }
-            case .image:
-                return [item]
+        let postToHandle = PostContents(
+            images: post.images ?? [],
+            videos: post.videos ?? []
+        )
+        do {
+            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+            let matches = detector.matches(
+                in: postText,
+                range: NSRange(postText.startIndex..., in: postText)
+            )
+            
+            if matches.isEmpty {
+                return [.text(postText)]
             }
-        }
-        return result
-    }
-    
-    private static func separateText(text: String, postImages: inout [PostImage]) -> [PostTextContentType]? {
-        guard let imageToFind = postImages.first else {
-            return nil
-        }
-        
-        guard let imageUrl = imageToFind.fullSource?.url ?? imageToFind.previewSource?.url else {
-            postImages.removeFirst()
-            return nil
-        }
-        
-        if let range = text.range(of: imageUrl) {
+            
             var result: [PostTextContentType] = []
-            var before = String(text[..<range.lowerBound])
-            var after = String(text[range.upperBound...])
+            var currentIndex = postText.startIndex
             
-            if !before.isEmpty {
-                if before.hasSuffix("\n\n") {
-                    before.removeSubrange(before.index(before.endIndex, offsetBy: -2)..<before.endIndex)
+            for match in matches {
+                guard let range = Range(match.range, in: postText),
+                      let url = match.url
+                else { continue }
+                
+                if currentIndex < range.lowerBound {
+                    var beforeSubstring = String(postText[currentIndex..<range.lowerBound])
+                    if !beforeSubstring.isEmpty {
+                        if beforeSubstring.hasPrefix("\n\n") {
+                            beforeSubstring.removeSubrange(beforeSubstring.startIndex..<beforeSubstring.index(beforeSubstring.startIndex, offsetBy: 2))
+                        }
+                        if beforeSubstring.hasSuffix("\n\n") {
+                            beforeSubstring.removeSubrange(beforeSubstring.index(beforeSubstring.endIndex, offsetBy: -2)..<beforeSubstring.endIndex)
+                        }
+                        if !beforeSubstring.isEmpty {
+                            result.append(.text(beforeSubstring))
+                        }
+                    }
                 }
-                result.append(.text(before))
+                
+                if let firstImage = postToHandle.images.first(where: { image in
+                    image.fullSource?.url == url.absoluteString
+                }) {
+                    result.append(.image(firstImage))
+                    currentIndex = range.upperBound
+                    continue
+                }
+                
+                if let firstVideo = postToHandle.videos.first(where: { video in
+                    url.absoluteString.range(of: video.id) != nil
+                }) {
+                    result.append(.video(firstVideo))
+                    currentIndex = range.upperBound
+                    continue
+                }
             }
             
-            result.append(.image(imageToFind))
-            
-            if !after.isEmpty {
-                if after.hasPrefix("\n\n") {
-                    after.removeSubrange(after.startIndex..<after.index(after.startIndex, offsetBy: 2))
+            if currentIndex < postText.endIndex {
+                var afterSubstring = String(postText[currentIndex...])
+                if afterSubstring.hasPrefix("\n\n") {
+                    afterSubstring.removeSubrange(afterSubstring.startIndex..<afterSubstring.index(afterSubstring.startIndex, offsetBy: 2))
                 }
-                result.append(.text(after))
+                if !afterSubstring.isEmpty {
+                    result.append(.text(afterSubstring))
+                }
             }
             
-            postImages.removeFirst()
             return result
-        } else {
-            return nil
+        } catch {
+            return [.text(postText)]
         }
     }
 }

@@ -9,4 +9,5 @@ enum PostTextContentType: Equatable, Hashable, Identifiable {
     var id: Self { self }
     case text(String)
     case image(PostImage)
+    case video(PostVideo)
 }

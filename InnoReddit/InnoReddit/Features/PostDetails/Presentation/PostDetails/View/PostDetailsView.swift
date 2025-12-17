@@ -21,7 +21,7 @@ fileprivate struct PostDetailsValues {
     static let headerLabelsVStackSpacing: CGFloat = 3
     static let headerLabelsLineLimit: Int = 1
     
-    static let imageTabViewCornerRadius: CGFloat = 15
+    static let mediaCornerRadius: CGFloat = 15
     static let imageTabViewAspectRatio: CGFloat = 1
 }
 
@@ -159,7 +159,7 @@ struct PostDetailsContentView: View {
                     }
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: constants.imageTabViewCornerRadius))
+            .clipShape(RoundedRectangle(cornerRadius: constants.mediaCornerRadius))
         } else if self.store.content.count > 0 {
             ForEach(self.store.content, id: \.self) { item in
                 view(for: item)
@@ -175,7 +175,10 @@ struct PostDetailsContentView: View {
                 .font(.body)
         case .image(let image):
             imageView(for: image)
-                .clipShape(RoundedRectangle(cornerRadius: constants.imageTabViewCornerRadius))
+                .clipShape(RoundedRectangle(cornerRadius: constants.mediaCornerRadius))
+        case .video(let video):
+            videoView(for: video)
+                .clipShape(RoundedRectangle(cornerRadius: constants.mediaCornerRadius))
         }
     }
     

@@ -14,12 +14,12 @@ final class PostTextDataSeparatorTest: XCTestCase {
     let firstImage = PostImage(
         id: "id",
         fullSource: PostImageSource(
-            url: "image3",
+            url: "https://reddit.com/image3",
             width: 0,
             height: 0
         ),
         previewSource: PostImageSource(
-            url: "image3",
+            url: "https://reddit.com/image3",
             width: 0,
             height: 0
         )
@@ -28,12 +28,12 @@ final class PostTextDataSeparatorTest: XCTestCase {
     let secondImage = PostImage(
         id: "id",
         fullSource: PostImageSource(
-            url: "image1",
+            url: "https://reddit.com/image1",
             width: 0,
             height: 0
         ),
         previewSource: PostImageSource(
-            url: "image1",
+            url: "https://reddit.com/image1",
             width: 0,
             height: 0
         )
@@ -42,12 +42,12 @@ final class PostTextDataSeparatorTest: XCTestCase {
     let thirdImage = PostImage(
         id: "id",
         fullSource: PostImageSource(
-            url: "image2",
+            url: "https://reddit.com/image2",
             width: 0,
             height: 0
         ),
         previewSource: PostImageSource(
-            url: "image2",
+            url: "https://reddit.com/image2",
             width: 0,
             height: 0
         )
@@ -68,6 +68,7 @@ final class PostTextDataSeparatorTest: XCTestCase {
             score: 0,
             created: Date(),
             images: postImages,
+            videos: nil,
             subredditId: "",
             id: "id",
             authorName: nil,
@@ -100,6 +101,7 @@ final class PostTextDataSeparatorTest: XCTestCase {
             score: 0,
             created: Date(),
             images: postImages,
+            videos: nil,
             subredditId: "",
             id: "id",
             authorName: nil,
@@ -126,6 +128,7 @@ final class PostTextDataSeparatorTest: XCTestCase {
             score: 0,
             created: Date(),
             images: postImages,
+            videos: nil,
             subredditId: "",
             id: "id",
             authorName: nil,
@@ -152,6 +155,7 @@ final class PostTextDataSeparatorTest: XCTestCase {
             score: 0,
             created: Date(),
             images: postImages,
+            videos: nil,
             subredditId: "",
             id: "id",
             authorName: nil,
