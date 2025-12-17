@@ -140,24 +140,26 @@ struct PostDetailsContentView: View {
                     .font(.body)
             }
             
-            if let images = self.store.images {
-                TabView {
-                    ForEach(images) { image in
-                        imageView(for: image)
+            Group {
+                if let images = self.store.images {
+                    TabView {
+                        ForEach(images) { image in
+                            imageView(for: image)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(constants.imageTabViewAspectRatio, contentMode: .fit)
+                    .tabViewStyle(.page)
+                    .indexViewStyle(.page(backgroundDisplayMode: .always))
+                }
+                
+                if let videos = self.store.videos {
+                    ForEach(videos) { video in
+                        videoView(for: video)
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: constants.imageTabViewCornerRadius))
-                .frame(maxWidth: .infinity)
-                .aspectRatio(constants.imageTabViewAspectRatio, contentMode: .fit)
-                .tabViewStyle(.page)
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
             }
-            
-            if let videos = self.store.videos {
-                ForEach(videos) { video in
-                    videoView(for: video)
-                }
-            }
+            .clipShape(RoundedRectangle(cornerRadius: constants.imageTabViewCornerRadius))
         } else if self.store.content.count > 0 {
             ForEach(self.store.content, id: \.self) { item in
                 view(for: item)
