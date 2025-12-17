@@ -16,6 +16,7 @@ struct PostDTO: Decodable {
     let ups: Int
     let score: Int
     let created: Double
+    let likes: Bool?
     let preview: PreviewDTO?
     let mediaMetadata: [String: MediaMetadataDTO]?
     let subredditId: String

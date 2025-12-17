@@ -23,6 +23,7 @@ struct Post: Identifiable {
     let id: String
     let authorName: String?
     var commentsCount: Int
+    var votedUp: Bool?
 }
 
 extension Post: Hashable {

@@ -15,8 +15,8 @@ protocol PostDetailsPresenterProtocol: AnyObject {
     func retrieveSubbreditImage()
     
     func onBookmarkTap()
-    func onUpvoteTap()
-    func onDownvoteTap()
+    func onUpvoteTap(state: PostDetailsScoreState)
+    func onDownvoteTap(state: PostDetailsScoreState)
     func onMoreTap()
 }
 
@@ -32,6 +32,7 @@ final class PostDetailsPresenter {
     }
     
     private(set) var post: Post
+    private var isModifyingScore: Bool = false
     
     init(post: Post) {
         self.post = post
@@ -74,18 +75,44 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
     }
     
     func onBookmarkTap() {
-        input?.onBookmarkTap()
+        input?.onBookmark()
     }
     
-    func onUpvoteTap() {
-        input?.onUpvoteTap()
+    func onUpvoteTap(state: PostDetailsScoreState) {
+        guard !isModifyingScore else { return }
+        isModifyingScore = true
+        self.input?.setScoreIsChanging()
+        Task { [weak self] in
+            guard let self else { return }
+            try await Task.sleep(for: .seconds(1))
+            switch state {
+            case .upVoted:
+                self.input?.changeScoreState(newState: .none)
+            default:
+                self.input?.changeScoreState(newState: .upVoted)
+            }
+            self.isModifyingScore = false
+        }
     }
     
-    func onDownvoteTap() {
-        input?.onDownvoteTap()
+    func onDownvoteTap(state: PostDetailsScoreState) {
+        guard !isModifyingScore else { return }
+        isModifyingScore = true
+        self.input?.setScoreIsChanging()
+        Task { [weak self] in
+            guard let self else { return }
+            try await Task.sleep(for: .seconds(1))
+            switch state {
+            case .downVoted:
+                self.input?.changeScoreState(newState: .none)
+            default:
+                self.input?.changeScoreState(newState: .downVoted)
+            }
+            self.isModifyingScore = false
+        }
     }
     
     func onMoreTap() {
-        input?.onMoreTap()
+        input?.onMore()
     }
 }

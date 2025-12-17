@@ -22,7 +22,7 @@ protocol PostDetailsImageStoreProtocol: AnyObject {
 }
 
 final class PostDetailsImageStore: ObservableObject {
-    @Published var viewState: PostImageState = .none
+    @Published private(set) var viewState: PostImageState = .none
     var output: PostDetailsImagePresenterProtocol?
     
     let fadeDuration: TimeInterval = 0.1

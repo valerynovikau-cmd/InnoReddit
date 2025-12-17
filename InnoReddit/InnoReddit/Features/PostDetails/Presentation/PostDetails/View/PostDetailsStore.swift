@@ -13,10 +13,27 @@ protocol PostDetailsStoreProtocol: AnyObject {
     var output: PostDetailsPresenterProtocol? { get set }
     func configure(post: Post, postContent: [PostTextContentType])
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool)
-    func onBookmarkTap()
-    func onUpvoteTap()
-    func onDownvoteTap()
-    func onMoreTap()
+    func onBookmark()
+    func changeScoreState(newState: PostDetailsScoreState)
+    func setScoreIsChanging()
+    func onMore()
+}
+
+enum PostDetailsScoreState {
+    case upVoted
+    case downVoted
+    case none
+}
+
+enum PostDetailsSaveState {
+    case modifyingSave
+    case saved
+    case none
+}
+
+enum SubredditIconToShow {
+    case defaultIcon
+    case iconFromURL(URL)
 }
 
 final class PostDetailsStore: ObservableObject {
@@ -28,17 +45,19 @@ final class PostDetailsStore: ObservableObject {
     
     var output: PostDetailsPresenterProtocol?
     
+    private let fadeDuration: TimeInterval = 0.1
+    
     @Published var title: String?
     @Published var content: [PostTextContentType] = []
     @Published var date: String = ""
     @Published var subredditName: String?
     @Published var authorName: String?
     @Published var score: String = ""
-
-    enum SubredditIconToShow {
-        case defaultIcon
-        case iconFromURL(URL)
-    }
+    
+    @Published private(set) var scoreState: PostDetailsScoreState = .none
+    @Published private(set) var isModifyingScore: Bool = false
+    @Published private(set) var saveState: PostDetailsSaveState = .none
+    
     @Published var iconToShow: SubredditIconToShow?
     
     @Published var images: [PostImage]? = nil
@@ -54,6 +73,15 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         self.authorName = post.authorName
         self.images = post.images
         self.videos = post.videos
+        
+        switch post.votedUp {
+        case true:
+            self.scoreState = .upVoted
+        case false:
+            self.scoreState = .downVoted
+        case nil:
+            self.scoreState = .none
+        }
         
         self.content = postContent
     }
@@ -78,19 +106,24 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         }
     }
     
-    func onBookmarkTap() {
+    func setScoreIsChanging() {
+        withAnimation(.easeIn(duration: fadeDuration)) {
+            self.isModifyingScore = true
+        }
+    }
+    
+    func onBookmark() {
         
     }
     
-    func onUpvoteTap() {
-        
+    func changeScoreState(newState: PostDetailsScoreState) {
+        withAnimation(.easeIn(duration: fadeDuration)) {
+            self.scoreState = newState
+            self.isModifyingScore = false
+        }
     }
     
-    func onDownvoteTap() {
-        
-    }
-    
-    func onMoreTap() {
+    func onMore() {
         
     }
 }

@@ -13,9 +13,13 @@ import AVKit
 
 fileprivate struct PostDetailsValues {
     static let moreSymbolName = "ellipsis"
-    static let upvoteSymbolName = "arrow.up"
-    static let downvoteSymbolName = "arrow.down"
+    static let upvoteSymbolName = "arrowshape.up"
+    static let upvoteSymbolNameVoted = "arrowshape.up.fill"
+    static let downvoteSymbolName = "arrowshape.down"
+    static let downvoteSymbolNameVoted = "arrowshape.down.fill"
+    
     static let bookmarkSymbolName = "bookmark"
+    static let bookmarkSymbolNameSaved = "bookmark.fill"
     
     static let mainVStackSpacing: CGFloat = 10
     static let headerLabelsVStackSpacing: CGFloat = 3
@@ -78,7 +82,7 @@ struct PostDetailsHeaderView: View {
                     case .defaultIcon:
                         Image(asset: Asset.Assets.Images.defaultSubredditAvatar)
                             .resizable()
-                            
+                        
                     case .iconFromURL(let url):
                         KFImage(url)
                             .resizable()
@@ -205,19 +209,40 @@ struct PostDetailsFooterView: View {
     
     var body: some View {
         HStack {
-            Button {
-                self.output?.onUpvoteTap()
-            } label: {
-                Image(systemName: constants.upvoteSymbolName)
+            ZStack {
+                HStack {
+                    Button {
+                        self.output?.onUpvoteTap(state: self.store.scoreState)
+                    } label: {
+                        if self.store.scoreState == .upVoted {
+                            Image(systemName: constants.upvoteSymbolNameVoted)
+                                .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
+                        } else {
+                            Image(systemName: constants.upvoteSymbolName)
+                        }
+                    }
+                    
+                    Text(store.score)
+                        .foregroundStyle(self.store.isModifyingScore ? .tertiary : .primary)
+                    
+                    Button {
+                        self.output?.onDownvoteTap(state: self.store.scoreState)
+                    } label: {
+                        if self.store.scoreState == .downVoted {
+                            Image(systemName: constants.downvoteSymbolNameVoted)
+                                .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
+                        } else {
+                            Image(systemName: constants.downvoteSymbolName)
+                        }
+                    }
+                }
+                .disabled(self.store.isModifyingScore)
+                
+                if self.store.isModifyingScore {
+                    ProgressView()
+                }
             }
             
-            Text(store.score)
-            
-            Button {
-                self.output?.onDownvoteTap()
-            } label: {
-                Image(systemName: constants.downvoteSymbolName)
-            }
             
             Spacer()
             

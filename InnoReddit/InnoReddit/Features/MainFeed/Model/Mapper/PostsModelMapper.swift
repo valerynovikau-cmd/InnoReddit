@@ -59,7 +59,8 @@ final class PostsModelMapper: PostsModelMapperProtocol {
                 subredditId: data.subredditId,
                 id: data.name,
                 authorName: data.author,
-                commentsCount: data.numComments
+                commentsCount: data.numComments,
+                votedUp: data.likes
             )
         })
         return posts
