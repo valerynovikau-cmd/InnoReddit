@@ -27,6 +27,9 @@ fileprivate struct PostDetailsValues {
     
     static let mediaCornerRadius: CGFloat = 15
     static let imageTabViewAspectRatio: CGFloat = 1
+    
+    static let scoreTextMinimalWidth: CGFloat = 25
+    static let scoreTextLineLimit: Int = 1
 }
 
 fileprivate typealias constants = PostDetailsValues
@@ -223,6 +226,8 @@ struct PostDetailsFooterView: View {
                     }
                     
                     Text(store.score)
+                        .frame(minWidth: constants.scoreTextMinimalWidth)
+                        .lineLimit(constants.scoreTextLineLimit)
                         .foregroundStyle(self.store.isModifyingScore ? .tertiary : .primary)
                     
                     Button {

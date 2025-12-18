@@ -19,10 +19,10 @@ protocol PostDetailsStoreProtocol: AnyObject {
     func onMore()
 }
 
-enum PostDetailsScoreState {
-    case upVoted
-    case downVoted
-    case none
+enum PostDetailsScoreState: Int {
+    case upVoted = 1
+    case downVoted = -1
+    case none = 0
 }
 
 enum PostDetailsSaveState {
@@ -120,6 +120,7 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         withAnimation(.easeIn(duration: fadeDuration)) {
             self.scoreState = newState
             self.isModifyingScore = false
+            self.score = "\((output?.post.score ?? 0) + newState.rawValue)"
         }
     }
     

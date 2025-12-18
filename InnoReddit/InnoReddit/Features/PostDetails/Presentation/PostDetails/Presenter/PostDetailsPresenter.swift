@@ -6,6 +6,7 @@
 //
 
 import Factory
+import Foundation
 
 protocol PostDetailsPresenterProtocol: AnyObject {
     var input: PostDetailsStoreProtocol? { get set }
@@ -84,12 +85,20 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
         self.input?.setScoreIsChanging()
         Task { [weak self] in
             guard let self else { return }
-            try await Task.sleep(for: .seconds(1))
-            switch state {
-            case .upVoted:
-                self.input?.changeScoreState(newState: .none)
-            default:
-                self.input?.changeScoreState(newState: .upVoted)
+            do {
+                if state == .upVoted {
+                    try await self.networkService.sendVote(vote: .none, id: self.post.id)
+                    self.input?.changeScoreState(newState: .none)
+                } else {
+                    try await self.networkService.sendVote(vote: .up, id: self.post.id)
+                    self.input?.changeScoreState(newState: .upVoted)
+                }
+            } catch let error as APIError {
+                print(error.errorMessage)
+                self.input?.changeScoreState(newState: state)
+            } catch {
+                print(error.localizedDescription)
+                self.input?.changeScoreState(newState: state)
             }
             self.isModifyingScore = false
         }
@@ -101,12 +110,21 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
         self.input?.setScoreIsChanging()
         Task { [weak self] in
             guard let self else { return }
-            try await Task.sleep(for: .seconds(1))
-            switch state {
-            case .downVoted:
-                self.input?.changeScoreState(newState: .none)
-            default:
-                self.input?.changeScoreState(newState: .downVoted)
+            do {
+                if state == .downVoted {
+                    try await self.networkService.sendVote(vote: .none, id: self.post.id)
+                    self.input?.changeScoreState(newState: .none)
+                } else {
+                    try await self.networkService.sendVote(vote: .down, id: self.post.id)
+                    self.input?.changeScoreState(newState: .downVoted)
+                }
+                print("success")
+            } catch let error as APIError {
+                print(error.errorMessage)
+                self.input?.changeScoreState(newState: state)
+            } catch {
+                print(error.localizedDescription)
+                self.input?.changeScoreState(newState: state)
             }
             self.isModifyingScore = false
         }
