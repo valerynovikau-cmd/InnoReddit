@@ -74,65 +74,71 @@ final class PostsModelMapper: PostsModelMapperProtocol {
         for value in values {
             switch value.e {
             case "Image":
-                guard let previews = value.p,
-                      let id = value.id
-                else { break }
-                
-                var previewSource: PostImageSource?
-                var fullSource: PostImageSource?
-                
-                if previews.count > 0,
-                   let previewImage = previews.last,
-                   let previewUrl = previewImage.u,
-                   let previewHeight = previewImage.y,
-                   let previewWidth = previewImage.x
-                {
-                    previewSource = PostImageSource(
-                        url: previewUrl,
-                        width: previewWidth,
-                        height: previewHeight
-                    )
-                }
-                
-                if let fullImage = value.s,
-                   let fullUrl = fullImage.u,
-                   let fullWidth = fullImage.x,
-                   let fullHeight = fullImage.y {
-                    fullSource = PostImageSource(
-                        url: fullUrl,
-                        width: fullWidth,
-                        height: fullHeight
-                    )
-                }
-                
-                guard fullSource != nil || previewSource != nil else { break }
-                
-                media.images.append(
-                    PostImage(
-                        id: id,
-                        fullSource: fullSource,
-                        previewSource: previewSource
-                    )
-                )
+                guard let image = self.metadataImage(value: value) else { break }
+                media.images.append(image)
             case "RedditVideo":
-                guard let id = value.id,
-                      let hlsUrl = value.hlsUrl,
-                      let height = value.y,
-                      let width = value.x
-                else { break }
-                media.videos.append(
-                    PostVideo(
-                        id: id,
-                        hlsUrl: hlsUrl,
-                        height: height,
-                        width: width
-                    )
-                )
+                guard let video = self.metadataVideo(value: value) else { break }
+                media.videos.append(video)
             default:
                 break
             }
         }
         return media
+    }
+    
+    private func metadataImage(value: MediaMetadataDTO) -> PostImage? {
+        guard let previews = value.p,
+              let id = value.id
+        else { return nil }
+        
+        var previewSource: PostImageSource?
+        var fullSource: PostImageSource?
+        
+        if previews.count > 0,
+           let previewImage = previews.last,
+           let previewUrl = previewImage.u,
+           let previewHeight = previewImage.y,
+           let previewWidth = previewImage.x
+        {
+            previewSource = PostImageSource(
+                url: previewUrl,
+                width: previewWidth,
+                height: previewHeight
+            )
+        }
+        
+        if let fullImage = value.s,
+           let fullUrl = fullImage.u,
+           let fullWidth = fullImage.x,
+           let fullHeight = fullImage.y {
+            fullSource = PostImageSource(
+                url: fullUrl,
+                width: fullWidth,
+                height: fullHeight
+            )
+        }
+        
+        guard fullSource != nil || previewSource != nil else { return nil }
+        
+        return PostImage(
+            id: id,
+            fullSource: fullSource,
+            previewSource: previewSource
+        )
+    }
+    
+    private func metadataVideo(value: MediaMetadataDTO) -> PostVideo? {
+        guard let id = value.id,
+              let hlsUrl = value.hlsUrl,
+              let height = value.y,
+              let width = value.x
+        else { return nil }
+        return PostVideo(
+            id: id,
+            hlsUrl: hlsUrl,
+            height: height,
+            width: width
+        )
     }
     
     private func singleVideo(data: PostDTO) -> PostVideo? {
