@@ -93,11 +93,7 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
                     try await self.networkService.sendVote(vote: .up, id: self.post.id)
                     self.input?.changeScoreState(newState: .upVoted)
                 }
-            } catch let error as APIError {
-                print(error.errorMessage)
-                self.input?.changeScoreState(newState: state)
             } catch {
-                print(error.localizedDescription)
                 self.input?.changeScoreState(newState: state)
             }
             self.isModifyingScore = false
@@ -118,12 +114,7 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
                     try await self.networkService.sendVote(vote: .down, id: self.post.id)
                     self.input?.changeScoreState(newState: .downVoted)
                 }
-                print("success")
-            } catch let error as APIError {
-                print(error.errorMessage)
-                self.input?.changeScoreState(newState: state)
             } catch {
-                print(error.localizedDescription)
                 self.input?.changeScoreState(newState: state)
             }
             self.isModifyingScore = false

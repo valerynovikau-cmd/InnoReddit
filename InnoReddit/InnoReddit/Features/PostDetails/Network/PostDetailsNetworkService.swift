@@ -5,15 +5,15 @@
 //  Created by Валерий Новиков on 8.12.25.
 //
 
-protocol PostDetailsNetworkServiceProtocol: AnyObject {
-    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO
-    func sendVote(vote: ScoreDirection, id: String) async throws(APIError)
-}
-
 enum ScoreDirection: String {
     case down = "-1"
     case none = "0"
     case up = "1"
+}
+
+protocol PostDetailsNetworkServiceProtocol: AnyObject {
+    func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO
+    func sendVote(vote: ScoreDirection, id: String) async throws(APIError)
 }
 
 final class PostDetailsNetworkService: BaseAPIClient { }

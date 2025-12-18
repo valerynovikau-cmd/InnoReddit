@@ -129,7 +129,6 @@ struct PostDetailsHeaderView: View {
 // MARK: - Post content view
 struct PostDetailsContentView: View {
     @ObservedObject private(set) var store: PostDetailsStore
-    private let player = AVPlayer(url: URL(string: "https://v.redd.it/qqb2a5hr9c7g1/CMAF_1080.mp4?source=fallback")!)
     
     var body: some View {
         if let title = self.store.title {
