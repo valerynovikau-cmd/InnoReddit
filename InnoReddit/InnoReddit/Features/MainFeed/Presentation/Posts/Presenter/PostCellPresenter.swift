@@ -22,7 +22,7 @@ protocol PostCellPresenterProtocol: AnyObject {
     func onSubredditTap()
     
     func retrieveSubredditIconURL()
-    func retrieveScoreAndCommentsCount()
+    func updatePost()
 }
 
 final class PostCellPresenter {
@@ -85,13 +85,14 @@ extension PostCellPresenter: PostCellPresenterProtocol {
         }
     }
     
-    func retrieveScoreAndCommentsCount() {
+    func updatePost() {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let (score, commentsCount) = try await self.networkService.getPostScoreAndCommentCount(postName: self.post.id)
-                self.post.commentsCount = commentsCount
-                self.post.score = score
+                let post = try await self.networkService.updatePost(postName: self.post.id)
+                self.post.commentsCount = post.numComments
+                self.post.score = post.score
+                self.post.votedUp = post.likes
                 self.input?.onScoreAndCommentsCountUpdated()
             }
         }

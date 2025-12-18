@@ -275,7 +275,7 @@ extension PostsViewController: PostCellDelegate {
         viewController.didMove(toParent: self)
     }
     
-    func updatedScoreAndCommentsCount(post: Post) {
+    func updatedPost(post: Post) {
         self.output?.updatePost(post: post)
     }
 }

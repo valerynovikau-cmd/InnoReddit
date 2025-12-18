@@ -11,7 +11,7 @@ import Factory
 protocol PostsNetworkServiceProtocol {
     func getPosts(after: String?, category: MainFeedCategory) async throws(APIError) -> ListingDTO
     func getSubredditIconURL(subredditName: String) async throws(APIError) -> SubredditDTO
-    func getPostScoreAndCommentCount(postName: String) async throws(APIError) -> (score: Int, commentCount: Int)
+    func updatePost(postName: String) async throws(APIError) -> PostDTO
 }
 
 final class PostsNetworkService: BaseAPIClient { }
@@ -33,11 +33,11 @@ extension PostsNetworkService: PostsNetworkServiceProtocol {
         return response
     }
     
-    func getPostScoreAndCommentCount(postName: String) async throws(APIError) -> (score: Int, commentCount: Int) {
+    func updatePost(postName: String) async throws(APIError) -> PostDTO {
         let response: ListingDTO = try await self.sendRequest(path: "/by_id/\(postName)", httpMethod: .GET)
         guard let post = response.data.children.first?.data else {
             throw .invalidResponse
         }
-        return (post.score, post.numComments)
+        return post
     }
 }

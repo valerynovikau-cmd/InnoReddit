@@ -26,7 +26,7 @@ protocol PostCellProtocol: AnyObject {
 
 protocol PostCellDelegate: AnyObject {
     func willShowPostCell(viewController: UIViewController)
-    func updatedScoreAndCommentsCount(post: Post)
+    func updatedPost(post: Post)
 }
 
 final class PostCell: UICollectionViewCell {
@@ -65,8 +65,10 @@ final class PostCell: UICollectionViewCell {
     }
     
     private enum PostCellButtonType: String {
-        case upvote = "arrow.up"
-        case downvote = "arrow.down"
+        case upvote = "arrowshape.up"
+        case upvoteVoted = "arrowshape.up.fill"
+        case downvote = "arrowshape.down"
+        case downvoteVoted = "arrowshape.down.fill"
         case comment = "message"
         case bookmark = "bookmark"
     }
@@ -369,7 +371,29 @@ final class PostCell: UICollectionViewCell {
     private func setupBottomButtonsInfo() {
         guard let post = self.output?.post else { return }
         scoreLabel.text = "\(post.score)"
+        self.setupScoreButtons()
         commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bottomLabelsFontSize)
+    }
+    
+    private func setupScoreButtons() {
+        guard let post = self.output?.post else { return }
+        switch post.votedUp {
+        case true:
+            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvoteVoted.rawValue)
+            upvoteButton.tintColor = Asset.Assets.Colors.innoOrangeColor.color
+            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvote.rawValue)
+            downvoteButton.tintColor = .label
+        case false:
+            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvote.rawValue)
+            upvoteButton.tintColor = .label
+            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvoteVoted.rawValue)
+            downvoteButton.tintColor = Asset.Assets.Colors.innoOrangeColor.color
+        default:
+            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvote.rawValue)
+            upvoteButton.tintColor = .label
+            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvote.rawValue)
+            downvoteButton.tintColor = .label
+        }
     }
     
     // MARK: - Lifecycle methods
@@ -424,13 +448,13 @@ extension PostCell: PostCellProtocol {
     }
     
     func onCollectionRefreshed() {
-        self.output?.retrieveScoreAndCommentsCount()
+        self.output?.updatePost()
     }
     
     func onScoreAndCommentsCountUpdated() {
         self.setupBottomButtonsInfo()
         guard let post = self.output?.post else { return }
-        self.delegate?.updatedScoreAndCommentsCount(post: post)
+        self.delegate?.updatedPost(post: post)
     }
     
     func onPostTap() {
