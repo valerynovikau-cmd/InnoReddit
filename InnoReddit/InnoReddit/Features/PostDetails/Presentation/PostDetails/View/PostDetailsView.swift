@@ -216,12 +216,8 @@ struct PostDetailsFooterView: View {
                     Button {
                         self.output?.onUpvoteTap(state: self.store.scoreState)
                     } label: {
-                        if self.store.scoreState == .upVoted {
-                            Image(systemName: constants.upvoteSymbolNameVoted)
-                                .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
-                        } else {
-                            Image(systemName: constants.upvoteSymbolName)
-                        }
+                        Image(systemName: self.store.scoreState == .upVoted ? constants.upvoteSymbolNameVoted : constants.upvoteSymbolName)
+                            .tint(self.store.scoreState == .upVoted ? Asset.Assets.Colors.innoOrangeColor.swiftUIColor : .primary)
                     }
                     
                     Text(store.score)
@@ -232,12 +228,8 @@ struct PostDetailsFooterView: View {
                     Button {
                         self.output?.onDownvoteTap(state: self.store.scoreState)
                     } label: {
-                        if self.store.scoreState == .downVoted {
-                            Image(systemName: constants.downvoteSymbolNameVoted)
-                                .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
-                        } else {
-                            Image(systemName: constants.downvoteSymbolName)
-                        }
+                        Image(systemName: self.store.scoreState == .downVoted ? constants.downvoteSymbolNameVoted : constants.downvoteSymbolName)
+                            .tint(self.store.scoreState == .downVoted ? Asset.Assets.Colors.innoOrangeColor.swiftUIColor : .primary)
                     }
                 }
             }
@@ -248,12 +240,8 @@ struct PostDetailsFooterView: View {
                 Button {
                     self.output?.onBookmarkTap(state: self.store.saveState)
                 } label: {
-                    if self.store.saveState == .none {
-                        Image(systemName: constants.bookmarkSymbolName)
-                    } else {
-                        Image(systemName: constants.bookmarkSymbolNameSaved)
-                            .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
-                    }
+                    Image(systemName: self.store.saveState == .none ? constants.bookmarkSymbolName : constants.bookmarkSymbolNameSaved)
+                        .tint(self.store.saveState == .none ? .primary : Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
                 }
             }
         }
