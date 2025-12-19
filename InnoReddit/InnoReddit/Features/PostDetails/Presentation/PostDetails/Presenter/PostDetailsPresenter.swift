@@ -15,7 +15,7 @@ protocol PostDetailsPresenterProtocol: AnyObject {
     
     func retrieveSubbreditImage()
     
-    func onBookmarkTap()
+    func onBookmarkTap(state: PostDetailsSaveState)
     func onUpvoteTap(state: PostDetailsScoreState)
     func onDownvoteTap(state: PostDetailsScoreState)
     func onMoreTap()
@@ -34,6 +34,7 @@ final class PostDetailsPresenter {
     
     private(set) var post: Post
     private var isModifyingScore: Bool = false
+    private var isModifyingSave: Bool = false
     
     init(post: Post) {
         self.post = post
@@ -75,8 +76,25 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
         self.input?.onSubredditIconUpdated(iconURL: subredditIconURL, shouldAnimate: shouldAnimate)
     }
     
-    func onBookmarkTap() {
-        input?.onBookmark()
+    func onBookmarkTap(state: PostDetailsSaveState) {
+        guard !isModifyingSave else { return }
+        isModifyingSave = true
+        self.input?.setSaveIsChanging()
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                var newState: PostDetailsSaveState
+                if state == .saved {
+                    newState = .none
+                    try await self.networkService.unsavePost(postId: self.post.id)
+                } else {
+                    newState = .saved
+                    try await self.networkService.savePost(postId: self.post.id)
+                }
+                self.input?.changeSaveState(newState: newState)
+            } catch { }
+            self.isModifyingSave = false
+        }
     }
     
     func onUpvoteTap(state: PostDetailsScoreState) {
@@ -86,16 +104,18 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
         Task { [weak self] in
             guard let self else { return }
             do {
+                var vote: ScoreDirection
+                var newState: PostDetailsScoreState
                 if state == .upVoted {
-                    try await self.networkService.sendVote(vote: .none, id: self.post.id)
-                    self.input?.changeScoreState(newState: .none)
+                    vote = .none
+                    newState = .none
                 } else {
-                    try await self.networkService.sendVote(vote: .up, id: self.post.id)
-                    self.input?.changeScoreState(newState: .upVoted)
+                    vote = .up
+                    newState = .upVoted
                 }
-            } catch {
-                self.input?.changeScoreState(newState: state)
-            }
+                try await self.networkService.sendVote(vote: vote, id: self.post.id)
+                self.input?.changeScoreState(newState: newState)
+            } catch { }
             self.isModifyingScore = false
         }
     }
@@ -107,16 +127,18 @@ extension PostDetailsPresenter: PostDetailsPresenterProtocol {
         Task { [weak self] in
             guard let self else { return }
             do {
+                var vote: ScoreDirection
+                var newState: PostDetailsScoreState
                 if state == .downVoted {
-                    try await self.networkService.sendVote(vote: .none, id: self.post.id)
-                    self.input?.changeScoreState(newState: .none)
+                    vote = .none
+                    newState = .none
                 } else {
-                    try await self.networkService.sendVote(vote: .down, id: self.post.id)
-                    self.input?.changeScoreState(newState: .downVoted)
+                    vote = .down
+                    newState = .downVoted
                 }
-            } catch {
-                self.input?.changeScoreState(newState: state)
-            }
+                try await self.networkService.sendVote(vote: vote, id: self.post.id)
+                self.input?.changeScoreState(newState: newState)
+            } catch { }
             self.isModifyingScore = false
         }
     }

@@ -13,9 +13,13 @@ protocol PostDetailsStoreProtocol: AnyObject {
     var output: PostDetailsPresenterProtocol? { get set }
     func configure(post: Post, postContent: [PostTextContentType])
     func onSubredditIconUpdated(iconURL: String?, shouldAnimate: Bool)
-    func onBookmark()
+    
     func changeScoreState(newState: PostDetailsScoreState)
     func setScoreIsChanging()
+    
+    func changeSaveState(newState: PostDetailsSaveState)
+    func setSaveIsChanging()
+    
     func onMore()
 }
 
@@ -26,7 +30,6 @@ enum PostDetailsScoreState: Int {
 }
 
 enum PostDetailsSaveState {
-    case modifyingSave
     case saved
     case none
 }
@@ -56,7 +59,9 @@ final class PostDetailsStore: ObservableObject {
     
     @Published private(set) var scoreState: PostDetailsScoreState = .none
     @Published private(set) var isModifyingScore: Bool = false
+    
     @Published private(set) var saveState: PostDetailsSaveState = .none
+    @Published private(set) var isModifyingSave: Bool = false
     
     @Published var iconToShow: SubredditIconToShow?
     
@@ -81,6 +86,12 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
             self.scoreState = .downVoted
         case nil:
             self.scoreState = .none
+        }
+        
+        if post.saved {
+            self.saveState = .saved
+        } else {
+            self.saveState = .none
         }
         
         self.content = postContent
@@ -112,15 +123,24 @@ extension PostDetailsStore: PostDetailsStoreProtocol {
         }
     }
     
-    func onBookmark() {
-        
-    }
-    
     func changeScoreState(newState: PostDetailsScoreState) {
         withAnimation(.easeIn(duration: fadeDuration)) {
             self.scoreState = newState
             self.isModifyingScore = false
             self.score = "\((output?.post.score ?? 0) + newState.rawValue)"
+        }
+    }
+    
+    func setSaveIsChanging() {
+        withAnimation(.easeIn(duration: fadeDuration)) {
+            self.isModifyingSave = true
+        }
+    }
+    
+    func changeSaveState(newState: PostDetailsSaveState) {
+        withAnimation(.easeIn(duration: fadeDuration)) {
+            self.saveState = newState
+            self.isModifyingSave = false
         }
     }
     

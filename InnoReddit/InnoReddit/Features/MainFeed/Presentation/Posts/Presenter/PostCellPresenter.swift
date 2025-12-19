@@ -93,7 +93,8 @@ extension PostCellPresenter: PostCellPresenterProtocol {
                 self.post.commentsCount = post.numComments
                 self.post.score = post.score
                 self.post.votedUp = post.likes
-                self.input?.onScoreAndCommentsCountUpdated()
+                self.post.saved = post.saved
+                self.input?.onPostUpdated()
             }
         }
     }

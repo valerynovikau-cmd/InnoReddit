@@ -14,7 +14,7 @@ protocol PostCellProtocol: AnyObject {
     
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
     func onCollectionRefreshed()
-    func onScoreAndCommentsCountUpdated()
+    func onPostUpdated()
     
     func onPostTap()
     func onUpvoteTap()
@@ -71,6 +71,7 @@ final class PostCell: UICollectionViewCell {
         case downvoteVoted = "arrowshape.down.fill"
         case comment = "message"
         case bookmark = "bookmark"
+        case bookmarkSaved = "bookmark.fill"
     }
 
     private typealias constants = PostCellValues
@@ -372,28 +373,52 @@ final class PostCell: UICollectionViewCell {
         guard let post = self.output?.post else { return }
         scoreLabel.text = "\(post.score)"
         self.setupScoreButtons()
+        self.setupBookmarkButton()
         commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bottomLabelsFontSize)
     }
     
     private func setupScoreButtons() {
         guard let post = self.output?.post else { return }
+        var upvoteSymbolName: String
+        var upvoteTintColor: UIColor
+        var downVoteSymbolName: String
+        var downvoteTintColor: UIColor
         switch post.votedUp {
         case true:
-            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvoteVoted.rawValue)
-            upvoteButton.tintColor = Asset.Assets.Colors.innoOrangeColor.color
-            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvote.rawValue)
-            downvoteButton.tintColor = .label
+            upvoteSymbolName = PostCellButtonType.upvoteVoted.rawValue
+            upvoteTintColor = Asset.Assets.Colors.innoOrangeColor.color
+            downVoteSymbolName = PostCellButtonType.downvote.rawValue
+            downvoteTintColor = .label
         case false:
-            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvote.rawValue)
-            upvoteButton.tintColor = .label
-            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvoteVoted.rawValue)
-            downvoteButton.tintColor = Asset.Assets.Colors.innoOrangeColor.color
+            upvoteSymbolName = PostCellButtonType.upvote.rawValue
+            upvoteTintColor = .label
+            downVoteSymbolName = PostCellButtonType.downvoteVoted.rawValue
+            downvoteTintColor = Asset.Assets.Colors.innoOrangeColor.color
         default:
-            upvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.upvote.rawValue)
-            upvoteButton.tintColor = .label
-            downvoteButton.setSystemImageConfiguration(systemName: PostCellButtonType.downvote.rawValue)
-            downvoteButton.tintColor = .label
+            upvoteSymbolName = PostCellButtonType.upvote.rawValue
+            upvoteTintColor = .label
+            downVoteSymbolName = PostCellButtonType.downvote.rawValue
+            downvoteTintColor = .label
         }
+        upvoteButton.setSystemImageConfiguration(systemName: upvoteSymbolName)
+        upvoteButton.tintColor = upvoteTintColor
+        downvoteButton.setSystemImageConfiguration(systemName: downVoteSymbolName)
+        downvoteButton.tintColor = downvoteTintColor
+    }
+    
+    private func setupBookmarkButton() {
+        guard let post = self.output?.post else { return }
+        var symoblName: String
+        var tintColor: UIColor
+        if post.saved {
+            symoblName = PostCellButtonType.bookmarkSaved.rawValue
+            tintColor = Asset.Assets.Colors.innoOrangeColor.color
+        } else {
+            symoblName = PostCellButtonType.bookmark.rawValue
+            tintColor = .label
+        }
+        bookmarkButton.setSystemImageConfiguration(systemName: symoblName)
+        bookmarkButton.tintColor = tintColor
     }
     
     // MARK: - Lifecycle methods
@@ -451,7 +476,7 @@ extension PostCell: PostCellProtocol {
         self.output?.updatePost()
     }
     
-    func onScoreAndCommentsCountUpdated() {
+    func onPostUpdated() {
         self.setupBottomButtonsInfo()
         guard let post = self.output?.post else { return }
         self.delegate?.updatedPost(post: post)

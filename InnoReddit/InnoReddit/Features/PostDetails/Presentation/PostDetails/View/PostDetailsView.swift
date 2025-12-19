@@ -211,7 +211,7 @@ struct PostDetailsFooterView: View {
     
     var body: some View {
         HStack {
-            ZStack {
+            PostDetailsLoaderView(isShowingLoader: self.store.isModifyingScore) {
                 HStack {
                     Button {
                         self.output?.onUpvoteTap(state: self.store.scoreState)
@@ -240,23 +240,49 @@ struct PostDetailsFooterView: View {
                         }
                     }
                 }
-                .disabled(self.store.isModifyingScore)
-                
-                if self.store.isModifyingScore {
-                    ProgressView()
-                }
             }
-            
             
             Spacer()
             
-            Button {
-                self.output?.onBookmarkTap()
-            } label: {
-                Image(systemName: constants.bookmarkSymbolName)
+            PostDetailsLoaderView(isShowingLoader: self.store.isModifyingSave) {
+                Button {
+                    self.output?.onBookmarkTap(state: self.store.saveState)
+                } label: {
+                    if self.store.saveState == .none {
+                        Image(systemName: constants.bookmarkSymbolName)
+                    } else {
+                        Image(systemName: constants.bookmarkSymbolNameSaved)
+                            .tint(Asset.Assets.Colors.innoOrangeColor.swiftUIColor)
+                    }
+                }
             }
         }
         .font(.title)
         .tint(Color.primary)
+    }
+}
+
+// MARK: - View with loader
+struct PostDetailsLoaderView<Content: View>: View {
+    let isShowingLoader: Bool
+    let content: Content
+    
+    init(
+        isShowingLoader: Bool,
+        @ViewBuilder view: () -> Content
+    ) {
+        self.isShowingLoader = isShowingLoader
+        self.content = view()
+    }
+    
+    var body: some View {
+        ZStack {
+            content
+                .disabled(isShowingLoader)
+            
+            if isShowingLoader {
+                ProgressView()
+            }
+        }
     }
 }

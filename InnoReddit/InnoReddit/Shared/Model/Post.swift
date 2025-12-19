@@ -11,7 +11,7 @@ struct Post: Identifiable {
     let subreddit: String?
     let text: String?
     let authorId: String?
-    let saved: Bool
+    var saved: Bool
     let title: String?
     let downs: Int
     let ups: Int
