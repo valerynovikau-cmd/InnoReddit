@@ -12,6 +12,7 @@ protocol PostCellPresenterProtocol: AnyObject {
     var router: MainScreenRouterProtocol? { get set }
     
     var post: Post { get }
+    var postSeparatedText: String? { get }
     
     func onPostTap()
     func onUpvoteTap()
@@ -21,7 +22,7 @@ protocol PostCellPresenterProtocol: AnyObject {
     func onSubredditTap()
     
     func retrieveSubredditIconURL()
-    func retrieveScoreAndCommentsCount()
+    func updatePost()
 }
 
 final class PostCellPresenter {
@@ -32,9 +33,25 @@ final class PostCellPresenter {
     @Injected(\.subredditIconsMemoryCache) private var cache: SubredditIconsMemoryCache
     
     private(set) var post: Post
+    private(set) var postSeparatedText: String?
     
     init(post: Post) {
         self.post = post
+        if self.post.images != nil && !self.post.images!.isEmpty ||
+            self.post.videos != nil && !self.post.videos!.isEmpty
+        {
+            let separatedContent = PostTextDataSeparator.separatePostContents(post: post)
+            self.postSeparatedText = separatedContent.compactMap({ content in
+                switch content {
+                case .text(let text):
+                    return text
+                default:
+                    return nil
+                }
+            }).joined(separator: " ")
+        } else {
+            self.postSeparatedText = self.post.text
+        }
     }
 }
 
@@ -68,14 +85,16 @@ extension PostCellPresenter: PostCellPresenterProtocol {
         }
     }
     
-    func retrieveScoreAndCommentsCount() {
+    func updatePost() {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let (score, commentsCount) = try await self.networkService.getPostScoreAndCommentCount(postName: self.post.id)
-                self.post.commentsCount = commentsCount
-                self.post.score = score
-                self.input?.onScoreAndCommentsCountUpdated()
+                let post = try await self.networkService.updatePost(postName: self.post.id)
+                self.post.commentsCount = post.numComments
+                self.post.score = post.score
+                self.post.votedUp = post.likes
+                self.post.saved = post.saved
+                self.input?.onPostUpdated()
             }
         }
     }
@@ -86,7 +105,7 @@ extension PostCellPresenter: PostCellPresenterProtocol {
     }
     
     func onPostTap() {
-        
+        self.router?.showPostDetails(post: post)
     }
     
     func onUpvoteTap() {

@@ -14,7 +14,7 @@ protocol PostCellProtocol: AnyObject {
     
     func onSubredditIconURLRetrieved(subredditIconURL: String?, shouldAnimate: Bool)
     func onCollectionRefreshed()
-    func onScoreAndCommentsCountUpdated()
+    func onPostUpdated()
     
     func onPostTap()
     func onUpvoteTap()
@@ -26,7 +26,7 @@ protocol PostCellProtocol: AnyObject {
 
 protocol PostCellDelegate: AnyObject {
     func willShowPostCell(viewController: UIViewController)
-    func updatedScoreAndCommentsCount(post: Post)
+    func updatedPost(post: Post)
 }
 
 final class PostCell: UICollectionViewCell {
@@ -65,17 +65,20 @@ final class PostCell: UICollectionViewCell {
     }
     
     private enum PostCellButtonType: String {
-        case upvote = "arrow.up"
-        case downvote = "arrow.down"
+        case upvote = "arrowshape.up"
+        case upvoteVoted = "arrowshape.up.fill"
+        case downvote = "arrowshape.down"
+        case downvoteVoted = "arrowshape.down.fill"
         case comment = "message"
         case bookmark = "bookmark"
+        case bookmarkSaved = "bookmark.fill"
     }
 
     private typealias constants = PostCellValues
     
     // MARK: - Content view
     private func configureContentView() {
-        contentView.backgroundColor = Asset.Colors.innoSecondaryBackgroundColor.color
+        contentView.backgroundColor = Asset.Assets.Colors.innoSecondaryBackgroundColor.color
         contentView.layer.cornerRadius = constants.outerCornerRadius
         contentView.layer.masksToBounds = true
         
@@ -95,7 +98,7 @@ final class PostCell: UICollectionViewCell {
         imageView.isUserInteractionEnabled = true
         imageView.contentMode = .scaleAspectFit
         imageView.addGestureRecognizer(tapGestureRecognizer)
-        imageView.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        imageView.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
         imageView.layer.cornerRadius = constants.subredditCornerRadius
         imageView.clipsToBounds = true
         return imageView
@@ -330,9 +333,10 @@ final class PostCell: UICollectionViewCell {
     }
     
     // MARK: - Cell setup
+    private lazy var dateFormatter = RelativeDateTimeFormatter()
+    
     private func setupHeaderInfo() {
         guard let post = self.output?.post else { return }
-        let dateFormatter = RelativeDateTimeFormatter()
         dateFormatter.dateTimeStyle = .numeric
         let relativeDate = dateFormatter.localizedString(for: post.created, relativeTo: Date())
         dateLabel.text = relativeDate
@@ -341,12 +345,12 @@ final class PostCell: UICollectionViewCell {
     }
     
     private func setupBodyTextInfo() {
-        guard let post = self.output?.post else { return }
-        if let text = post.text, !text.isEmpty {
+        guard let text = self.output?.postSeparatedText else { return }
+        if !text.isEmpty {
             postContentStackView.addArrangedSubview(bodyLabel)
             bodyLabel.text = text
         }
-        titleLabel.text = post.title ?? ""
+        titleLabel.text = self.output?.post.title ?? ""
     }
     
     private func setupPostsImages() {
@@ -368,7 +372,53 @@ final class PostCell: UICollectionViewCell {
     private func setupBottomButtonsInfo() {
         guard let post = self.output?.post else { return }
         scoreLabel.text = "\(post.score)"
+        self.setupScoreButtons()
+        self.setupBookmarkButton()
         commentButton.setTitleConfiguration(titleText: "\(post.commentsCount)", fontSize: constants.bottomLabelsFontSize)
+    }
+    
+    private func setupScoreButtons() {
+        guard let post = self.output?.post else { return }
+        var upvoteSymbolName: String
+        var upvoteTintColor: UIColor
+        var downVoteSymbolName: String
+        var downvoteTintColor: UIColor
+        switch post.votedUp {
+        case true:
+            upvoteSymbolName = PostCellButtonType.upvoteVoted.rawValue
+            upvoteTintColor = Asset.Assets.Colors.innoOrangeColor.color
+            downVoteSymbolName = PostCellButtonType.downvote.rawValue
+            downvoteTintColor = .label
+        case false:
+            upvoteSymbolName = PostCellButtonType.upvote.rawValue
+            upvoteTintColor = .label
+            downVoteSymbolName = PostCellButtonType.downvoteVoted.rawValue
+            downvoteTintColor = Asset.Assets.Colors.innoOrangeColor.color
+        default:
+            upvoteSymbolName = PostCellButtonType.upvote.rawValue
+            upvoteTintColor = .label
+            downVoteSymbolName = PostCellButtonType.downvote.rawValue
+            downvoteTintColor = .label
+        }
+        upvoteButton.setSystemImageConfiguration(systemName: upvoteSymbolName)
+        upvoteButton.tintColor = upvoteTintColor
+        downvoteButton.setSystemImageConfiguration(systemName: downVoteSymbolName)
+        downvoteButton.tintColor = downvoteTintColor
+    }
+    
+    private func setupBookmarkButton() {
+        guard let post = self.output?.post else { return }
+        var symoblName: String
+        var tintColor: UIColor
+        if post.saved {
+            symoblName = PostCellButtonType.bookmarkSaved.rawValue
+            tintColor = Asset.Assets.Colors.innoOrangeColor.color
+        } else {
+            symoblName = PostCellButtonType.bookmark.rawValue
+            tintColor = .label
+        }
+        bookmarkButton.setSystemImageConfiguration(systemName: symoblName)
+        bookmarkButton.tintColor = tintColor
     }
     
     // MARK: - Lifecycle methods
@@ -412,7 +462,7 @@ extension PostCell: PostCellProtocol {
                 options: options
             )
         } else {
-            self.subredditImageView.image = Asset.Images.defaultSubredditAvatar.image
+            self.subredditImageView.image = Asset.Assets.Images.defaultSubredditAvatar.image
             if shouldAnimate {
                 subredditImageView.alpha = 0
                 UIView.animate(withDuration: constants.fadeInAnimationDuration) { [weak self] in
@@ -423,17 +473,17 @@ extension PostCell: PostCellProtocol {
     }
     
     func onCollectionRefreshed() {
-        self.output?.retrieveScoreAndCommentsCount()
+        self.output?.updatePost()
     }
     
-    func onScoreAndCommentsCountUpdated() {
+    func onPostUpdated() {
         self.setupBottomButtonsInfo()
         guard let post = self.output?.post else { return }
-        self.delegate?.updatedScoreAndCommentsCount(post: post)
+        self.delegate?.updatedPost(post: post)
     }
     
     func onPostTap() {
-        
+        self.output?.onPostTap()
     }
     
     func onUpvoteTap() {

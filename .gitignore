@@ -91,3 +91,8 @@ TestingPurposes/
 # =========================
 *+Preview.swift
 ViewControllerPreview.swift
+
+# =========================
+# Swiftgen config for test assets
+# =========================
+swiftgen-testing.yml

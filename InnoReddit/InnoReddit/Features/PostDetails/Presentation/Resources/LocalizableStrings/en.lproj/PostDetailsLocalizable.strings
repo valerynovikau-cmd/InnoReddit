@@ -1,0 +1,11 @@
+/* 
+  PostDetailsLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 8.12.25.
+  
+*/
+
+"deletedSubreddit" = "[deleted]";
+"deletedAuthor" = "[deleted]";
+"imageLoadFailed" = "Failed to load";

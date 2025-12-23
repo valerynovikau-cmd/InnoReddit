@@ -7,6 +7,6 @@
 
 @testable import InnoReddit
 
-final class DummyAuthenticationRouter: AuthenticationRouterProtocol {
-    func goToMainFlow() { }
-}
+//final class DummyAuthenticationRouter: AuthenticationRouterProtocol {
+//    func goToMainFlow() { }
+//}

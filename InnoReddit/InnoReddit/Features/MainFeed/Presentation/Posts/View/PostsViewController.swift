@@ -53,7 +53,7 @@ final class PostsViewController: IRBaseViewController {
     
     // MARK: - Root view
     private func configureRootView() {
-        view.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        view.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
     }
     
     // MARK: - Collection view
@@ -154,6 +154,7 @@ final class PostsViewController: IRBaseViewController {
                let post = output.posts.first(where: { $0.id == postIdentifier })
             {
                 let cellOutput = PostCellPresenter(post: post)
+                cellOutput.router = self.output?.router
                 cell.delegate = self
                 cell.output = cellOutput
                 cellOutput.input = cell
@@ -274,7 +275,7 @@ extension PostsViewController: PostCellDelegate {
         viewController.didMove(toParent: self)
     }
     
-    func updatedScoreAndCommentsCount(post: Post) {
+    func updatedPost(post: Post) {
         self.output?.updatePost(post: post)
     }
 }

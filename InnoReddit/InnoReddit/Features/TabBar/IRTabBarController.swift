@@ -44,12 +44,12 @@ class IRTabBarController: UITabBarController {
         
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = Asset.Colors.innoBackgroundColor.color
+        appearance.backgroundColor = Asset.Assets.Colors.innoBackgroundColor.color
         
         let stackedLayoutAppearance = appearance.stackedLayoutAppearance
-        stackedLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        stackedLayoutAppearance.selected.iconColor = Asset.Assets.Colors.innoOrangeColor.color
         stackedLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: Asset.Colors.innoOrangeColor.color
+            .foregroundColor: Asset.Assets.Colors.innoOrangeColor.color
         ]
         
         stackedLayoutAppearance.normal.iconColor = .gray
@@ -60,9 +60,9 @@ class IRTabBarController: UITabBarController {
         appearance.stackedLayoutAppearance = stackedLayoutAppearance
         
         let compactInlineLayoutAppearance = appearance.compactInlineLayoutAppearance
-        compactInlineLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        compactInlineLayoutAppearance.selected.iconColor = Asset.Assets.Colors.innoOrangeColor.color
         compactInlineLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: Asset.Colors.innoOrangeColor.color
+            .foregroundColor: Asset.Assets.Colors.innoOrangeColor.color
         ]
         
         compactInlineLayoutAppearance.normal.iconColor = .gray
@@ -73,9 +73,9 @@ class IRTabBarController: UITabBarController {
         appearance.compactInlineLayoutAppearance = compactInlineLayoutAppearance
         
         let inlineLayoutAppearance = appearance.inlineLayoutAppearance
-        inlineLayoutAppearance.selected.iconColor = Asset.Colors.innoOrangeColor.color
+        inlineLayoutAppearance.selected.iconColor = Asset.Assets.Colors.innoOrangeColor.color
         inlineLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: Asset.Colors.innoOrangeColor.color
+            .foregroundColor: Asset.Assets.Colors.innoOrangeColor.color
         ]
         
         inlineLayoutAppearance.normal.iconColor = .gray

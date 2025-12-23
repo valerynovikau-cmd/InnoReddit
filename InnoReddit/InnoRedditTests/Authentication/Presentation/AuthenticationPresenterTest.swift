@@ -20,9 +20,9 @@ final class AuthenticationPresenterTest: XCTestCase {
         Container.shared.webAuthSessionService.register {
             MockASWebAuthSessionService()
         }
-        Container.shared.authenticationRouter.register {
-            DummyAuthenticationRouter()
-        }
+//        Container.shared.authenticationRouter.register {
+//            DummyAuthenticationRouter()
+//        }
         Container.shared.getAccessTokenUseCase.register {
             MockGetAccessTokenUseCase()
         }

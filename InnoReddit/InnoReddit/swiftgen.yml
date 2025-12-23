@@ -6,6 +6,7 @@ strings:
       output: Features/Authentication/Presentation/Resources/LocalizableStrings/AuthenticationLocalizableStrings+Generated.swift
       params:
         enumName: AuthenticationLocalizableStrings
+        
   - inputs:
       - Features/TabBar/Resources/LocalizableStrings/en.lproj/TabBarLocalizable.strings
     outputs:
@@ -13,6 +14,7 @@ strings:
       output: Features/TabBar/Resources/LocalizableStrings/TabBarLocalizableStrings+Generated.swift
       params:
         enumName: TabBarLocalizableStrings
+        
   - inputs:
       - Features/MainFeed/Presentation/Resources/LozalizableStrings/en.lproj/MainScreenLocalizable.strings
     outputs:
@@ -20,6 +22,7 @@ strings:
       output: Features/MainFeed/Presentation/Resources/LozalizableStrings/MainScreenLocalizableStrings+Generated.swift
       params:
         enumName: MainScreenStrings
+        
   - inputs:
       - Shared/APIClient/LocalizableStrings/en.lproj/APIErrorLocalizable.strings
     outputs:
@@ -27,12 +30,21 @@ strings:
       output: Shared/APIClient/LocalizableStrings/APIErrorLocalizableStrings+Generated.swift
       params:
         enumName: APIErrorStrings
+        
+  - inputs:
+      - Features/PostDetails/Presentation/Resources/LocalizableStrings/en.lproj/PostDetailsLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/PostDetails/Presentation/Resources/LocalizableStrings/PostDetailsLocalizableStrings+Generated.swift
+      params:
+        enumName: PostDetailsStrings
 
 xcassets:
-  inputs:
-    Resources/Assets/Assets.xcassets
-  outputs:
-    templateName: swift5
-    params:
-        forceProvidesNamespaces: true
-    output: Resources/Assets/XCAssets+Generated.swift
+  - inputs:
+      Resources/Assets/Assets.xcassets
+    outputs:
+      templateName: swift5
+      params:
+          forceFileNameEnum: true
+          forceProvidesNamespaces: true
+      output: Resources/Assets/XCAssets+Generated.swift

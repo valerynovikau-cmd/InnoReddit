@@ -224,7 +224,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/opt/homebrew/bin/swiftgen config run --config \"$SRCROOT/InnoReddit/swiftgen.yml\"\n";
+			shellScript = "if [ -d \"$SRCROOT/InnoReddit/TestingPurposes/Assets/TestAssets.xcassets\" ] && [ -f \"$SRCROOT/InnoReddit/swiftgen-testing.yml\" ]; then\n    echo \"Running SwiftGen with testing config\"\n    /opt/homebrew/bin/swiftgen config run --config \"$SRCROOT/InnoReddit/swiftgen-testing.yml\"\nelse\n    echo \"Running SwiftGen with default config\"\n    /opt/homebrew/bin/swiftgen config run --config \"$SRCROOT/InnoReddit/swiftgen.yml\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

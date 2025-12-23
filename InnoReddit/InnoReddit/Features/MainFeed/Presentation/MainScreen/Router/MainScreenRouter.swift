@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Factory
 
 protocol MainScreenRouterProtocol: AnyObject {
@@ -18,6 +19,8 @@ final class MainScreenRouter: RouterProtocol {
 
 extension MainScreenRouter: MainScreenRouterProtocol {
     func showPostDetails(post: Post) {
-        
+        let view = Container.shared.postDetailsView.resolve(post)
+        let hostingVC = UIHostingController(rootView: view)
+        navigationController.pushViewController(hostingVC, animated: true)
     }
 }
