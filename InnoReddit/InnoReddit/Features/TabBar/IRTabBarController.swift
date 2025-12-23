@@ -11,7 +11,7 @@ import Factory
 enum IRTabBarItem: Int, CaseIterable {
     case mainFeed = 0
     case createPost = 1
-    case settings = 2
+    case profile = 2
     
     var getTabBarItem: UITabBarItem {
         switch self {
@@ -27,11 +27,11 @@ enum IRTabBarItem: Int, CaseIterable {
                 image: UIImage(systemName: TabBarLocalizableStrings.createPostSFSymbolName),
                 selectedImage: UIImage(systemName: TabBarLocalizableStrings.createPostSFSymbolNameSelected)
             )
-        case .settings:
+        case .profile:
             UITabBarItem(
-                title: TabBarLocalizableStrings.settingsTabBarTitle,
-                image: UIImage(systemName: TabBarLocalizableStrings.settingsSFSymbolName),
-                selectedImage: UIImage(systemName: TabBarLocalizableStrings.settingsSFSymbolNameSelected)
+                title: TabBarLocalizableStrings.profileTabBarTitle,
+                image: UIImage(systemName: TabBarLocalizableStrings.profileSFSymbolName),
+                selectedImage: UIImage(systemName: TabBarLocalizableStrings.profileSFSymbolNameSelected)
             )
         }
     }

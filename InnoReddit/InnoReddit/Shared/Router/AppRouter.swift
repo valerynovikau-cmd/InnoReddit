@@ -87,7 +87,7 @@ extension AppRouter: AppRouterProtocol {
             vc = mainFeedNavigationController
         case .createPost:
             vc = UIViewController()
-        case .settings:
+        case .profile:
             vc = UIViewController()
         }
         

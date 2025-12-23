@@ -8,7 +8,7 @@
 
 "mainFeedTabBarTitle" = "Main";
 "createPostTabBarTitle" = "Create";
-"settingsTabBarTitle" = "Settings";
+"profileTabBarTitle" = "Profile";
 
 "mainFeedSFSymbolName" = "house";
 "mainFeedSFSymbolNameSelected" = "house.fill";
@@ -16,5 +16,5 @@
 "createPostSFSymbolName" = "plus.circle";
 "createPostSFSymbolNameSelected" = "plus.circle.fill";
 
-"settingsSFSymbolName" = "gear";
-"settingsSFSymbolNameSelected" = "gear";
+"profileSFSymbolName" = "person.crop.circle";
+"profileSFSymbolNameSelected" = "person.crop.circle.fill";
