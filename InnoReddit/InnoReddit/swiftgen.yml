@@ -38,6 +38,14 @@ strings:
       output: Features/PostDetails/Presentation/Resources/LocalizableStrings/PostDetailsLocalizableStrings+Generated.swift
       params:
         enumName: PostDetailsStrings
+        
+  - inputs:
+      - Features/Profile/Presentation/Resources/LocalizableStrings/en.lproj/ProfileLocalizable.strings
+    outputs:
+      templateName: structured-swift5
+      output: Features/Profile/Presentation/Resources/LocalizableStrings/ProfileLocalizableStrings+Generated.swift
+      params:
+        enumName: ProfileStrings
 
 xcassets:
   - inputs:
