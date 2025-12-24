@@ -26,4 +26,16 @@ extension Container {
             AuthenticationViewController()
         }
     }
+    
+    var authSessionManager: Factory<AuthSessionManagerProtocol> {
+        self { @MainActor in
+            AuthSessionManager()
+        }.singleton
+    }
+    
+    var authenticationNetworkService: Factory<AuthenticationNetworkServiceProtocol> {
+        self { @MainActor in
+            AuthenticationNetworkService()
+        }
+    }
 }

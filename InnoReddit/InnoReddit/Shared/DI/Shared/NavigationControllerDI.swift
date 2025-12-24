@@ -20,4 +20,10 @@ extension Container {
             IRNavigationController()
         }.singleton
     }
+    
+    var profileNavigationController: Factory<UINavigationController> {
+        self { @MainActor in
+            IRNavigationController()
+        }.singleton
+    }
 }

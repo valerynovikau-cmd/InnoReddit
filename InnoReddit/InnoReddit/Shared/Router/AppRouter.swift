@@ -88,7 +88,42 @@ extension AppRouter: AppRouterProtocol {
         case .createPost:
             vc = UIViewController()
         case .profile:
-            vc = UIViewController()
+            let profileView = Container.shared.profileView.resolve()
+            
+            let profilePresenter = Container.shared.profilePresenter.resolve()
+            let appRouter = Container.shared.appRouter.resolve(nil)
+            
+            profileView.output = profilePresenter
+            profilePresenter.router = appRouter
+            profilePresenter.input = profileView
+            
+            let profileNavigationController = Container.shared.profileNavigationController.resolve()
+            let profileRouter = Container.shared.profileRouter.resolve()
+            
+            let controllersWithCategoriesStrings: [(UIViewController, String)] = ProfilePostsCategory.allCases.compactMap {
+                let view = Container.shared.postsView.resolve()
+                let presenter = Container.shared.profilePostsPresenter.resolve($0);
+                
+                view.output = presenter
+                presenter.input = view
+                presenter.router = profileRouter
+                
+                (view as? PostsViewController)?.delegate = (profileView as? PostsSearchBarDelegateProtocol)
+                
+                guard let vc = (view as? UIViewController) else {
+                    return nil
+                }
+                return (vc, $0.titleString)
+            }
+            
+            profileView.setPageControllerViewControllers(controllersWithCategoriesStrings: controllersWithCategoriesStrings)
+            
+            guard let profileVC = (profileView as? UIViewController) else {
+                return nil
+            }
+            profileNavigationController.setViewControllers([profileVC], animated: false)
+            
+            vc = profileNavigationController
         }
         
         vc.tabBarItem = item.getTabBarItem
@@ -110,6 +145,13 @@ extension AppRouter: UITabBarControllerDelegate {
                    let mainScreenVC = navigationVC.topViewController as? MainScreenViewProtocol
                 {
                     mainScreenVC.scrollCurrentViewControllerToTop()
+                }
+            case IRTabBarItem.profile.rawValue:
+                if tabBarController.selectedIndex == index,
+                   let navigationVC = viewController as? IRNavigationController,
+                   let profileVC = navigationVC.topViewController as? ProfileViewProtocol
+                {
+                    profileVC.scrollCurrentViewControllerToTop()
                 }
             default:
                 return true
