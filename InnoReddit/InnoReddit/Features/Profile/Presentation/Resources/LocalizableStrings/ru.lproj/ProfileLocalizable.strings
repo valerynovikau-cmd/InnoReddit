@@ -1,0 +1,18 @@
+/* 
+  ProfileLocalizable.strings
+  InnoReddit
+
+  Created by Валерий Новиков on 23.12.25.
+  
+*/
+
+"userPostsTab" = "Ваши посты";
+"userSavedTab" = "Сохраненное";
+
+"karmaLabel" = "Карма";
+"subscribersLabel" = "Подписчики";
+"accountAgeSting" = "Возраст аккаунта";
+
+"errorLabel" = "Ошибка";
+
+"signOutButtonLabel" = "Выйти";
