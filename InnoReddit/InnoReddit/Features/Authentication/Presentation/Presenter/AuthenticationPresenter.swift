@@ -22,6 +22,8 @@ final class AuthenticationPresenter {
     @Injected(\.webAuthSessionService) private var webAuthSessionService: ASWebAuthSessionServiceProtocol
     @Injected(\.retrieveTokensUseCase) private var retrieveTokensUseCase: RetrieveTokensUseCaseProtocol
     @Injected(\.getAccessTokenUseCase) private var getAccessTokenUseCase: GetAccessTokenUseCaseProtocol
+    @Injected(\.authSessionManager) private var authSessionManager: AuthSessionManagerProtocol
+    @Injected(\.authenticationNetworkService) private var authenticationNetworkService: AuthenticationNetworkServiceProtocol
 }
 
 extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
@@ -36,8 +38,19 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 let code = try await self.webAuthSessionService.startSession(scopes: scopes)
                 
                 try await self.retrieveTokensUseCase.execute(code: code, scopes: scopes)
+                
+                let response = try await self.authenticationNetworkService.getUserInfo()
+                let user = UserModel(
+                    username: response.name,
+                    iconImageURL: response.iconImg,
+                    totalKarma: response.totalKarma,
+                    accountCreatedAt: Date(timeIntervalSince1970: TimeInterval(floatLiteral: response.created)),
+                    subscribers: response.subreddit.subscribers
+                )
+                authSessionManager.updateUser(user: user)
+                
                 self.input?.enableLoginButton()
-                self.router.showMainApp()
+                self.goToMainFlowIfAuthenticated()
                 return
             } catch let error as AuthenticationSessionError {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
@@ -50,6 +63,9 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
                 default:
                     errorMessage = AuthenticationLocalizableStrings.serverErrorMessage
                 }
+            } catch let error as APIError {
+                errorTitle = error.errorTitle
+                errorMessage = error.errorMessage
             } catch {
                 errorTitle = AuthenticationLocalizableStrings.errorMessageTitle
                 errorMessage = AuthenticationLocalizableStrings.authenticationErrorMessage
@@ -62,6 +78,7 @@ extension AuthenticationPresenter: AuthenticationViewPresenterProtocol {
     func goToMainFlowIfAuthenticated() {
         do {
             let _ = try self.getAccessTokenUseCase.execute()
+            guard let _ = self.authSessionManager.user else { return }
             self.router.showMainApp()
         } catch { }
     }

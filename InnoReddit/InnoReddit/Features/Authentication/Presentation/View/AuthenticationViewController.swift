@@ -226,7 +226,52 @@ class AuthenticationViewController: IRBaseViewController {
         ])
     }
     
-    // MARK: General view UI configuration
+    // MARK: - Activity indicator container view
+    
+    private let activityIndicatorContainerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .black.withAlphaComponent(0.2)
+        view.alpha = 0
+        return view
+    }()
+    
+    private func configureActivityIndicatorContainerView() {
+        view.addSubview(activityIndicatorContainerView)
+        NSLayoutConstraint.activate([
+            activityIndicatorContainerView.topAnchor.constraint(equalTo: view.topAnchor),
+            activityIndicatorContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            activityIndicatorContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            activityIndicatorContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+    }
+    
+    private func removeActivityIndicatorContainerView() {
+        activityIndicatorContainerView.removeFromSuperview()
+    }
+    
+    // MARK: - Activity indicator
+    private let activityIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.color = Asset.Assets.Colors.innoOrangeColor.color
+        return view
+    }()
+    
+    private func configureActivityIndicatorView() {
+        activityIndicatorContainerView.addSubview(activityIndicator)
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: activityIndicatorContainerView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: activityIndicatorContainerView.centerYAnchor),
+        ])
+        activityIndicator.startAnimating()
+    }
+    
+    private func removeActivityIndicatorView() {
+        activityIndicator.removeFromSuperview()
+    }
+    
+    // MARK: - General view UI configuration
     
     private func configureUI() {
         self.configureRootView()
@@ -237,6 +282,9 @@ class AuthenticationViewController: IRBaseViewController {
         self.configureWelcomeDescriptionLabel()
         self.configureLoginButton()
         self.configureTermsOfServiceLabel()
+        
+        self.configureActivityIndicatorContainerView()
+        self.configureActivityIndicatorView()
     }
     
     // MARK: - Lifecycle methods
@@ -259,6 +307,7 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
         UIView.animate(withDuration: constants.loginButtonDisablingAnimationDuration) {
             self.loginButton.isEnabled = false
             self.loginButton.alpha = 0.75
+            self.activityIndicatorContainerView.alpha = 1
         }
     }
     
@@ -266,6 +315,7 @@ extension AuthenticationViewController: AuthenticationViewProtocol {
         UIView.animate(withDuration: constants.loginButtonDisablingAnimationDuration) {
             self.loginButton.isEnabled = true
             self.loginButton.alpha = 1
+            self.activityIndicatorContainerView.alpha = 0
         }
     }
     
